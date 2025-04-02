@@ -1,0 +1,48 @@
+{
+    "name": "milanmadar/coolio-orm",
+    "description": "PHP ORM based on Doctrine DBAL",
+    "keywords": [
+        "orm",
+        "abstraction",
+        "database",
+        "dbal",
+        "db2",
+        "mariadb",
+        "mssql",
+        "mysql",
+        "pgsql",
+        "postgresql",
+        "oci8",
+        "oracle",
+        "pdo",
+        "queryobject",
+        "sasql",
+        "sql",
+        "sqlite",
+        "sqlserver",
+        "sqlsrv"
+    ],
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Milan Madar",
+            "email": "milanmadar@hotmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Milanmadar\\CoolioORM\\": "src/"
+        }
+    },
+    "require": {
+        "php": "^8.2",
+        "doctrine/dbal": "4.2.3",
+        "ext-mbstring": "*"
+    },
+    "require-dev": {
+        "ext-xdebug": "*",
+        "phpstan/phpstan": "1.9",
+        "phpunit/phpunit": "^12.0"
+    }
+}
