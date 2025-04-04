@@ -446,7 +446,7 @@ class ManagerDbTest extends TestCase
         $orm = \Milanmadar\CoolioORM\ORM::instance();
 
         /** @var OrmTest\Manager $mgr1 */
-        $mgr1 = $orm->entityManager(OrmTest\Manager::class);
+        $mgr1 = $orm->entityManager(OrmTest\Manager::class, $orm->getDoctrineConnectionByUrl($_ENV['DB_POSTGRES_DB1']));
         /** @var OrmTest\Manager $mgr2 */
         $mgr2 = $orm->entityManager(OrmTest\Manager::class, $orm->getDoctrineConnectionByUrl($_ENV['DB_POSTGRES_DB2']));
 
