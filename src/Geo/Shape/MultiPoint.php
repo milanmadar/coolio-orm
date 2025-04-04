@@ -1,0 +1,96 @@
+<?php
+
+namespace Milanmadar\CoolioORM\Geo\Shape;
+
+class MultiPoint extends Geometry
+{
+    /** @var array<Point> */
+    private array $points;
+
+    /**
+     * @param array $jsonData
+     * @param int|null $srid
+     * @return MultiPoint
+     */
+    public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): static
+    {
+        if (!isset($srid)) $srid = $_ENV['GEO_DEFAULT_SRID'];
+
+        if (
+            !isset($jsonData['type'], $jsonData['coordinates']) ||
+            $jsonData['type'] !== 'MultiPoint' ||
+            !is_array($jsonData['coordinates'])
+        ) {
+            throw new \InvalidArgumentException('Invalid GeoJSON for MultiPoint');
+        }
+
+        $points = [];
+
+        foreach ($jsonData['coordinates'] as $coords) {
+            if (!is_array($coords) || count($coords) !== 2) {
+                throw new \InvalidArgumentException('Invalid coordinate in MultiPoint');
+            }
+            $points[] = new Point((float)$coords[0], (float)$coords[1], $srid);
+        }
+
+        return new static($points, $srid);
+    }
+
+    /**
+     * @param array<Point> $points
+     * @param int|null $srid
+     */
+    public function __construct(array $points, int|null $srid = null)
+    {
+        if (empty($points)) {
+            throw new \InvalidArgumentException('MultiPoint must contain at least one Point.');
+        }
+
+        parent::__construct($srid);
+        $this->points = $points;
+    }
+
+    /**
+     * @return array<Point>
+     */
+    public function getPoints(): array
+    {
+        return $this->points;
+    }
+
+    /**
+     * @param array $points
+     * @return $this
+     */
+    public function setPoints(array $points): MultiPoint
+    {
+        if (empty($points)) {
+            throw new \InvalidArgumentException('MultiPoint must contain at least one Point.');
+        }
+
+        $this->points = $points;
+        return $this;
+    }
+
+    public function toWKT(): string
+    {
+        $pointStrings = array_map(
+            fn(Point $p) => sprintf('%F %F', $p->getX(), $p->getY()),
+            $this->points
+        );
+
+        return 'MULTIPOINT(' . implode(', ', $pointStrings) . ')';
+    }
+
+    public function toGeoJSON(): array
+    {
+        return [
+            'type' => 'MultiPoint',
+            'coordinates' => array_map(
+                fn(Point $p) => [$p->getX(), $p->getY()],
+                $this->points
+            )
+        ];
+    }
+
+}
