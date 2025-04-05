@@ -208,6 +208,7 @@ abstract class Manager
                             'boolean' => (int)$v,
                             'array', 'simple_array' => serialize($v),
                             'json', 'json_array' => json_encode($v),
+                            'geometry', 'geometry_curved' => $v->toEWKT(),
                             default => Type::getType($this->fieldTypes[$k])->convertToDatabaseValue($v, $this->db->getDatabasePlatform()),
                         };
                     }
@@ -514,31 +515,18 @@ abstract class Manager
             try {
                 $this->db->insert($this->dbTable, $dataToSave);
             }
-            catch(\Doctrine\DBAL\Exception $e)
-            {
-                if(str_contains($e->getMessage(), 'gone away') || str_contains($e->getMessage(), 'Deadlock') || str_contains($e->getMessage(), 'Lock wait timeout')) {
-                    try {
-                        sleep(2);
-                        $this->db->insert($this->dbTable, $dataToSave);
+            catch (\Doctrine\DBAL\Exception\ConnectionException|\Doctrine\DBAL\Exception\ConnectionLost|\Doctrine\DBAL\Exception\RetryableException $e) {
+                sleep(2);
+                $this->db->insert($this->dbTable, $dataToSave);
+            }
+            catch(\Doctrine\DBAL\Exception $e) {
+                // log the data too, but truncate the too long things
+                foreach($dataToSave as $field=>$value) {
+                    if(is_string($value) && mb_strlen($value, 'UTF-8') > 1024) {
+                        $dataToSave[$field] = mb_substr($value, 0, 1018).'[...]';
                     }
-                    catch(\Doctrine\DBAL\Exception $e) {
-                        // log the data too, but truncate the too long things
-                        foreach($dataToSave as $field=>$value) {
-                            if(is_string($value) && mb_strlen($value, 'UTF-8') > 1024) {
-                                $dataToSave[$field] = mb_substr($value, 0, 1018).'[...]';
-                            }
-                        }
-                        throw Utils::handleDriverDBALException($e, "ORM\\Manager::save() (insert ".get_class($ent).") (tried again)", null, $dataToSave);
-                    }
-                } else {
-                    // log the data too, but truncate the too long things
-                    foreach($dataToSave as $field=>$value) {
-                        if(is_string($value) && mb_strlen($value, 'UTF-8') > 1024) {
-                            $dataToSave[$field] = mb_substr($value, 0, 1018).'[...]';
-                        }
-                    }
-                    throw Utils::handleDriverDBALException($e, "ORM\\Manager::save() (insert ".get_class($ent).")", null, $dataToSave);
                 }
+                throw Utils::handleDriverException($e, "INSERT ".get_class($this), $dataToSave);
             }
 
             if($forceInsert) {
@@ -558,30 +546,19 @@ abstract class Manager
             try {
                 $this->db->update($this->dbTable, $dataToSave, ['id'=>$ent->_get('id')]);
             }
-            catch(\Doctrine\DBAL\Exception $e)
-            {
-                if(str_contains($e->getMessage(), 'gone away') || str_contains($e->getMessage(), 'Deadlock') || str_contains($e->getMessage(), 'Lock wait timeout')) {
-                    try {
-                        sleep(2);
-                        $this->db->update($this->dbTable, $dataToSave, ['id' => $ent->_get('id')]);
-                    }
-                    catch (\Doctrine\DBAL\Exception $e) {
-                        // log the data too, but truncate the too long things
-                        foreach ($dataToSave as $field => $value) {
-                            if (is_string($value) && mb_strlen($value, 'UTF-8') > 1024) {
-                                $dataToSave[$field] = mb_substr($value, 0, 1000) . '... [truncated for log]';
-                            }
-                        }
-                        throw Utils::handleDriverDBALException($e, "ORM\\Manager::save() (update " . get_class($ent) . " " . $ent->_get('id') . ") (tried again)", null, $dataToSave);
-                    }
-                } else {
+            catch (\Doctrine\DBAL\Exception\ConnectionException|\Doctrine\DBAL\Exception\ConnectionLost|\Doctrine\DBAL\Exception\RetryableException $e) {
+                try {
+                    sleep(2);
+                    $this->db->update($this->dbTable, $dataToSave, ['id' => $ent->_get('id')]);
+                }
+                catch (\Doctrine\DBAL\Exception $e) {
                     // log the data too, but truncate the too long things
-                    foreach($dataToSave as $field=>$value) {
-                        if(is_string($value) && mb_strlen($value, 'UTF-8') > 1024) {
-                            $dataToSave[$field] = mb_substr($value, 0, 1000).'... [truncated for log]';
+                    foreach ($dataToSave as $field => $value) {
+                        if (is_string($value) && mb_strlen($value, 'UTF-8') > 1024) {
+                            $dataToSave[$field] = mb_substr($value, 0, 1000) . '... [truncated for log]';
                         }
                     }
-                    throw Utils::handleDriverDBALException($e, "ORM\\Manager::save() (update ".get_class($ent)." ".$ent->_get('id').")", null, $dataToSave);
+                    throw Utils::handleDriverException($e, "UPDATE " . get_class($this) . " (id:" . $ent->_get('id') . ")", $dataToSave);
                 }
             }
 

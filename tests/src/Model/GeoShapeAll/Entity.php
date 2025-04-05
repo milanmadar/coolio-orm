@@ -80,7 +80,7 @@ class Entity extends \Milanmadar\CoolioORM\Entity
 
     public function setGeomcollectionGeom(Shape\GeometryCollection $val): self
     {
-        $this->_set('multipolygon_geom', $val);
+        $this->_set('geomcollection_geom', $val);
         return $this;
     }
 

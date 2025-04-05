@@ -194,7 +194,7 @@ class GeoTest extends TestCase
         $this->assertEquals($oCnt+1, self::$dbHelper->countRows('geometry_test'));
     }
 
-    public function testInsert_asObject()
+    public function testInsert_asObjects()
     {
         $mgr = self::$dbHelper->getManager(GeoShapeAll\Manager::class);
 
@@ -273,6 +273,105 @@ class GeoTest extends TestCase
             ->setValue('multicurve_geom', $multiCurve)
             ->executeStatement()
         ;
+        $this->assertEquals($oCnt+1, self::$dbHelper->countRows('geometry_test'));
+
+        //
+        // Select All Shapes
+        //
+        $ent = $mgr->findById(2);
+
+        $this->assertTrue($point == $ent->getPointGeom());
+        $this->assertTrue($lineString == $ent->getLinestringGeom());
+        $this->assertTrue($polygon == $ent->getPolygonGeom());
+        $this->assertTrue($multiPoint == $ent->getMultipointGeom());
+        $this->assertTrue($multiLineString == $ent->getMultilinestringGeom());
+        $this->assertTrue($multiPolygon == $ent->getMultipolygonGeom());
+        $this->assertTrue($geometryCollection == $ent->getGeomcollectionGeom());
+        $this->assertTrue($circularString == $ent->getCircularStringGeom());
+        $this->assertTrue($compoundCurve == $ent->getCompoundcurveGeom());
+        $this->assertTrue($curvePolygon == $ent->getCurvepolygonGeom());
+        $this->assertTrue($multiCurve == $ent->getMulticurveGeom());
+    }
+
+    public function testInsert_asEntity()
+    {
+        $mgr = self::$dbHelper->getManager(GeoShapeAll\Manager::class);
+
+        $oCnt = self::$dbHelper->countRows('geometry_test');
+
+        //
+        // Create All Shapes
+        //
+        $point = new Shape\Point(6, 7, 4326);
+        $lineString = new LineString([
+            new Point(1, 1), new Point(2, 2), new Point(3, 3), new Point(4, 4)
+        ], 4326);
+        $multiPoint = new MultiPoint([
+            new Point(1, 1), new Point(2, 2), new Point(3, 3), new Point(4, 4)
+        ], 4326);
+        $polygon = new Polygon([
+            new LineString([new Point(0, 0), new Point(0, 5), new Point(5, 5), new Point(5, 0), new Point(0, 0)]),
+            new LineString([new Point(1, 1), new Point(1, 2), new Point(2, 2), new Point(2, 1), new Point(1, 1)])
+        ], 4326);
+        $multiLineString = new MultiLineString([
+            new LineString([new Point(1, 1), new Point(2, 2), new Point(3, 3)], 4326),
+            new LineString([new Point(4, 4), new Point(5, 5)], 4326),
+            new LineString([new Point(6, 6), new Point(7, 7), new Point(8, 8)], 4326)
+        ], 4326);
+        $multiPolygon = new MultiPolygon([
+            new Polygon([
+                new LineString([new Point(0, 0), new Point(0, 5), new Point(5, 5), new Point(5, 0), new Point(0, 0),]),
+                new LineString([new Point(1, 1), new Point(1, 2), new Point(2, 2), new Point(2, 1), new Point(1, 1),])
+            ], 4326),
+            new Polygon([
+                new LineString([new Point(8, 8), new Point(0, 5), new Point(5, 5), new Point(5, 0), new Point(8, 8),]),
+                new LineString([new Point(9, 9), new Point(1, 2), new Point(2, 2), new Point(2, 1), new Point(9, 9),])
+            ], 4326)
+        ], 4326);
+        $compoundCurve = new CompoundCurve([
+            new LineString([new Point(2, 0), new Point(3, 1)]),
+            new CircularString([new Point(3, 1), new Point(4, 2), new Point(5, 1)]),
+            new LineString([new Point(5, 1), new Point(6, 0)]),
+        ], 4326);
+        $circularString = new CircularString([
+            new Point(0, 0), new Point(4, 0), new Point(4, 4), new Point(0, 4), new Point(0, 0)
+        ], 4326);
+        $curvePolygon = new CurvePolygon([
+            new CircularString([new Point(0, 0, 4326), new Point(6, 0, 4326), new Point(6, 6, 4326), new Point(0, 6, 4326), new Point(0, 0, 4326)], 4326),
+            new LineString([new Point(2, 2, 4326), new Point(3, 2, 4326), new Point(3, 3, 4326), new Point(2, 3, 4326), new Point(2, 2, 4326)], 4326),
+            new CircularString([new Point(1, 1, 4326), new Point(2, 1, 4326), new Point(2, 2, 4326), new Point(1, 2, 4326), new Point(1, 1, 4326)], 4326)
+        ], 4326);
+        $multiCurve = new MultiCurve([
+            new CircularString([new Point(0, 0, 4326), new Point(1, 2, 4326), new Point(2, 0, 4326)], 4326),
+            new LineString([new Point(3, 3, 4326), new Point(4, 4, 4326), new Point(5, 5, 4326)], 4326)
+        ], 4326);
+        $geometryCollection = new GeometryCollection([
+            new Point(1, 1, 4326),
+            new LineString([new Point(2, 2, 4326), new Point(3, 3, 4326), new Point(4, 4, 4326)], 4326),
+            new Polygon([
+                new LineString([new Point(0, 0, 4326), new Point(0, 5, 4326), new Point(5, 5, 4326), new Point(5, 0, 4326), new Point(0, 0, 4326),], 4326),
+                new LineString([new Point(1, 1, 4326), new Point(1, 2, 4326), new Point(2, 2, 4326), new Point(2, 1, 4326), new Point(1, 1, 4326),], 4326)
+            ], 4326)
+        ], 4326);
+
+        $newEnt = $mgr->createEntity()
+            ->setPointGeom($point)
+            ->setLinestringGeom($lineString)
+            ->setPolygonGeom($polygon)
+            ->setMultipointGeom($multiPoint)
+            ->setMultilinestringGeom($multiLineString)
+            ->setMultipolygonGeom($multiPolygon)
+            ->setGeomcollectionGeom($geometryCollection)
+            ->setCircularstringGeom($circularString)
+            ->setCompoundcurveGeom($compoundCurve)
+            ->setCurvepolygonGeom($curvePolygon)
+            ->setMulticurveGeom($multiCurve)
+        ;
+
+        //
+        // Insert All Shapes
+        //
+        $mgr->save($newEnt);
         $this->assertEquals($oCnt+1, self::$dbHelper->countRows('geometry_test'));
 
         //
