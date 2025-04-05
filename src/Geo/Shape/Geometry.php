@@ -13,6 +13,12 @@ abstract class Geometry
      */
     abstract public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): static;
 
+    /**
+     * @param string $ewktString
+     * @return Geometry
+     */
+    abstract public static function createFromGeoEWKTString(string $ewktString): static;
+
     public function __construct(int|null $srid = null)
     {
         $this->srid = $srid ?? $_ENV['GEO_DEFAULT_SRID'];

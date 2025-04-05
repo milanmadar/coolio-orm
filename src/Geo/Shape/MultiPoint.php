@@ -37,6 +37,54 @@ class MultiPoint extends Geometry
     }
 
     /**
+     * @param string $ewktString
+     * @return MultiPoint
+     */
+    public static function createFromGeoEWKTString(string $ewktString): static
+    {
+        // Parse the EWKT string, expected format: SRID=<srid>;MULTIPOINT(<x1> <y1>, <x2> <y2>, ...)
+        if (strpos($ewktString, 'MULTIPOINT') === false) {
+            throw new \InvalidArgumentException('Invalid EWKT format. Expected MULTIPOINT type.');
+        }
+
+        // Extract the SRID and the WKT string
+        $ewktParts = explode(';', $ewktString, 2);
+        if (count($ewktParts) != 2) {
+            throw new \InvalidArgumentException('Invalid EWKT string, could not find SRID and geometry parts.');
+        }
+
+        $sridPart = $ewktParts[0];
+        $geometryPart = $ewktParts[1];
+
+        // Extract SRID value
+        if (strpos($sridPart, 'SRID=') !== 0) {
+            throw new \InvalidArgumentException('Invalid SRID part in EWKT string.');
+        }
+
+        $srid = (int) substr($sridPart, 5);
+
+        // Validate and extract the MULTIPOINT coordinates
+        preg_match('/MULTIPOINT\((.*)\)/', $geometryPart, $matches);
+        if (empty($matches)) {
+            throw new \InvalidArgumentException('Invalid MULTIPOINT format in EWKT.');
+        }
+
+        $pointsData = explode(',', $matches[1]);
+        $points = [];
+
+        foreach ($pointsData as $pointData) {
+            $coords = array_map('trim', explode(' ', $pointData));
+            if (count($coords) !== 2) {
+                throw new \InvalidArgumentException('Each point must have exactly 2 coordinates.');
+            }
+
+            $points[] = new Point((float) $coords[0], (float) $coords[1], $srid);
+        }
+
+        return new static($points, $srid);
+    }
+
+    /**
      * @param array<Point> $points
      * @param int|null $srid
      */
