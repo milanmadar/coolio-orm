@@ -138,14 +138,14 @@ class Polygon extends Geometry
     public function toWKT(): string
     {
         $ringStrings = array_map(
-            fn(LineString $ls) => '(' . implode(', ', array_map(
-                    fn(Point $p) => sprintf('%F %F', $p->getX(), $p->getY()),
+            fn(LineString $ls) => '(' . implode(',', array_map(
+                    fn(Point $p) => sprintf('%s %s', $p->getX(), $p->getY()),
                     $ls->getPoints()
                 )) . ')',
             $this->lineStrings
         );
 
-        return 'POLYGON(' . implode(', ', $ringStrings) . ')';
+        return 'POLYGON(' . implode(',', $ringStrings) . ')';
     }
 
     /**

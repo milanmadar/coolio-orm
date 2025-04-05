@@ -117,7 +117,7 @@ class CompoundCurve extends Geometry implements HasStartEndPointInterface
     public function toWKT(): string
     {
         $segmentWKT = array_map(fn($segment) => $segment->toWKT(), $this->segments);
-        return 'COMPOUNDCURVE(' . implode(', ', $segmentWKT) . ')';
+        return 'COMPOUNDCURVE(' . implode(',', $segmentWKT) . ')';
     }
 
     /**

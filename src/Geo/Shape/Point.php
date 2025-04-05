@@ -108,7 +108,7 @@ class Point extends Geometry
      */
     public function toWKT(): string
     {
-        return sprintf('POINT(%F %F)', $this->x, $this->y);
+        return sprintf('POINT(%s %s)', $this->x, $this->y);
     }
 
     /**

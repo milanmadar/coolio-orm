@@ -79,11 +79,11 @@ class CircularString extends Geometry implements HasStartEndPointInterface
     public function toWKT(): string
     {
         $pointStrings = array_map(
-            fn(Point $p) => sprintf('%F %F', $p->getX(), $p->getY()),
+            fn(Point $p) => sprintf('%s %s', $p->getX(), $p->getY()),
             $this->points
         );
 
-        return 'CIRCULARSTRING(' . implode(', ', $pointStrings) . ')';
+        return 'CIRCULARSTRING(' . implode(',', $pointStrings) . ')';
     }
 
     public function toGeoJSON(): array

@@ -126,11 +126,11 @@ class MultiPoint extends Geometry
     public function toWKT(): string
     {
         $pointStrings = array_map(
-            fn(Point $p) => sprintf('%F %F', $p->getX(), $p->getY()),
+            fn(Point $p) => sprintf('%s %s', $p->getX(), $p->getY()),
             $this->points
         );
 
-        return 'MULTIPOINT(' . implode(', ', $pointStrings) . ')';
+        return 'MULTIPOINT(' . implode(',', $pointStrings) . ')';
     }
 
     /**

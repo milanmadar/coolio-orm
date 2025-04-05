@@ -109,7 +109,7 @@ class GeometryCollection extends Geometry
     public function toWKT(): string
     {
         $wktGeometries = array_map(fn(Geometry $g) => $g->toWKT(), $this->geometries);
-        return 'GEOMETRYCOLLECTION(' . implode(', ', $wktGeometries) . ')';
+        return 'GEOMETRYCOLLECTION(' . implode(',', $wktGeometries) . ')';
     }
 
     /**

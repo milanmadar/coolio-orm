@@ -89,7 +89,7 @@ class MultiCurve extends Geometry
     public function toWKT(): string
     {
         $curveWKT = array_map(fn($curve) => $curve->toWKT(), $this->curves);
-        return 'MULTICURVE(' . implode(', ', $curveWKT) . ')';
+        return 'MULTICURVE(' . implode(',', $curveWKT) . ')';
     }
 
     /**

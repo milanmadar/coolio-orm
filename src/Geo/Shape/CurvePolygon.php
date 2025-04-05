@@ -91,7 +91,7 @@ class CurvePolygon extends Geometry
     public function toWKT(): string
     {
         $boundaryWKT = array_map(fn($boundary) => $boundary->toWKT(), $this->boundaries);
-        return 'CURVEPOLYGON(' . implode(', ', $boundaryWKT) . ')';
+        return 'CURVEPOLYGON(' . implode(',', $boundaryWKT) . ')';
     }
 
     /**

@@ -44,8 +44,13 @@ abstract class Geometry
         return sprintf('SRID=%d;%s', $this->srid, $this->toWKT());
     }
 
+    public function ST_GeomFromEWKT(): string
+    {
+        return sprintf('ST_GeomFromEWKT(\'%s\')', $this->toEWKT());
+    }
+
     public function __toString(): string
     {
-        return $this->toWKT();
+        return $this->ST_GeomFromEWKT();
     }
 }

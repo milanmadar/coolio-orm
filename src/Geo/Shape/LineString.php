@@ -31,7 +31,7 @@ class LineString extends Geometry implements HasStartEndPointInterface
             if (!is_array($coords) || count($coords) !== 2) {
                 throw new \InvalidArgumentException('Invalid coordinate in LineString');
             }
-            $points[] = new Point((float)$coords[0], (float)[1], $srid);
+            $points[] = new Point((float)$coords[0], (float)$coords[1], $srid);
         }
 
         return new static($points, $srid);
@@ -65,6 +65,8 @@ class LineString extends Geometry implements HasStartEndPointInterface
         $srid = (int) substr($sridPart, 5);
 
         // Validate and extract the LINESTRING coordinates
+        $geometryPart = str_replace('((', '(', $geometryPart);
+        $geometryPart = str_replace('))', ')', $geometryPart);
         preg_match('/LINESTRING\((.*)\)/', $geometryPart, $matches);
         if (empty($matches)) {
             throw new \InvalidArgumentException('Invalid LINESTRING format in EWKT.');
@@ -125,11 +127,11 @@ class LineString extends Geometry implements HasStartEndPointInterface
     public function toWKT(): string
     {
         $pointStrings = array_map(
-            fn(Point $p) => sprintf('%F %F', $p->getX(), $p->getY()),
+            fn(Point $p) => sprintf('%s %s', $p->getX(), $p->getY()),
             $this->points
         );
 
-        return 'LINESTRING(' . implode(', ', $pointStrings) . ')';
+        return 'LINESTRING(' . implode(',', $pointStrings) . ')';
     }
 
     /**

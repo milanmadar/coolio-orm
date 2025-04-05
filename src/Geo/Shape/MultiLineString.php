@@ -152,14 +152,14 @@ class MultiLineString extends Geometry
     public function toWKT(): string
     {
         $segments = array_map(
-            fn(LineString $ls) => '(' . implode(', ', array_map(
-                    fn(Point $p) => sprintf('%F %F', $p->getX(), $p->getY()),
+            fn(LineString $ls) => '(' . implode(',', array_map(
+                    fn(Point $p) => sprintf('%s %s', $p->getX(), $p->getY()),
                     $ls->getPoints()
                 )) . ')',
             $this->lineStrings
         );
 
-        return 'MULTILINESTRING(' . implode(', ', $segments) . ')';
+        return 'MULTILINESTRING(' . implode(',', $segments) . ')';
     }
 
     /**
