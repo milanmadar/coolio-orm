@@ -8,8 +8,8 @@ class MultiPoint extends Geometry
     private array $points;
 
     /**
-     * @param array $jsonData
-     * @param int|null $srid
+     * @param array<mixed> $geoJsonData
+     * @param int|null $srid Optional SRID, defaults to the value in $_ENV['GEO_DEFAULT_SRID']
      * @return MultiPoint
      */
     public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): static

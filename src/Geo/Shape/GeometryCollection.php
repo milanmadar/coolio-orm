@@ -8,15 +8,9 @@ class GeometryCollection extends Geometry
     private array $geometries;
 
     /**
-     * @param array<Geometry> $geometries
-     * @param int|null $srid
+     * @param array<mixed> $jsonData
+     * @return GeometryCollection
      */
-    public function __construct(array $geometries, int|null $srid = null)
-    {
-        parent::__construct($srid);
-        $this->geometries = $geometries;
-    }
-
     public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): static
     {
         if (
@@ -34,6 +28,16 @@ class GeometryCollection extends Geometry
         }
 
         return new static($geometries, $srid);
+    }
+
+    /**
+     * @param array<Geometry> $geometries
+     * @param int|null $srid
+     */
+    public function __construct(array $geometries, int|null $srid = null)
+    {
+        parent::__construct($srid);
+        $this->geometries = $geometries;
     }
 
     public function toWKT(): string

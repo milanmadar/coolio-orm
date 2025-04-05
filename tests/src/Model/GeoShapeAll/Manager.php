@@ -1,6 +1,6 @@
 <?php
 
-namespace tests\Model\OrmThird;
+namespace tests\Model\GeoShapeAll;
 
 use Milanmadar\CoolioORM\ORM;
 
@@ -48,7 +48,8 @@ class Manager extends \Milanmadar\CoolioORM\Manager
      */
     public function getFieldTypes(): array { return [
         'id' => 'integer',
-        'fk_to_this' => 'string',
+        'polygon_geom' => 'geometry',
+        'circularstring_geom' => 'geometry_curved',
     ]; }
 
     /**
@@ -74,14 +75,14 @@ class Manager extends \Milanmadar\CoolioORM\Manager
      */
     public static function getDbDefaultConnectionUrl(): string
     {
-        return $_ENV['DB_MYSQL_DB1'];
+        return $_ENV['DB_POSTGRES_DB1'];
     }
 
     /**
      * @inheritDoc
      */
     public function getDefaultDbTable(): string {
-        return 'orm_third';
+        return 'geometry_test';
     }
 
     /**

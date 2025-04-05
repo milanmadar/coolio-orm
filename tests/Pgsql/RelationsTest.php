@@ -160,6 +160,7 @@ class RelationsTest extends TestCase
     public function testIDNewTSetNotexistingOid()
     {
         $ormTestMgr = self::$dbHelper->getManager(OrmTest\Manager::class);
+        $ormOtherMgr = self::$dbHelper->getManager(OrmOther\Manager::class);
 
         $ormTest = $ormTestMgr->createEntity();
         $ormTest->setOrmOtherId(9876);
@@ -451,22 +452,6 @@ class RelationsTest extends TestCase
         $ormTest->setOrmThirdKey(null);
 
         $this->assertNull($ormTest->getOrmThird());
-        $this->assertNull($ormTest->getOrmThirdKey());
-    }
-
-    public function testFIELDNewTSetNotexistingOid()
-    {
-        $ormTestMgr = self::$dbHelper->getManager(OrmTest\Manager::class);
-
-        $ormTest = $ormTestMgr->createEntity();
-        $ormTest->setOrmThirdKey('nothing');
-
-        $this->assertEquals('nothing', $ormTest->getOrmThirdKey());
-
-        $ormThird = $ormTest->getOrmThird();
-        $this->assertNull($ormThird);
-
-        // the $ormTest->getOrmThird() call made the Id to be null too
         $this->assertNull($ormTest->getOrmThirdKey());
     }
 

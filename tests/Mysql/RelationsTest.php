@@ -160,6 +160,7 @@ class RelationsTest extends TestCase
     public function testIDNewTSetNotexistingOid()
     {
         $ormTestMgr = self::$dbHelper->getManager(OrmTest\Manager::class);
+        $ormOtherMgr = self::$dbHelper->getManager(OrmOther\Manager::class);
 
         $ormTest = $ormTestMgr->createEntity();
         $ormTest->setOrmOtherId(9876);
@@ -457,6 +458,7 @@ class RelationsTest extends TestCase
     public function testFIELDNewTSetNotexistingOid()
     {
         $ormTestMgr = self::$dbHelper->getManager(OrmTest\Manager::class);
+        $ormOtherMgr = self::$dbHelper->getManager(OrmOther\Manager::class);
 
         $ormTest = $ormTestMgr->createEntity();
         $ormTest->setOrmThirdKey('nothing');

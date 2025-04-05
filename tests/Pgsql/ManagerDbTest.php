@@ -8,6 +8,7 @@ use Milanmadar\CoolioORM\Event\EntityEventTypeEnum;
 use PHPUnit\Framework\TestCase;
 use tests\DbHelper;
 use tests\Model\OrmTest;
+use tests\Model\OrmOther;
 use tests\EntityEventSubscriber;
 
 class ManagerDbTest extends TestCase
@@ -502,6 +503,7 @@ class ManagerDbTest extends TestCase
     public function testEntitySerialization()
     {
         $mgr = self::$dbHelper->getManager(OrmTest\Manager::class);
+        $mgr2 = self::$dbHelper->getManager(OrmOther\Manager::class);
 
         $ent1 = $mgr->findById(10);
         // just make sure it was in the db and has attached ormOther

@@ -4,8 +4,6 @@ namespace Milanmadar\CoolioORM;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Types\Type;
-use Doctrine\DBAL\ArrayParameterType;
-use Doctrine\DBAL\ParameterType;
 
 abstract class Manager
 {
@@ -147,16 +145,20 @@ abstract class Manager
             }
             else*/if(isset($v))
             {
-                $data[$k] = match($this->fieldTypes[$k] ?? 'doesnt_belong_to_this_entity') {
-                    'doesnt_belong_to_this_entity' => $v,
-                    'string', 'text' => (string)$v,
-                    'integer', 'smallint', 'bigint' => (int)$v,
-                    'float', 'decimal' => (float)$v,
-                    'boolean' => (bool)$v,
-                    'array', 'simple_array' => unserialize($v),
-                    'json', 'json_array' => json_decode($v, true),
-                    default => Type::getType($this->fieldTypes[$k])->convertToPHPValue($v, $this->db->getDatabasePlatform()),
-                };
+                if(!str_ends_with($k, '_srid')) {
+                    $data[$k] = match($this->fieldTypes[$k] ?? 'doesnt_belong_to_this_entity') {
+                        'doesnt_belong_to_this_entity' => $v,
+                        'string', 'text' => (string)$v,
+                        'integer', 'smallint', 'bigint' => (int)$v,
+                        'float', 'decimal' => (float)$v,
+                        'boolean' => (bool)$v,
+                        'array', 'simple_array' => unserialize($v),
+                        'json', 'json_array' => json_decode($v, true),
+                        'geometry' => Geo\Shape\Factory::createFromGeoJSONString($v, $data[$k.'_srid'] ?? null),
+                        'geometry_curved' => Geo\Shape\Factory::createFromGeoEWKTString($v),
+                        default => Type::getType($this->fieldTypes[$k])->convertToPHPValue($v, $this->db->getDatabasePlatform()),
+                    };
+                }
             }
             else // this else was not here and all test passed
             {
@@ -230,7 +232,7 @@ abstract class Manager
     /**
      * @return array<string, string>
      */
-    abstract protected function getFieldTypes(): array;
+    abstract public function getFieldTypes(): array;
 
     /**
      * All the field names
@@ -302,6 +304,18 @@ abstract class Manager
     public function getDbConnUrl(): string
     {
         return $this->dbConnUrl;
+    }
+
+    /**
+     * Returns the db connection url
+     * @param string $dbConnUrl
+     * @return $this
+     */
+    public function setDbConnUrl(string $dbConnUrl): self
+    {
+        $db = $this->orm->getDoctrineConnectionByUrl($dbConnUrl);
+        $this->setDb($db);
+        return $this;
     }
 
     /**
@@ -415,6 +429,7 @@ abstract class Manager
      */
     public function findOne(string $sql, array $binds = [], bool $forceToGetFromDb = false): ?Entity
     {
+        $sql = Geo\GeoQueryProcessor::processQuery($sql, $this);
         $row = Utils::executeQuery_bindValues($sql, $binds, $this->db, $this->statementRepo)->fetchAssociative();
         return $row ? $this->createEntityFromDbData($row, $forceToGetFromDb) : null;
     }
@@ -446,6 +461,7 @@ abstract class Manager
     public function findMany(string $sql, array $binds = [], bool $forceToGetFromDb = false): array
     {
         $arrRes = [];
+        $sql = Geo\GeoQueryProcessor::processQuery($sql, $this);
         $doctrineRes = Utils::executeQuery_bindValues($sql, $binds, $this->db, $this->statementRepo);
         while($row = $doctrineRes->fetchAssociative()) {
             $arrRes[] = $this->createEntityFromDbData($row, $forceToGetFromDb);
@@ -460,7 +476,9 @@ abstract class Manager
      */
     public function createQueryBuilder(): QueryBuilder
     {
-        return (new QueryBuilder( $this->orm, $this->db, $this ))->select('*')->from( $this->dbTable );
+        return (new QueryBuilder( $this->orm, $this->db, $this ))
+            ->select('*')
+            ->from($this->dbTable);
     }
 
     /**

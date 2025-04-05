@@ -5,12 +5,11 @@ namespace Pgsql;
 use Milanmadar\CoolioORM\ORM;
 use PHPUnit\Framework\TestCase;
 use tests\DbHelper;
-use tests\Model\OrmTest;
+use tests\Model\GeoShapeAll;
 
 class GeoTest extends TestCase
 {
     private static DbHelper $dbHelper;
-    private static int $oRowCnt;
 
     // This method runs once when the test class is loaded
     public static function setUpBeforeClass(): void
@@ -24,142 +23,130 @@ class GeoTest extends TestCase
     protected function setUp(): void
     {
         ORM::_clearSingleton();
-        self::$dbHelper->resetTo('Pgsql/fixtures/fix.sql');
-        if(!isset(self::$oRowCnt)) {
-            self::$oRowCnt = self::$dbHelper->countRows('orm_test');
-        }
+        self::$dbHelper->resetTo('Pgsql/fixtures/geometry.sql');
     }
 
-    public function testInsert()
+    public function testSelectAllShapes_FindOne_QueryBuilder_ExplicitSELECTlist()
     {
-        $mgr = self::$dbHelper->getManager(OrmTest\Manager::class);
+        $mgr = self::$dbHelper->getManager(GeoShapeAll\Manager::class);
 
-        $json = $this->json();
-        $ent = $mgr->createEntity();
+        /** @var GeoShapeAll\Entity $ent */
+        $ent = $mgr->createQueryBuilder()
+//            ->select(
+//                'ST_AsGeoJSON(polygon_geom) AS polygon_geom',
+//                'ST_SRID(polygon_geom) AS polygon_geom_srid',
+//                'ST_AsEWKT(circularstring_geom) AS circularstring_geom'
+//            )
+            ->select('polygon_geom','circularstring_geom')
+            ->andWhere('1=1')
+            ->limit(0, 1)
+            ->fetchOneEntity()
+        ;
 
-        $ent->setFldJson($json);
-        $this->assertEquals($json, $ent->getFldJson());
-
-        $rowCnt = self::$dbHelper->countRows('orm_test');
-        $mgr->save($ent);
-        $this->assertEquals($ent->getId(), $rowCnt+1);
-
-        $rowCnt = self::$dbHelper->countRows('orm_test');
-        $this->assertEquals(self::$oRowCnt+1, $rowCnt);
-
-        $mgr->clearRepository(true);
-
-        $ent3 = $mgr->findById($ent->getId());
-        $this->assertTrue($ent !== $ent3);
-
-        $this->assertEquals($json, $ent->getFldJson());
-        $this->assertEquals($ent->getFldJson(), $ent3->getFldJson());
+        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape\Polygon', $ent->getPolygonGeom());
+        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape\CircularString', $ent->getCircularStringGeom());
     }
 
-    public function testUpdate()
+    public function testSelectAllShapes_FindOne_QueryBuilder_Star()
     {
-        $mgr = self::$dbHelper->getManager(OrmTest\Manager::class);
+        $mgr = self::$dbHelper->getManager(GeoShapeAll\Manager::class);
 
-        $json = $this->json();
-        $ent = $mgr->createEntity();
+        /** @var GeoShapeAll\Entity $ent */
+        $ent = $mgr->createQueryBuilder()
+            ->select('*')
+            ->andWhere('1=1')
+            ->limit(0, 1)
+            ->fetchOneEntity()
+        ;
 
-        $ent->setFldJson($json);
-
-        $mgr->save($ent);
-
-        $mgr->clearRepository(true);
-
-        $jsonUpd = $json;
-        $jsonUpd['abc'] = 98765;
-        $ent->setFldJson($jsonUpd);
-        $mgr->save($ent);
-
-        $ent2 = $mgr->findById($ent->getId());
-        $this->assertTrue($ent !== $ent2);
-
-        $this->assertEquals($jsonUpd, $ent->getFldJson());
-        $this->assertEquals($ent->getFldJson(), $ent2->getFldJson());
+        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape\Polygon', $ent->getPolygonGeom());
+        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape\CircularString', $ent->getCircularStringGeom());
     }
 
-    public function testSelectAsNew()
+    public function testSelectAllShapes_FindOne_QueryBuilder_NoSELECT()
     {
-        $mgr = self::$dbHelper->getManager(OrmTest\Manager::class);
+        $mgr = self::$dbHelper->getManager(GeoShapeAll\Manager::class);
 
-        $json = $this->json();
-        $ent = $mgr->createEntity();
+        /** @var GeoShapeAll\Entity $ent */
+        $ent = $mgr->createQueryBuilder()
+            ->andWhere('1=1')
+            ->limit(0, 1)
+            ->fetchOneEntity()
+        ;
 
-        $ent->setFldJson($json);
-
-        $mgr->save($ent);
-
-        $mgr->clearRepository(true);
-        $entNew = $mgr->findOneWhere("fld_json->>'str'='halika'");
-        $this->assertInstanceOf('\tests\Model\OrmTest\Entity', $entNew);
-        $this->assertTrue($ent !== $entNew);
-
-        $mgr->clearRepository(true);
-        $entNew = $mgr->findOneWhere("fld_json->>'str'=?", [$json['str']]);
-        $this->assertInstanceOf('\tests\Model\OrmTest\Entity', $entNew);
-        $this->assertTrue($ent !== $entNew);
-
-        $mgr->clearRepository(true);
-        $entNew = $mgr->findOneWhere("fld_json->>'str'=:Val", ['Val'=>$json['str']]);
-        $this->assertInstanceOf('\tests\Model\OrmTest\Entity', $entNew);
-        $this->assertTrue($ent !== $entNew);
-
-        $mgr->clearRepository(true);
-        $entNew = $mgr->findOneWhere("fld_json->>'str'=:Val", ['Val'=>'nope']);
-        $this->assertNull($entNew);
+        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape\Polygon', $ent->getPolygonGeom());
+        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape\CircularString', $ent->getCircularStringGeom());
     }
 
-    public function testSelectUseRepo()
+    public function testSelectAllShapes_FindOne_noQueryBuilder()
     {
-        $mgr = self::$dbHelper->getManager(OrmTest\Manager::class);
+        $mgr = self::$dbHelper->getManager(GeoShapeAll\Manager::class);
 
-        $json = $this->json();
-        $ent = $mgr->createEntity();
+        /** @var GeoShapeAll\Entity $ent */
+        $ent = $mgr->findById(1);
 
-        $ent->setFldJson($json);
+        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape\Polygon', $ent->getPolygonGeom());
+        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape\CircularString', $ent->getCircularStringGeom());
+    }
+    public function testSelectAllShapes_FindMany_QueryBuilder_ExplicitSELECTlist()
+    {
+        $mgr = self::$dbHelper->getManager(GeoShapeAll\Manager::class);
 
-        $mgr->save($ent);
+        /** @var GeoShapeAll\Entity[] $ents */
+        $ents = $mgr->createQueryBuilder()
+//            ->select(
+//                'ST_AsGeoJSON(polygon_geom) AS polygon_geom',
+//                'ST_SRID(polygon_geom) AS polygon_geom_srid',
+//                'ST_AsEWKT(circularstring_geom) AS circularstring_geom'
+//            )
+            ->select('polygon_geom','circularstring_geom')
+            ->andWhere('1=1')
+            ->limit(0, 1)
+            ->fetchManyEntity()
+        ;
 
-        $entNew = $mgr->findOneWhere("fld_json->>'str'='halika'");
-        $this->assertInstanceOf('\tests\Model\OrmTest\Entity', $entNew);
-        $this->assertTrue($ent === $entNew);
-
-        $entNew = $mgr->findOneWhere("fld_json->>'str'=?", [$json['str']]);
-        $this->assertInstanceOf('\tests\Model\OrmTest\Entity', $entNew);
-        $this->assertTrue($ent === $entNew);
-
-        $entNew = $mgr->findOneWhere("fld_json->>'str'=:Val", ['Val'=>$json['str']]);
-        $this->assertInstanceOf('\tests\Model\OrmTest\Entity', $entNew);
-        $this->assertTrue($ent === $entNew);
-
-        $entNew = $mgr->findOneWhere("fld_json->>'str'=:Val", ['Val'=>'nope']);
-        $this->assertNull($entNew);
+        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape\Polygon', $ents[0]->getPolygonGeom());
+        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape\CircularString', $ents[0]->getCircularStringGeom());
     }
 
-    public function testSimpleArrayInJsonField()
+    public function testSelectAllShapes_FindMany_QueryBuilder_Star()
     {
-        $mgr = self::$dbHelper->getManager(OrmTest\Manager::class);
+        $mgr = self::$dbHelper->getManager(GeoShapeAll\Manager::class);
 
-        $arr = ['asd','efg','hij'];
-        $ent = $mgr->createEntity();
+        /** @var GeoShapeAll\Entity[] $ents */
+        $ents = $mgr->createQueryBuilder()
+            ->select('*')
+            ->andWhere('1=1')
+            ->limit(0, 1)
+            ->fetchManyEntity()
+        ;
 
-        $ent->setFldJson($arr);
-        $this->assertEquals($arr, $ent->getFldJson());
+        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape\Polygon', $ents[0]->getPolygonGeom());
+        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape\CircularString', $ents[0]->getCircularStringGeom());
+    }
+    public function testSelectAllShapes_FindMany_QueryBuilder_NoSELECT()
+    {
+        $mgr = self::$dbHelper->getManager(GeoShapeAll\Manager::class);
 
-        $mgr->save($ent);
+        /** @var GeoShapeAll\Entity[] $ents */
+        $ents = $mgr->createQueryBuilder()
+            ->andWhere('1=1')
+            ->limit(0, 1)
+            ->fetchManyEntity()
+        ;
 
-        $rowCnt = self::$dbHelper->countRows('orm_test');
-        $this->assertEquals(self::$oRowCnt+1, $rowCnt);
+        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape\Polygon', $ents[0]->getPolygonGeom());
+        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape\CircularString', $ents[0]->getCircularStringGeom());
+    }
 
-        $mgr->clearRepository(true);
+    public function testSelectAllShapes_FindMany_noQueryBuilder()
+    {
+        $mgr = self::$dbHelper->getManager(GeoShapeAll\Manager::class);
 
-        $ent2 = $mgr->findById($ent->getId());
-        $this->assertTrue($ent !== $ent2);
+        /** @var GeoShapeAll\Entity[] $ents */
+        $ents = $mgr->findManyWhere("1=1");
 
-        $this->assertEquals($arr, $ent->getFldJson());
-        $this->assertEquals($ent->getFldJson(), $ent2->getFldJson());
+        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape\Polygon', $ents[0]->getPolygonGeom());
+        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape\CircularString', $ents[0]->getCircularStringGeom());
     }
 }

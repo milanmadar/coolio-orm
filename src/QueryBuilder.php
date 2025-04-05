@@ -28,6 +28,7 @@ class QueryBuilder extends DoctrineQueryBuilder
     private Connection $db;
     private ?StatementRepository $statementRepo;
     private ?Manager $entityMgr;
+    private bool $select_asterist_is_done;
 
     public function __construct(ORM $orm, Connection $db, ?Manager $entityMgr = null)
     {
@@ -40,6 +41,7 @@ class QueryBuilder extends DoctrineQueryBuilder
         $this->orm = $orm;
         $this->statementRepo = $this->orm->getStatementRepositoryByConnection($db);
         $this->entityMgr = $entityMgr;
+        $this->select_asterist_is_done = false;
     }
 
     /**
@@ -66,8 +68,49 @@ class QueryBuilder extends DoctrineQueryBuilder
      */
     public function select(string ...$expressions): self
     {
+        // Tiny optimization to avoid running the "transform geometries" section below.
+        // It's needed, because the baseManager::createQueryBuilder() calls $this->select('*')
+        // and then the user may also call $this->select('*').
+        // So just don't do the "transform geometries" section below twice
+        if($expressions[0] == '*') {
+            if($this->select_asterist_is_done) {
+                return $this;
+            }
+            $this->select_asterist_is_done = true;
+        } else {
+            $this->select_asterist_is_done = false;
+        }
+
+        // transform geometries
+        if(isset($this->entityMgr))
+        {
+            if($expressions[0] == '*') {
+                $expressions = $this->entityMgr->getFields();
+            }
+
+            $_exps = [];
+            $fieldTypes = $this->entityMgr->getFieldTypes();
+            foreach($expressions as $e) {
+                if(isset($fieldTypes[$e])) {
+                    if($fieldTypes[$e] == 'geometry') {
+                        $_exps[] = "ST_AsGeoJSON({$e}) AS {$e}";
+                        $_exps[] = "ST_SRID({$e}) AS {$e}_srid";
+                    } elseif($fieldTypes[$e] == 'geometry_curved') {
+                        $_exps[] = "ST_AsEWKT({$e}) as {$e}";
+                    } else {
+                        $_exps[] = $e;
+                    }
+                } else {
+                    $_exps[] = $e;
+                }
+            }
+        }
+        else {
+            $_exps = $expressions;
+        }
+
         $this->type = self::TYPE_SELECT;
-        parent::select(...$expressions);
+        parent::select(...$_exps);
         return $this;
     }
 

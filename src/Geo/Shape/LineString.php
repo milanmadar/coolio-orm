@@ -7,6 +7,11 @@ class LineString extends Geometry
     /** @var array<Point> */
     private array $points;
 
+    /**
+     * @param array<mixed> $geoJsonData
+     * @param int|null $srid Optional SRID, defaults to the value in $_ENV['GEO_DEFAULT_SRID']
+     * @return LineString
+     */
     public static function createFromGeoJSONData(array $jsonData, ?int $srid = null): static
     {
         if (!isset($srid)) $srid = $_ENV['GEO_DEFAULT_SRID'];

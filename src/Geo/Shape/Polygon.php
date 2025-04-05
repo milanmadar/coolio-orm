@@ -10,8 +10,8 @@ class Polygon extends Geometry
     private array $lineStrings;
 
     /**
-     * @param array $jsonData
-     * @param int|null $srid
+     * @param array<mixed> $geoJsonData
+     * @param int|null $srid Optional SRID, defaults to the value in $_ENV['GEO_DEFAULT_SRID']
      * @return Polygon
      */
     public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): static
@@ -43,12 +43,7 @@ class Polygon extends Geometry
      */
     public function __construct(array $lineStrings, int|null $srid = null)
     {
-        if (empty($lineStrings)) {
-            throw new \InvalidArgumentException('A Polygon must have at least one LineString.');
-        }
-
         $this->_validateRings($lineStrings);
-
         parent::__construct($srid);
         $this->lineStrings = $lineStrings;
     }

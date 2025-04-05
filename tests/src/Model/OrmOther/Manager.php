@@ -46,7 +46,7 @@ class Manager extends \Milanmadar\CoolioORM\Manager
     /**
      * @inheritDoc
      */
-    protected function getFieldTypes(): array { return [
+    public function getFieldTypes(): array { return [
         'id' => 'integer',
         'fld_int' => 'integer',
         'title' => 'string',

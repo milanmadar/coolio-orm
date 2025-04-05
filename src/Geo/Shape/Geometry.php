@@ -7,7 +7,7 @@ abstract class Geometry
     protected int $srid;
 
     /**
-     * @param array $jsonData
+     * @param array<mixed> $jsonData
      * @param int|null $srid Optional SRID, defaults to the value in $_ENV['GEO_DEFAULT_SRID']
      * @return Geometry
      */

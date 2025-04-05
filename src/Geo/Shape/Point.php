@@ -8,7 +8,7 @@ class Point extends Geometry
     private float $y;
 
     /**
-     * @param array $jsonData
+     * @param array<mixed> $jsonData
      * @param int|null $srid Optional SRID, defaults to the value in $_ENV['GEO_DEFAULT_SRID']
      * @return Point
      */
@@ -26,6 +26,47 @@ class Point extends Geometry
         }
 
         return new self($jsonData['coordinates'][0], $jsonData['coordinates'][1], $srid);
+    }
+
+    /**
+     * @param string $ewktString
+     * @return Point
+     */
+    public static function createFromGeoEWKTString(string $ewktString): static
+    {
+        // Parse the EWKT string, expected format: SRID=<srid>;POINT(<x> <y>)
+        if (strpos($ewktString, 'POINT') === false) {
+            throw new \InvalidArgumentException('Invalid EWKT format. Expected POINT type.');
+        }
+
+        // Extract the SRID and the WKT string
+        $ewktParts = explode(';', $ewktString, 2);
+        if (count($ewktParts) != 2) {
+            throw new \InvalidArgumentException('Invalid EWKT string, could not find SRID and geometry parts.');
+        }
+
+        $sridPart = $ewktParts[0];
+        $geometryPart = $ewktParts[1];
+
+        // Extract SRID value
+        if (strpos($sridPart, 'SRID=') !== 0) {
+            throw new \InvalidArgumentException('Invalid SRID part in EWKT string.');
+        }
+
+        $srid = (int) substr($sridPart, 5);
+
+        // Validate and extract the POINT coordinates
+        preg_match('/POINT\((.*)\)/', $geometryPart, $matches);
+        if (empty($matches)) {
+            throw new \InvalidArgumentException('Invalid POINT format in EWKT.');
+        }
+
+        $coords = array_map('trim', explode(' ', $matches[1]));
+        if (count($coords) !== 2) {
+            throw new \InvalidArgumentException('A POINT must have exactly 2 coordinates.');
+        }
+
+        return new static((float) $coords[0], (float) $coords[1], $srid);
     }
 
     public function __construct(float $x, float $y, int|null $srid = null)
