@@ -33,7 +33,7 @@ class DbJsonTest extends TestCase
     public static function setUpBeforeClass(): void
     {
         // Load the database helper
-        $conn = ORM::instance()->getDoctrineConnectionByUrl($_ENV['DB_POSTGRES_DB1']);
+        $conn = ORM::instance()->getDbByUrl($_ENV['DB_POSTGRES_DB1']);
         self::$dbHelper = new DbHelper( $conn );
     }
 

@@ -27,7 +27,7 @@ class GeoTest extends TestCase
     public static function setUpBeforeClass(): void
     {
         // Load the database helper
-        $conn = ORM::instance()->getDoctrineConnectionByUrl($_ENV['DB_POSTGRES_DB1']);
+        $conn = ORM::instance()->getDbByUrl($_ENV['DB_POSTGRES_DB1']);
         self::$dbHelper = new DbHelper( $conn );
     }
 
@@ -140,6 +140,7 @@ class GeoTest extends TestCase
         $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape\Polygon', $ents[0]->getPolygonGeom());
         $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape\CircularString', $ents[0]->getCircularStringGeom());
     }
+
     public function testSelectAllShapes_FindMany_QueryBuilder_NoSELECT()
     {
         $mgr = self::$dbHelper->getManager(GeoShapeAll\Manager::class);
@@ -153,6 +154,20 @@ class GeoTest extends TestCase
 
         $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape\Polygon', $ents[0]->getPolygonGeom());
         $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape\CircularString', $ents[0]->getCircularStringGeom());
+    }
+
+    public function testgetSQLNamedParameters()
+    {
+        $mgr = self::$dbHelper->getManager(GeoShapeAll\Manager::class);
+
+        $expect = "SELECT id, ST_AsGeoJSON(point_geom) AS point_geom, ST_SRID(point_geom) AS point_geom_srid, ST_AsGeoJSON(linestring_geom) AS linestring_geom, ST_SRID(linestring_geom) AS linestring_geom_srid, ST_AsGeoJSON(polygon_geom) AS polygon_geom, ST_SRID(polygon_geom) AS polygon_geom_srid, ST_AsGeoJSON(multipoint_geom) AS multipoint_geom, ST_SRID(multipoint_geom) AS multipoint_geom_srid, ST_AsGeoJSON(multilinestring_geom) AS multilinestring_geom, ST_SRID(multilinestring_geom) AS multilinestring_geom_srid, ST_AsGeoJSON(multipolygon_geom) AS multipolygon_geom, ST_SRID(multipolygon_geom) AS multipolygon_geom_srid, ST_AsGeoJSON(geomcollection_geom) AS geomcollection_geom, ST_SRID(geomcollection_geom) AS geomcollection_geom_srid, ST_AsEWKT(circularstring_geom) as circularstring_geom, ST_AsEWKT(compoundcurve_geom) as compoundcurve_geom, ST_AsEWKT(curvedpolygon_geom) as curvedpolygon_geom, ST_AsEWKT(multicurve_geom) as multicurve_geom FROM geometry_test WHERE 1=1 LIMIT 1";
+        $sql = $mgr->createQueryBuilder()
+            ->andWhere('1=1')
+            ->limit(0, 1)
+            ->getSQLNamedParameters()
+        ;
+
+        $this->assertEquals($expect, $sql);
     }
 
     public function testSelectAllShapes_FindMany_noQueryBuilder()

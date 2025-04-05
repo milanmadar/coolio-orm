@@ -14,7 +14,7 @@ class SelectInArrayTest extends TestCase
     // This method runs once when the test class is loaded
     public static function setUpBeforeClass(): void
     {
-        $conn = ORM::instance()->getDoctrineConnectionByUrl($_ENV['DB_MYSQL_DB1']);
+        $conn = ORM::instance()->getDbByUrl($_ENV['DB_MYSQL_DB1']);
         self::$dbHelper = new DbHelper( $conn );
     }
 

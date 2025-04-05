@@ -314,7 +314,7 @@ abstract class Manager
      */
     public function setDbConnUrl(string $dbConnUrl): self
     {
-        $db = $this->orm->getDoctrineConnectionByUrl($dbConnUrl);
+        $db = $this->orm->getDbByUrl($dbConnUrl);
         $this->setDb($db);
         return $this;
     }
@@ -352,7 +352,7 @@ abstract class Manager
      */
     public function setDbByConnectionUrl(string $connUrl): self
     {
-        return $this->setDb($this->orm->getDoctrineConnectionByUrl($connUrl));
+        return $this->setDb($this->orm->getDbByUrl($connUrl));
     }
 
     /**

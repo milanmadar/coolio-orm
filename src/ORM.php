@@ -59,7 +59,7 @@ class ORM
      * @param string $connUrl Usually list $_ENV['DB_CONNECTION_URL']
      * @return Connection
      */
-    public function getDoctrineConnectionByUrl(string $connUrl): Connection
+    public function getDbByUrl(string $connUrl): Connection
     {
         if(!isset($this->doctrineConnectionsByUrl[$connUrl])) {
             $connectionParams = (new DsnParser())->parse($connUrl);
@@ -85,7 +85,7 @@ class ORM
     public function entityManager(string $mgrClassName, ?Connection $db = null): Manager
     {
         if(!isset($db)) {
-            $db = $this->getDoctrineConnectionByUrl( $mgrClassName::getDbDefaultConnectionUrl() );
+            $db = $this->getDbByUrl( $mgrClassName::getDbDefaultConnectionUrl() );
         }
 
         $k = $mgrClassName .Utils::getDbConnUrl($db);
@@ -115,7 +115,7 @@ class ORM
      */
     public function createQueryBuilderByConnectionUrl(string $connUrl): QueryBuilder
     {
-        return new QueryBuilder($this, $this->getDoctrineConnectionByUrl($connUrl) );
+        return new QueryBuilder($this, $this->getDbByUrl($connUrl) );
     }
 
     /**

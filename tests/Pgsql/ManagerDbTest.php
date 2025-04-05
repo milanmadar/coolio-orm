@@ -20,10 +20,10 @@ class ManagerDbTest extends TestCase
     // This method runs once when the test class is loaded
     public static function setUpBeforeClass(): void
     {
-        $conn1 = ORM::instance()->getDoctrineConnectionByUrl($_ENV['DB_POSTGRES_DB1']);
+        $conn1 = ORM::instance()->getDbByUrl($_ENV['DB_POSTGRES_DB1']);
         self::$dbHelper = new DbHelper( $conn1 );
 
-        $conn2 = ORM::instance()->getDoctrineConnectionByUrl($_ENV['DB_POSTGRES_DB2']);
+        $conn2 = ORM::instance()->getDbByUrl($_ENV['DB_POSTGRES_DB2']);
         self::$dbHelperChange = new DbHelper( $conn2 );
     }
 
@@ -447,9 +447,9 @@ class ManagerDbTest extends TestCase
         $orm = \Milanmadar\CoolioORM\ORM::instance();
 
         /** @var OrmTest\Manager $mgr1 */
-        $mgr1 = $orm->entityManager(OrmTest\Manager::class, $orm->getDoctrineConnectionByUrl($_ENV['DB_POSTGRES_DB1']));
+        $mgr1 = $orm->entityManager(OrmTest\Manager::class, $orm->getDbByUrl($_ENV['DB_POSTGRES_DB1']));
         /** @var OrmTest\Manager $mgr2 */
-        $mgr2 = $orm->entityManager(OrmTest\Manager::class, $orm->getDoctrineConnectionByUrl($_ENV['DB_POSTGRES_DB2']));
+        $mgr2 = $orm->entityManager(OrmTest\Manager::class, $orm->getDbByUrl($_ENV['DB_POSTGRES_DB2']));
 
         // select them
         $ent1_1 = $mgr1->findOneWhere("id=?", [1]);

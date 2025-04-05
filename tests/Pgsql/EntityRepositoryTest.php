@@ -15,7 +15,7 @@ class EntityRepositoryTest extends TestCase
     // This method runs once when the test class is loaded
     public static function setUpBeforeClass(): void
     {
-        $conn1 = ORM::instance()->getDoctrineConnectionByUrl($_ENV['DB_POSTGRES_DB1']);
+        $conn1 = ORM::instance()->getDbByUrl($_ENV['DB_POSTGRES_DB1']);
         self::$dbHelper = new DbHelper( $conn1 );
     }
 
