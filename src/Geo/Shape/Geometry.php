@@ -29,8 +29,14 @@ abstract class Geometry
         return $this->srid;
     }
 
+    /**
+     * @return string
+     */
     abstract public function toWKT(): string;
 
+    /**
+     * @return array<mixed>
+     */
     abstract public function toGeoJSON(): array;
 
     public function toEWKT(): string

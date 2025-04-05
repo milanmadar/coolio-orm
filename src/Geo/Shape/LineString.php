@@ -2,7 +2,7 @@
 
 namespace Milanmadar\CoolioORM\Geo\Shape;
 
-class LineString extends Geometry
+class LineString extends Geometry implements HasStartEndPointInterface
 {
     /** @var array<Point> */
     private array $points;
@@ -119,6 +119,9 @@ class LineString extends Geometry
         return $this;
     }
 
+    /**
+     * @return string
+     */
     public function toWKT(): string
     {
         $pointStrings = array_map(
@@ -129,11 +132,24 @@ class LineString extends Geometry
         return 'LINESTRING(' . implode(', ', $pointStrings) . ')';
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function toGeoJSON(): array
     {
         return [
             'type' => 'LineString',
             'coordinates' => $this->points
         ];
+    }
+
+    public function getStartPoint(): Point
+    {
+        return $this->points[0];
+    }
+
+    public function getEndPoint(): Point
+    {
+        return $this->points[count($this->points) - 1];
     }
 }

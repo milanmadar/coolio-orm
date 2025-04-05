@@ -161,6 +161,9 @@ class MultiPolygon extends Geometry
         return $this;
     }
 
+    /**
+     * @return string
+     */
     public function toWKT(): string
     {
         $polygonStrings = array_map(
@@ -177,6 +180,9 @@ class MultiPolygon extends Geometry
         return 'MULTIPOLYGON(' . implode(', ', $polygonStrings) . ')';
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function toGeoJSON(): array
     {
         return [

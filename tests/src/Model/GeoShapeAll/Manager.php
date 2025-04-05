@@ -48,8 +48,17 @@ class Manager extends \Milanmadar\CoolioORM\Manager
      */
     public function getFieldTypes(): array { return [
         'id' => 'integer',
+        'point_geom' => 'geometry',
+        'linestring_geom' => 'geometry',
         'polygon_geom' => 'geometry',
+        'multipoint_geom' => 'geometry',
+        'multilinestring_geom' => 'geometry',
+        'multipolygon_geom' => 'geometry',
+        'geomcollection_geom' => 'geometry',
         'circularstring_geom' => 'geometry_curved',
+        'compoundcurve_geom' => 'geometry_curved',
+        'curvedpolygon_geom' => 'geometry_curved',
+        'multicurve_geom' => 'geometry_curved',
     ]; }
 
     /**

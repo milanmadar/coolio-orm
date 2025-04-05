@@ -146,6 +146,9 @@ class MultiLineString extends Geometry
         return $this;
     }
 
+    /**
+     * @return string
+     */
     public function toWKT(): string
     {
         $segments = array_map(
@@ -159,6 +162,9 @@ class MultiLineString extends Geometry
         return 'MULTILINESTRING(' . implode(', ', $segments) . ')';
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function toGeoJSON(): array
     {
         return [

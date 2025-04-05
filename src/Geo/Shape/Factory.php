@@ -41,16 +41,27 @@ class Factory
             'MultiLineString' => MultiLineString::createFromGeoJSONData($geoJsonData, $srid),
             'Polygon' => Polygon::createFromGeoJSONData($geoJsonData, $srid),
             'MultiPolygon' => MultiPolygon::createFromGeoJSONData($geoJsonData, $srid),
-            'GeometryCollection' => self::createFromGeoJSONData($geoJsonData, $srid), // recursive
+            'GeometryCollection' => GeometryCollection::createFromGeoJSONData($geoJsonData, $srid), // recursive
             default => throw new \InvalidArgumentException("Unsupported geometry type in collection: ".$geoJsonData['type']),
         };
     }
 
     public static function createFromGeoEWKTString(string $ewktString): Geometry
     {
-        if (str_contains($ewktString, 'CIRCULARSTRING')) {
+        $begin = substr($ewktString, 0, 35);
+        if (str_contains($begin, 'MULTICURVE')) {
+            return MultiCurve::createFromGeoEWKTString($ewktString);
+        }
+        elseif (str_contains($begin, 'COMPOUNDCURVE')) {
+            return CompoundCurve::createFromGeoEWKTString($ewktString);
+        }
+        elseif (str_contains($begin, 'CURVEPOLYGON')) {
+            return CurvePolygon::createFromGeoEWKTString($ewktString);
+        }
+        elseif (str_contains($begin, 'CIRCULARSTRING')) {
             return CircularString::createFromGeoEWKTString($ewktString);
-        } else {
+        }
+        else {
             throw new \InvalidArgumentException('Unsupported geometry type in EWKT string: '.substr($ewktString, 0, 50).'...');
         }
     }

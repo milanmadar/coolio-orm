@@ -120,6 +120,9 @@ class MultiPoint extends Geometry
         return $this;
     }
 
+    /**
+     * @return string
+     */
     public function toWKT(): string
     {
         $pointStrings = array_map(
@@ -130,6 +133,9 @@ class MultiPoint extends Geometry
         return 'MULTIPOINT(' . implode(', ', $pointStrings) . ')';
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function toGeoJSON(): array
     {
         return [

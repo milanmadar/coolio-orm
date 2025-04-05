@@ -103,11 +103,17 @@ class Point extends Geometry
         return [$this->x, $this->y];
     }
 
+    /**
+     * @return string
+     */
     public function toWKT(): string
     {
         return sprintf('POINT(%F %F)', $this->x, $this->y);
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function toGeoJSON(): array
     {
         return [

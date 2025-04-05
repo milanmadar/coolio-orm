@@ -2,7 +2,7 @@
 
 namespace Milanmadar\CoolioORM\Geo\Shape;
 
-class CircularString extends Geometry
+class CircularString extends Geometry implements HasStartEndPointInterface
 {
     /** @var array<Point> */
     private  array $points;
@@ -119,5 +119,15 @@ class CircularString extends Geometry
         if (count($points) < 3 || count($points) % 2 === 0) {
             throw new \InvalidArgumentException('A CircularString must have an odd number of points ≥ 3.');
         }
+    }
+
+    public function getStartPoint(): Point
+    {
+        return $this->points[0];
+    }
+
+    public function getEndPoint(): Point
+    {
+        return $this->points[count($this->points) - 1];
     }
 }

@@ -103,12 +103,18 @@ class GeometryCollection extends Geometry
         $this->geometries = $geometries;
     }
 
+    /**
+     * @return string
+     */
     public function toWKT(): string
     {
         $wktGeometries = array_map(fn(Geometry $g) => $g->toWKT(), $this->geometries);
         return 'GEOMETRYCOLLECTION(' . implode(', ', $wktGeometries) . ')';
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function toGeoJSON(): array
     {
         return [

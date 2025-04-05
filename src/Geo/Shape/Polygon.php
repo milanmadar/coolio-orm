@@ -132,6 +132,9 @@ class Polygon extends Geometry
         return $this;
     }
 
+    /**
+     * @return string
+     */
     public function toWKT(): string
     {
         $ringStrings = array_map(
@@ -145,6 +148,9 @@ class Polygon extends Geometry
         return 'POLYGON(' . implode(', ', $ringStrings) . ')';
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function toGeoJSON(): array
     {
         return [
