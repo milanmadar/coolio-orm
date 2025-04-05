@@ -8,11 +8,11 @@ class CompoundCurve extends Geometry implements HasStartEndPointInterface
     private array $segments;
 
     /**
-     * @param array<mixed> $points
+     * @param array<mixed> $jsonData
      * @param int|null $srid Optional SRID, defaults to the value in $_ENV['GEO_DEFAULT_SRID']
      * @return CompoundCurve
      */
-    public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): static
+    public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): CompoundCurve
     {
         // GeoJSON does not support CircularString by spec
         throw new \RuntimeException('GeoJSON does not support CompoundCurve. Use EWKT instead.');
@@ -23,7 +23,7 @@ class CompoundCurve extends Geometry implements HasStartEndPointInterface
      * @param string $ewktString
      * @return CompoundCurve
      */
-    public static function createFromGeoEWKTString(string $ewktString): static
+    public static function createFromGeoEWKTString(string $ewktString): CompoundCurve
     {
         // Extract the SRID and geometry part from the EWKT string.
         if (strpos($ewktString, 'COMPOUNDCURVE') === false) {
@@ -96,7 +96,7 @@ class CompoundCurve extends Geometry implements HasStartEndPointInterface
             }
         }
 
-        return new static($processedSegments, $srid);
+        return new CompoundCurve($processedSegments, $srid);
     }
 
     /**

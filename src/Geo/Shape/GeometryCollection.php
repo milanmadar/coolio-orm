@@ -11,7 +11,7 @@ class GeometryCollection extends Geometry
      * @param array<mixed> $jsonData
      * @return GeometryCollection
      */
-    public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): static
+    public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): GeometryCollection
     {
         if (
             !isset($jsonData['type'], $jsonData['geometries']) ||
@@ -27,14 +27,14 @@ class GeometryCollection extends Geometry
             $geometries[] = Factory::createFromGeoJSONData($geometryData, $srid);
         }
 
-        return new static($geometries, $srid);
+        return new GeometryCollection($geometries, $srid);
     }
 
     /**
      * @param string $ewktString
      * @return GeometryCollection
      */
-    public static function createFromGeoEWKTString(string $ewktString): static
+    public static function createFromGeoEWKTString(string $ewktString): GeometryCollection
     {
         // Parse the EWKT string, expected format: SRID=<srid>;GEOMETRYCOLLECTION(<geometry1>, <geometry2>, <geometry3>, ...)
         if (strpos($ewktString, 'GEOMETRYCOLLECTION') === false) {
@@ -90,7 +90,7 @@ class GeometryCollection extends Geometry
             }
         }
 
-        return new static($geometries, $srid);
+        return new GeometryCollection($geometries, $srid);
     }
 
     /**

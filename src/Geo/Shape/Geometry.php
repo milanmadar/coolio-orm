@@ -11,13 +11,13 @@ abstract class Geometry
      * @param int|null $srid Optional SRID, defaults to the value in $_ENV['GEO_DEFAULT_SRID']
      * @return Geometry
      */
-    abstract public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): static;
+    abstract public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): Geometry;
 
     /**
      * @param string $ewktString
      * @return Geometry
      */
-    abstract public static function createFromGeoEWKTString(string $ewktString): static;
+    abstract public static function createFromGeoEWKTString(string $ewktString): Geometry;
 
     public function __construct(int|null $srid = null)
     {

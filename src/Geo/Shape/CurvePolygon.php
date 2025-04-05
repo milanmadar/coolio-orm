@@ -4,15 +4,15 @@ namespace Milanmadar\CoolioORM\Geo\Shape;
 
 class CurvePolygon extends Geometry
 {
-    /** @var array<LineString,CircularString> */
-    private array $boundaries; // An array of boundary segments (LineString or CircularString)
+    /** @var array<\Milanmadar\CoolioORM\Geo\Shape\LineString,\Milanmadar\CoolioORM\Geo\Shape\CircularString> */
+    private array $boundaries;
 
     /**
-     * @param array<mixed> $points
+     * @param array<mixed> $jsonData
      * @param int|null $srid Optional SRID, defaults to the value in $_ENV['GEO_DEFAULT_SRID']
      * @return CurvePolygon
      */
-    public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): static
+    public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): CurvePolygon
     {
         // GeoJSON does not support CircularString by spec
         throw new \RuntimeException('GeoJSON does not support CurvePolygon. Use EWKT instead.');
@@ -22,7 +22,7 @@ class CurvePolygon extends Geometry
      * @param string $ewktString
      * @return CurvePolygon
      */
-    public static function createFromGeoEWKTString(string $ewktString): static
+    public static function createFromGeoEWKTString(string $ewktString): CurvePolygon
     {
         // Extract the SRID and geometry part from the EWKT string.
         if (strpos($ewktString, 'CURVEPOLYGON') === false) {
@@ -44,7 +44,6 @@ class CurvePolygon extends Geometry
         }
 
         // Now split the boundaries inside the CurvePolygon (separated by commas)
-        $boundaryStrings = [];
         $geometryPart = $matches[1];
 
         // Regular expression to capture boundaries (both CIRCULARSTRING and LINESTRING without type)
@@ -55,28 +54,37 @@ class CurvePolygon extends Geometry
         }
 
         // Process each boundary found
+        /** @var array<\Milanmadar\CoolioORM\Geo\Shape\LineString,\Milanmadar\CoolioORM\Geo\Shape\CircularString> $boundaries */
+        $boundaries = [];
         foreach ($boundaryMatches[0] as $boundaryString) {
             $boundaryString = trim($boundaryString);
 
             // Check if it's a CIRCULARSTRING
             if (strpos($boundaryString, 'CIRCULARSTRING') === 0) {
                 // It's a CIRCULARSTRING
-                $boundaries[] = CircularString::createFromGeoEWKTString("SRID=$srid;$boundaryString");
+                /** @var \Milanmadar\CoolioORM\Geo\Shape\CircularString $_ */
+                $_ = CircularString::createFromGeoEWKTString("SRID=$srid;$boundaryString");
+                $boundaries[] = $_;
             } elseif (strpos($boundaryString, 'LINESTRING') === 0) {
                 // It's an explicitly typed LINESTRING
-                $boundaries[] = LineString::createFromGeoEWKTString("SRID=$srid;$boundaryString");
+                /** @var \Milanmadar\CoolioORM\Geo\Shape\LineString $_ */
+                $_ = LineString::createFromGeoEWKTString("SRID=$srid;$boundaryString");
+                $boundaries[] = $_;
             } else {
                 // It's an untyped LINESTRING (just a list of points)
-                $boundaries[] = LineString::createFromGeoEWKTString("SRID=$srid;LINESTRING$boundaryString");
+                /** @var \Milanmadar\CoolioORM\Geo\Shape\LineString $_ */
+                $_ = LineString::createFromGeoEWKTString("SRID=$srid;LINESTRING$boundaryString");
+                $boundaries[] = $_;
             }
         }
 
-        return new static($boundaries, $srid);
+        /** @var array<\Milanmadar\CoolioORM\Geo\Shape\LineString,\Milanmadar\CoolioORM\Geo\Shape\CircularString> $boundaries */
+        return new CurvePolygon($boundaries, $srid);
     }
 
 
     /**
-     * @param array<LineString,CircularString> $boundaries
+     * @param array<\Milanmadar\CoolioORM\Geo\Shape\LineString,\Milanmadar\CoolioORM\Geo\Shape\CircularString> $boundaries
      * @param int|null $srid The SRID of the CurvePolygon.
      */
     public function __construct(array $boundaries, int|null $srid = null)
@@ -107,7 +115,7 @@ class CurvePolygon extends Geometry
     }
 
     /**
-     * @return array<LineString,CircularString>
+     * @return array<\Milanmadar\CoolioORM\Geo\Shape\LineString,\Milanmadar\CoolioORM\Geo\Shape\CircularString>
      */
     public function getBoundaries(): array
     {
@@ -115,10 +123,10 @@ class CurvePolygon extends Geometry
     }
 
     /**
-     * @param array<LineString,CircularString> $boundaries
+     * @param array<\Milanmadar\CoolioORM\Geo\Shape\LineString,\Milanmadar\CoolioORM\Geo\Shape\CircularString> $boundaries
      * @return $this
      */
-    public function setBoundaries(array $boundaries): array
+    public function setBoundaries(array $boundaries): self
     {
         $this->boundaries = $boundaries;
         return $this;

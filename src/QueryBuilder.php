@@ -26,7 +26,7 @@ class QueryBuilder extends DoctrineQueryBuilder
 
     private ORM $orm;
     private Connection $db;
-    private ?StatementRepository $statementRepo;
+    private StatementRepository $statementRepo;
     private ?Manager $entityMgr;
     private bool $select_asterist_is_done;
 
@@ -293,8 +293,12 @@ class QueryBuilder extends DoctrineQueryBuilder
     {
         $this->type = self::TYPE_INSERT;
 
-        if(!isset($table) && isset($this->entityMgr)) {
-            $table = $this->entityMgr->getDbTable();
+        if(!isset($table)) {
+            if(isset($this->entityMgr)) {
+                $table = $this->entityMgr->getDbTable();
+            } else {
+                throw new \InvalidArgumentException('QueryBuilder::insert() You must provide a table name or set an entity manager.');
+            }
         }
 
         parent::insert($table);
@@ -309,8 +313,12 @@ class QueryBuilder extends DoctrineQueryBuilder
     {
         $this->type = self::TYPE_UPDATE;
 
-        if(!isset($table) && isset($this->entityMgr)) {
-            $table = $this->entityMgr->getDbTable();
+        if(!isset($table)) {
+            if(isset($this->entityMgr)) {
+                $table = $this->entityMgr->getDbTable();
+            } else {
+                throw new \InvalidArgumentException('QueryBuilder::update() You must provide a table name or set an entity manager.');
+            }
         }
 
         parent::update($table);
@@ -325,8 +333,12 @@ class QueryBuilder extends DoctrineQueryBuilder
     {
         $this->type = self::TYPE_DELETE;
 
-        if(!isset($table) && isset($this->entityMgr)) {
-            $table = $this->entityMgr->getDbTable();
+        if(!isset($table)) {
+            if(isset($this->entityMgr)) {
+                $table = $this->entityMgr->getDbTable();
+            } else {
+                throw new \InvalidArgumentException('QueryBuilder::delete() You must provide a table name or set an entity manager.');
+            }
         }
 
         parent::delete($table);
@@ -439,6 +451,7 @@ class QueryBuilder extends DoctrineQueryBuilder
      */
     public function orderBy(string $sort, ?string $order = null): self
     {
+        if(!isset($order)) $order = 'ASC';
         $this->orderBys = [ [$sort, $order] ];
         parent::orderBy($sort, $order);
         return $this;
@@ -450,6 +463,7 @@ class QueryBuilder extends DoctrineQueryBuilder
      */
     public function addOrderBy(string $sort, ?string $order = null): self
     {
+        if(!isset($order)) $order = 'ASC';
         $this->orderBys[] = [$sort, $order];
         parent::addOrderBy($sort, $order);
         return $this;
@@ -505,7 +519,7 @@ class QueryBuilder extends DoctrineQueryBuilder
             $value = $_values;
         }
 
-        if(!isset($type) && is_array($value)) {
+        if($type == ParameterType::STRING && is_array($value)) {
             if(empty($value)) {
                 $type = ArrayParameterType::INTEGER;
             } else {
@@ -708,7 +722,7 @@ class QueryBuilder extends DoctrineQueryBuilder
                 sleep($retrySleep);
             }
             catch (Exception $e) {
-                throw Utils::handleDriverException($e, $sql ?? null, $params);
+                throw Utils::handleDriverException($e, $sql, $params);
             }
         }
 
@@ -747,7 +761,7 @@ class QueryBuilder extends DoctrineQueryBuilder
                 sleep($retrySleep);
             }
             catch (Exception $e) {
-                throw Utils::handleDriverException($e, $sql ?? null, $params);
+                throw Utils::handleDriverException($e, $sql, $params);
             }
         }
 
@@ -786,7 +800,7 @@ class QueryBuilder extends DoctrineQueryBuilder
                 sleep($retrySleep);
             }
             catch (Exception $e) {
-                throw Utils::handleDriverException($e, $sql ?? null, $params);
+                throw Utils::handleDriverException($e, $sql, $params);
             }
         }
 
@@ -825,7 +839,7 @@ class QueryBuilder extends DoctrineQueryBuilder
                 sleep($retrySleep);
             }
             catch (Exception $e) {
-                throw Utils::handleDriverException($e, $sql ?? null, $params);
+                throw Utils::handleDriverException($e, $sql, $params);
             }
         }
 
@@ -864,7 +878,7 @@ class QueryBuilder extends DoctrineQueryBuilder
                 sleep($retrySleep);
             }
             catch (Exception $e) {
-                throw Utils::handleDriverException($e, 'ORM\\QueryBuilder::fetchOne()', $sql ?? null, $params);
+                throw Utils::handleDriverException($e, $sql, $params);
             }
         }
 
@@ -903,7 +917,7 @@ class QueryBuilder extends DoctrineQueryBuilder
                 sleep($retrySleep);
             }
             catch (Exception $e) {
-                throw Utils::handleDriverException($e, $sql ?? null, $params);
+                throw Utils::handleDriverException($e, $sql, $params);
             }
         }
 
@@ -942,7 +956,7 @@ class QueryBuilder extends DoctrineQueryBuilder
                 sleep($retrySleep);
             }
             catch (Exception $e) {
-                throw Utils::handleDriverException($e, $sql ?? null, $params);
+                throw Utils::handleDriverException($e, $sql, $params);
             }
         }
 

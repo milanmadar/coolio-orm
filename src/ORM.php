@@ -4,7 +4,6 @@ namespace Milanmadar\CoolioORM;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
-use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
 use Doctrine\DBAL\Tools\DsnParser;
 
 class ORM
@@ -75,7 +74,7 @@ class ORM
 
     /**
      * Entity Manager, <b>SINGLETON</b>
-     * @template T
+     * @template T of \Milanmadar\CoolioORM\Manager
      * @param T $mgrClassName
      * @param Connection|null $db Optional. Default is the class default: $mgrClassName::getDbSelector()
      * @return T
@@ -94,7 +93,9 @@ class ORM
         if(!isset($this->entityManagers[$k])) {
             $this->entityManagers[$k] = new $mgrClassName( $this, $db, $this->getEntityRepository() );
         }
-        return $this->entityManagers[$k]; /** @phpstan-ignore-line */
+
+        /** @var T of Milanmadar\CoolioORM\Manager */
+        return $this->entityManagers[$k];
     }
 
     /**

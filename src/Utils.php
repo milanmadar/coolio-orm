@@ -11,7 +11,7 @@ class Utils
     /**
      * 'IN (:ArrayParam)'
      * @param string $sql
-     * @param array<string|int, mixed> $binds
+     * @param array<int<0, max>|string, mixed> $binds
      * @throws \InvalidArgumentException
      */
     public static function handleArrayInSQLParams(string &$sql, array &$binds): void
@@ -65,7 +65,7 @@ class Utils
 
     /**
      * @param string $sql
-     * @param array $binds
+     * @param array<mixed> $binds
      * @param Connection $conn
      * @param StatementRepository|null $statementRepo
      * @return Result
@@ -115,7 +115,7 @@ class Utils
                     return $conn->executeQuery($sql, $binds, $paramTypes);
                 }
             }
-            catch (Exception\ConnectionException|Exception\ConnectionLost|Exception\RetryableException $e) {
+            catch (Exception\ConnectionException | Exception\ConnectionLost | Exception\RetryableException $e) {
                 if ($i == $maxTries) {
                     throw self::handleDriverException($e, $sql, $binds);
                 }
@@ -132,7 +132,7 @@ class Utils
 
     /**
      * @param string $sql
-     * @param array $binds
+     * @param array<mixed> $binds
      * @param Connection $conn
      * @param StatementRepository|null $statementRepo
      * @return int The number of affected rows
@@ -182,7 +182,7 @@ class Utils
                     return (int)$conn->executeStatement($sql, $binds, $paramTypes);
                 }
             }
-            catch (Exception\ConnectionException|Exception\ConnectionLost|Exception\RetryableException $e) {
+            catch (Exception\ConnectionException | Exception\ConnectionLost | Exception\RetryableException $e) {
                 if ($i == $maxTries) {
                     throw self::handleDriverException($e, $sql, $binds);
                 }
@@ -194,24 +194,24 @@ class Utils
         }
 
         // this is just so IDE doesn't complain, but the loop above always returns or throws
-        return $conn->executeStatement($sql, $binds, $paramTypes);
+        return (int)$conn->executeStatement($sql, $binds, $paramTypes);
     }
 
     /**
-     * @param \Doctrine\DBAL\Exception $e
+     * @param Exception | Exception\RetryableException $e
      * @param string|null $sql
      * @param array<int|string, mixed>|null $binds
      * @return ORMException
      */
-    public static function handleDriverException(\Doctrine\DBAL\Exception $e, ?string $sql, ?array $binds): ORMException
+    public static function handleDriverException(Exception|Exception\RetryableException $e, ?string $sql, ?array $binds): ORMException
     {
         $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 3);
         $caller = $backtrace[2];
         $callerClass = isset($caller['class']) ? $caller['class'] : null;
-        $callerFunction = isset($caller['function']) ? $caller['function'] : null;
+        $callerFunction = $caller['function'];
         $from = $callerClass.'::'.$callerFunction.'()';
 
-        if($e instanceof \Doctrine\DBAL\Exception\DriverException)
+        if($e instanceof Exception\DriverException)
         {
             $exClass = get_class($e);
             $query = $e->getQuery();

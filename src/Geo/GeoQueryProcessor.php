@@ -42,12 +42,17 @@ class GeoQueryProcessor
             $processedSelect = implode(", ", array_map(fn($c) => $c, $_cols));
 
             // Replace the original SELECT part with the processed one
+            /** @var string $sql */
             $sql = preg_replace('/^\s*SELECT\s+(.*)\s+FROM\s+/i', 'SELECT ' . $processedSelect . ' FROM ', $sql);
         }
 
         return $sql;
     }
 
+    /**
+     * @param string $selectPart
+     * @return array<string>
+     */
     private static function splitSelectColumns(string $selectPart): array
     {
         $columns = [];

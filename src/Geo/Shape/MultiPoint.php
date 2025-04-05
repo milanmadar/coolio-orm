@@ -8,11 +8,11 @@ class MultiPoint extends Geometry
     private array $points;
 
     /**
-     * @param array<mixed> $geoJsonData
+     * @param array<mixed> $jsonData
      * @param int|null $srid Optional SRID, defaults to the value in $_ENV['GEO_DEFAULT_SRID']
      * @return MultiPoint
      */
-    public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): static
+    public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): MultiPoint
     {
         if (!isset($srid)) $srid = $_ENV['GEO_DEFAULT_SRID'];
 
@@ -33,14 +33,14 @@ class MultiPoint extends Geometry
             $points[] = new Point((float)$coords[0], (float)$coords[1], $srid);
         }
 
-        return new static($points, $srid);
+        return new MultiPoint($points, $srid);
     }
 
     /**
      * @param string $ewktString
      * @return MultiPoint
      */
-    public static function createFromGeoEWKTString(string $ewktString): static
+    public static function createFromGeoEWKTString(string $ewktString): MultiPoint
     {
         // Parse the EWKT string, expected format: SRID=<srid>;MULTIPOINT(<x1> <y1>, <x2> <y2>, ...)
         if (strpos($ewktString, 'MULTIPOINT') === false) {
@@ -81,7 +81,7 @@ class MultiPoint extends Geometry
             $points[] = new Point((float) $coords[0], (float) $coords[1], $srid);
         }
 
-        return new static($points, $srid);
+        return new MultiPoint($points, $srid);
     }
 
     /**
@@ -107,7 +107,7 @@ class MultiPoint extends Geometry
     }
 
     /**
-     * @param array $points
+     * @param array<Point> $points
      * @return $this
      */
     public function setPoints(array $points): MultiPoint

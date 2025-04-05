@@ -9,21 +9,21 @@ class MultiCurve extends Geometry
     private array $curves;
 
     /**
-     * @param array<mixed> $points
+     * @param array<mixed> $jsonData
      * @param int|null $srid Optional SRID, defaults to the value in $_ENV['GEO_DEFAULT_SRID']
      * @return MultiCurve
      */
-    public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): static
+    public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): MultiCurve
     {
         // GeoJSON does not support CircularString by spec
         throw new \RuntimeException('GeoJSON does not support MultiCurve. Use EWKT instead.');
     }
 
     /**
-     * @param string<LineString|CircularString|CompoundCurve> $ewktString
+     * @param string $ewktString
      * @return MultiCurve
      */
-    public static function createFromGeoEWKTString(string $ewktString): static
+    public static function createFromGeoEWKTString(string $ewktString): MultiCurve
     {
         // Extract the SRID and geometry part from the EWKT string.
         if (strpos($ewktString, 'MULTICURVE') === false) {
@@ -69,7 +69,7 @@ class MultiCurve extends Geometry
             }
         }
 
-        return new static($curves, $srid);
+        return new MultiCurve($curves, $srid);
     }
 
 

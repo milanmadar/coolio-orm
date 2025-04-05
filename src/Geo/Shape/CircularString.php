@@ -8,11 +8,11 @@ class CircularString extends Geometry implements HasStartEndPointInterface
     private  array $points;
 
     /**
-     * @param array<mixed> $points
+     * @param array<mixed> $jsonData
      * @param int|null $srid Optional SRID, defaults to the value in $_ENV['GEO_DEFAULT_SRID']
      * @return CircularString
      */
-    public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): static
+    public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): CircularString
     {
         // GeoJSON does not support CircularString by spec
         throw new \RuntimeException('GeoJSON does not support CircularString. Use EWKT instead.');
@@ -22,7 +22,7 @@ class CircularString extends Geometry implements HasStartEndPointInterface
      * @param string $ewktString
      * @return CircularString
      */
-    public static function createFromGeoEWKTString(string $ewktString): static
+    public static function createFromGeoEWKTString(string $ewktString): CircularString
     {
         if (!str_contains($ewktString, 'CIRCULARSTRING')) {
             throw new \InvalidArgumentException('Invalid EWKT format. Expected CIRCULARSTRING type.');
@@ -62,7 +62,7 @@ class CircularString extends Geometry implements HasStartEndPointInterface
             $points[] = new Point((float)$coords[0], (float)$coords[1], $srid);
         }
 
-        return new static($points, $srid);
+        return new CircularString($points, $srid);
     }
 
     /**

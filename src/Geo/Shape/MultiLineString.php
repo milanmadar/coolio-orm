@@ -8,11 +8,11 @@ class MultiLineString extends Geometry
     private array $lineStrings;
 
     /**
-     * @param array<mixed> $geoJsonData
+     * @param array<mixed> $jsonData
      * @param int|null $srid Optional SRID, defaults to the value in $_ENV['GEO_DEFAULT_SRID']
      * @return MultiLineString
      */
-    public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): static
+    public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): MultiLineString
     {
         if (!isset($srid)) $srid = $_ENV['GEO_DEFAULT_SRID'];
 
@@ -43,14 +43,14 @@ class MultiLineString extends Geometry
             $lineStrings[] = new LineString($points, $srid);
         }
 
-        return new static($lineStrings, $srid);
+        return new MultiLineString($lineStrings, $srid);
     }
 
     /**
      * @param string $ewktString
      * @return MultiLineString
      */
-    public static function createFromGeoEWKTString(string $ewktString): static
+    public static function createFromGeoEWKTString(string $ewktString): MultiLineString
     {
         // Parse the EWKT string, expected format: SRID=<srid>;MULTILINESTRING((<x1> <y1>, <x2> <y2>, ...), ...)
         if (strpos($ewktString, 'MULTILINESTRING') === false) {
@@ -107,7 +107,7 @@ class MultiLineString extends Geometry
             $lineStrings[] = new LineString($points, $srid);
         }
 
-        return new static($lineStrings, $srid);
+        return new MultiLineString($lineStrings, $srid);
     }
 
     /**

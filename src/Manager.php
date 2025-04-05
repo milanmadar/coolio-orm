@@ -526,7 +526,7 @@ abstract class Manager
                         $dataToSave[$field] = mb_substr($value, 0, 1018).'[...]';
                     }
                 }
-                throw Utils::handleDriverException($e, "INSERT ".get_class($this), $dataToSave);
+                throw Utils::handleDriverException($e, "Manager::save() INSERT ".get_class($this), $dataToSave);
             }
 
             if($forceInsert) {
@@ -558,7 +558,7 @@ abstract class Manager
                             $dataToSave[$field] = mb_substr($value, 0, 1000) . '... [truncated for log]';
                         }
                     }
-                    throw Utils::handleDriverException($e, "UPDATE " . get_class($this) . " (id:" . $ent->_get('id') . ")", $dataToSave);
+                    throw Utils::handleDriverException($e, "Manager::save() UPDATE " . get_class($this) . " (id:" . $ent->_get('id') . ")", $dataToSave);
                 }
             }
 
@@ -595,18 +595,13 @@ abstract class Manager
             try {
                 $this->db->delete($this->dbTable, ['id' => $oldId]);
             }
-            catch(\Doctrine\DBAL\Exception $e)
-            {
-                if(str_contains($e->getMessage(), 'gone away') || str_contains($e->getMessage(), 'Deadlock') || str_contains($e->getMessage(), 'Lock wait timeout')) {
-                    try {
-                        sleep(2);
-                        $this->db->delete($this->dbTable, ['id' => $oldId]);
-                    }
-                    catch (\Doctrine\DBAL\Exception $e) {
-                        throw Utils::handleDriverDBALException($e, "ORM\\Manager::delete() (" . get_class($ent) . " ,id: " . $oldId . ") (tried again)", null, null);
-                    }
-                } else {
-                    throw Utils::handleDriverDBALException($e, "ORM\\Manager::delete() (" . get_class($ent) . " ,id: " . $oldId . ")", null, null);
+            catch (\Doctrine\DBAL\Exception\ConnectionException|\Doctrine\DBAL\Exception\ConnectionLost|\Doctrine\DBAL\Exception\RetryableException $e) {
+                try {
+                    sleep(2);
+                    $this->db->delete($this->dbTable, ['id' => $oldId]);
+                }
+                catch (\Doctrine\DBAL\Exception $e) {
+                    throw Utils::handleDriverException($e, "Manager::delete() (" . get_class($ent) . " ,id: " . $oldId . ")", null);
                 }
             }
         }

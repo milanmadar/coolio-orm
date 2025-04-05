@@ -8,11 +8,11 @@ class LineString extends Geometry implements HasStartEndPointInterface
     private array $points;
 
     /**
-     * @param array<mixed> $geoJsonData
+     * @param array<mixed> $jsonData
      * @param int|null $srid Optional SRID, defaults to the value in $_ENV['GEO_DEFAULT_SRID']
      * @return LineString
      */
-    public static function createFromGeoJSONData(array $jsonData, ?int $srid = null): static
+    public static function createFromGeoJSONData(array $jsonData, ?int $srid = null): LineString
     {
         if (!isset($srid)) $srid = $_ENV['GEO_DEFAULT_SRID'];
 
@@ -34,14 +34,14 @@ class LineString extends Geometry implements HasStartEndPointInterface
             $points[] = new Point((float)$coords[0], (float)$coords[1], $srid);
         }
 
-        return new static($points, $srid);
+        return new LineString($points, $srid);
     }
 
     /**
      * @param string $ewktString
      * @return LineString
      */
-    public static function createFromGeoEWKTString(string $ewktString): static
+    public static function createFromGeoEWKTString(string $ewktString): LineString
     {
         // Parse the EWKT string, expected format: SRID=<srid>;LINESTRING(<x1> <y1>, <x2> <y2>, ...)
         if (strpos($ewktString, 'LINESTRING') === false) {
@@ -84,7 +84,7 @@ class LineString extends Geometry implements HasStartEndPointInterface
             $points[] = new Point((float) $coords[0], (float) $coords[1], $srid);
         }
 
-        return new static($points, $srid);
+        return new LineString($points, $srid);
     }
 
     /**

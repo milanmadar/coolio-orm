@@ -123,7 +123,7 @@ abstract class Entity implements Event\AnnouncerInterface
      * Returns the datapoint
      * @param string $fieldName
      * @return mixed
-     * @throws \LogicException When the Entity was deleted. To get the 'id' it had, call _getDeletedId()
+     * //throws \LogicException When the Entity was deleted. To get the 'id' it had, call _getDeletedId()
      */
     public function _get(string $fieldName): mixed
     {
@@ -138,7 +138,7 @@ abstract class Entity implements Event\AnnouncerInterface
      * Is this field set to anything (including null)?
      * @param string $fieldName
      * @return bool
-     * @throws \LogicException When the Entity was deleted. To get the 'id' it had, call _getDeletedId()
+     * //throws \LogicException When the Entity was deleted. To get the 'id' it had, call _getDeletedId()
      */
     public function _has(string $fieldName): bool
     {
@@ -170,7 +170,7 @@ abstract class Entity implements Event\AnnouncerInterface
     /**
      * Primary id
      * @return int|null
-     * @throws \LogicException When the Entity was deleted. To get the 'id' it had, call _getDeletedId()
+     * //throws \LogicException When the Entity was deleted. To get the 'id' it had, call _getDeletedId()
      */
     public function getId(): ?int
     {
@@ -180,7 +180,7 @@ abstract class Entity implements Event\AnnouncerInterface
     /**
      * Does it have a primary id that is a positive integer
      * @return bool
-     * @throws \LogicException When the Entity was deleted. To get the 'id' it had, call _getDeletedId()
+     * //throws \LogicException When the Entity was deleted. To get the 'id' it had, call _getDeletedId()
      */
     public function hasId(): bool
     {
@@ -409,7 +409,7 @@ abstract class Entity implements Event\AnnouncerInterface
      * Even if this Entity has an 'id' field, the next $mgr->save() will run an INSERT query.
      * (Useful when migrating)
      * @param bool $is
-     * @return $this;
+     * @return $this
      */
     public function _setForceInsertOnNextSave(bool $is): self
     {
@@ -420,7 +420,7 @@ abstract class Entity implements Event\AnnouncerInterface
     /**
      * Even if this Entity has an 'id' field, the next $mgr->save() will run an INSERT query.
      * (Useful when migrating)
-     * @return bool;
+     * @return bool
      */
     public function _getForceInsertOnNextSave(): bool
     {

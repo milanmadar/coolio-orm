@@ -2,21 +2,19 @@
 
 namespace Milanmadar\CoolioORM;
 
-use Milanmadar\CoolioORM\Event\EntityEventTypeEnum;
-
 class EntityRelation
 {
     private ORM $orm;
     private ?Entity $refEnt;
     private string $fld;
     private string $refFld;
-    /** @var class-string<mixed> */
+    /** @var class-string<Manager> */
     private string $refMgrClass;
 
     /**
      * @param ORM $orm
      * @param string $fld
-     * @param class-string<mixed> $refMgrClass
+     * @param class-string<Manager> $refMgrClass
      */
     public function __construct(ORM $orm, string $fld, string $refFld, string $refMgrClass)
     {
@@ -28,7 +26,7 @@ class EntityRelation
     }
 
     /**
-     * @return class-string<mixed>
+     * @return class-string<Manager>
      */
     public function getRefMgrClass(): string
     {

@@ -10,11 +10,11 @@ class Polygon extends Geometry
     private array $lineStrings;
 
     /**
-     * @param array<mixed> $geoJsonData
+     * @param array<mixed> $jsonData
      * @param int|null $srid Optional SRID, defaults to the value in $_ENV['GEO_DEFAULT_SRID']
      * @return Polygon
      */
-    public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): static
+    public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): Polygon
     {
         if (!isset($srid)) $srid = $_ENV['GEO_DEFAULT_SRID'];
 
@@ -34,14 +34,14 @@ class Polygon extends Geometry
             $lineStrings[] = new LineString($points, $srid);
         }
 
-        return new static($lineStrings, $srid);
+        return new Polygon($lineStrings, $srid);
     }
 
     /**
      * @param string $ewktString
      * @return Polygon
      */
-    public static function createFromGeoEWKTString(string $ewktString): static
+    public static function createFromGeoEWKTString(string $ewktString): Polygon
     {
         // Parse the EWKT string, expected format: SRID=<srid>;POLYGON((<x1> <y1>, <x2> <y2>, ...), (<x3> <y3>, <x4> <y4>, ...))
         if (strpos($ewktString, 'POLYGON') === false) {
@@ -99,7 +99,7 @@ class Polygon extends Geometry
             $rings[] = new LineString($points, $srid);
         }
 
-        return new static($rings, $srid);
+        return new Polygon($rings, $srid);
     }
 
     /**

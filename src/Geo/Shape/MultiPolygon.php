@@ -12,7 +12,7 @@ class MultiPolygon extends Geometry
      * @param int|null $srid Optional SRID, defaults to the value in $_ENV['GEO_DEFAULT_SRID']
      * @return MultiPolygon
      */
-    public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): static
+    public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): MultiPolygon
     {
         if (!isset($srid)) $srid = $_ENV['GEO_DEFAULT_SRID'];
 
@@ -40,14 +40,14 @@ class MultiPolygon extends Geometry
             $polygons[] = new Polygon($rings, $srid);
         }
 
-        return new static($polygons, $srid);
+        return new MultiPolygon($polygons, $srid);
     }
 
     /**
      * @param string $ewktString
      * @return MultiPolygon
      */
-    public static function createFromGeoEWKTString(string $ewktString): static
+    public static function createFromGeoEWKTString(string $ewktString): MultiPolygon
     {
         // Parse the EWKT string, expected format: SRID=<srid>;MULTIPOLYGON(((<x1> <y1>, <x2> <y2>, ...), (<x3> <y3>, <x4> <y4>, ...)), ((...)))
         if (strpos($ewktString, 'MULTIPOLYGON') === false) {
@@ -122,7 +122,7 @@ class MultiPolygon extends Geometry
             $polygons[] = new Polygon($rings, $srid);
         }
 
-        return new static($polygons, $srid);
+        return new MultiPolygon($polygons, $srid);
     }
 
     /**
@@ -193,7 +193,7 @@ class MultiPolygon extends Geometry
                         fn(Point $p) => [$p->getX(), $p->getY()],
                         $ls->getPoints()
                     ),
-                    $p->getRings()
+                    $p->getLineStrings()
                 ),
                 $this->polygons
             )

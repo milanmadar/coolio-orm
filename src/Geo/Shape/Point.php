@@ -12,7 +12,7 @@ class Point extends Geometry
      * @param int|null $srid Optional SRID, defaults to the value in $_ENV['GEO_DEFAULT_SRID']
      * @return Point
      */
-    public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): static
+    public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): Point
     {
         if (!isset($srid)) $srid = $_ENV['GEO_DEFAULT_SRID'];
 
@@ -25,14 +25,14 @@ class Point extends Geometry
             throw new \InvalidArgumentException('Invalid GeoJSON for Point');
         }
 
-        return new self($jsonData['coordinates'][0], $jsonData['coordinates'][1], $srid);
+        return new Point($jsonData['coordinates'][0], $jsonData['coordinates'][1], $srid);
     }
 
     /**
      * @param string $ewktString
      * @return Point
      */
-    public static function createFromGeoEWKTString(string $ewktString): static
+    public static function createFromGeoEWKTString(string $ewktString): Point
     {
         // Parse the EWKT string, expected format: SRID=<srid>;POINT(<x> <y>)
         if (strpos($ewktString, 'POINT') === false) {
@@ -66,7 +66,7 @@ class Point extends Geometry
             throw new \InvalidArgumentException('A POINT must have exactly 2 coordinates.');
         }
 
-        return new static((float) $coords[0], (float) $coords[1], $srid);
+        return new Point((float) $coords[0], (float) $coords[1], $srid);
     }
 
     public function __construct(float $x, float $y, int|null $srid = null)
@@ -98,6 +98,9 @@ class Point extends Geometry
         return $this;
     }
 
+    /**
+     * @return array<float>
+     */
     public function getCoordinates(): array
     {
         return [$this->x, $this->y];
