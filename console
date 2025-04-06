@@ -1,8 +1,8 @@
 #!/usr/bin/env php
 <?php
-require __DIR__ . '/../vendor/autoload.php';
-require __DIR__ . '/../dotEnvLoader.php';
-dotEnvLoader(__DIR__ . '/../.env');
+require __DIR__ . '/vendor/autoload.php';
+require __DIR__ . '/dotEnvLoader.php';
+dotEnvLoader(__DIR__ . '/.env');
 
 use Milanmadar\CoolioORM;
 use Symfony\Component\Console\Application;

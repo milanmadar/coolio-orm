@@ -1,8 +1,145 @@
-# Database Acces (ORM, DBAL)
+# PHP Database Acces (ORM, DBAL)
 
-We use PostgreSQL with PostGIS (v17). See the [Scaffold section](README.md#rules-for-the-database-tables) to learn the rules of the database table structures.
+This ORM is well tested on MySQL and PostgreSQL (also with PostGIS extension for Geometry and Geography). It should work on any other SQL database that Doctrine DBAL supports, but we don't test it on the others.
 
-It is preferable to use the [Managers](README.md#the-manager) or their [QueryBuilder](README.md#create-a-query-builder) to read/write data. Only use the pure [Database Connections](README.md#database-connections) when necessary.
+It is based on <a href="https://www.doctrine-project.org/projects/doctrine-dbal/en/4.2/reference/introduction.html#introduction" target="_blank">Doctrine DBAL</a>, so it's query builder is very similar (except CoolioORM has the `$queryBuilde->andWhereColumn()`). And CoolioORM support PostGIS Geometries in an easy-to-use object oriented way.
+
+---
+
+## Installation
+
+```bash
+composer require coolio-orm/coolio-orm
+```
+
+You need the following environmental variables (like `.env`, also known as `DotEnv`):
+
+```dotenv
+# The default database connection
+DB_DEFAULT=pdo-mysql://my_user:my_password@localhost/my_database
+# See here about connection urls: 
+# https://www.doctrine-project.org/projects/doctrine-dbal/en/4.2/reference/configuration.html#connecting-using-a-url
+#
+# You can define more database connections, just start with DB_ and then the name of the connection
+# DB_OTHER=pdo-pgsql://other_user:other_password@localhost_or_otherhost/my_other_database
+
+# Max how many entities should we keep in cache
+COOLIO_ORM_ENTITY_REPO_MAX_ITEMS=1000
+
+# How many times should we retry a failed query
+COOLIO_ORM_RETRY_ATTEMPTS=1
+
+# How long should we wait between retrying a failed query
+COOLIO_ORM_RETRY_SLEEP=2
+
+# PostGIS: The default SRID (reading from the database will use what is in the db, not this default)  
+GEO_DEFAULT_SRID=4326
+```
+---
+
+## Usage
+
+### Step 1: Create database table
+
+```sql
+// PostGIS Example
+CREATE TABLE geometry_test (
+   id SERIAL PRIMARY KEY,
+   title VARCHAR(255) NOT NULL,
+   difficulty INT NOT NULL DEFAULT 0,
+
+   -- geometry types
+   point_geom             geometry(Point, 4326),
+   linestring_geom        geometry(LineString, 4326),
+   polygon_geom           geometry(Polygon, 4326),
+   multipoint_geom        geometry(MultiPoint, 4326),
+   multilinestring_geom   geometry(MultiLineString, 4326),
+   multipolygon_geom      geometry(MultiPolygon, 4326),
+   geomcollection_geom    geometry(GeometryCollection, 4326),
+
+   -- curved geometry types
+   circularstring_geom    geometry(CIRCULARSTRING, 4326),
+   compoundcurve_geom     geometry(COMPOUNDCURVE, 4326),
+   curvedpolygon_geom     geometry(CURVEPOLYGON, 4326),
+   multicurve_geom        geometry(MULTICURVE, 4326)
+);
+```
+
+### Step 2: Scaffold
+
+Scaffold means generating the PHP classes (Entity and Manager) from the Database table. In you terminal, run:
+
+```bash
+vendor/milanmadar/coolio-orm/console scaffold
+```
+
+It will ask you which table you want to scaffold, and ask questions if needed.
+
+### Step 3: Use it in your PHP code
+
+In this example we scaffolded `GeometryTest`, so we have `GeometryTest\Entity` and `GeometryTest\Manager` classes.
+
+```php
+use Milanmadar\CoolioORM\ORM;
+use Milanmadar\CoolioORM\Geo\Shape;
+use App\Model\GeometryTest;
+
+$orm = ORM::instance();
+
+$geotestManager = $orm->entityManager( GeometryTest\Manager::class );
+
+// Create a new product, and fill it with things
+$geotest = $geotestManager->createEntity()
+    ->setTitle("My first Geometry enabled Entity")
+    ->setDifficulty( 1 )
+    ->setPointGeom( new Shape\Point(1, 2) )
+    ->setLinestringGeom( new LineString([ new Point(1, 1), new Point(2, 2), new Point(3, 3), new Point(4, 4) ], 4326));
+
+// Save it to the database
+$geotestManager->save($geotest);
+
+// Now our Entity has an ID
+$geotest->getId(); // 1
+
+// Get an entity from the database
+$geotest = $geotestManager->findById( 1 );
+$geotest->getTitle(); // "My first Geometry enabled Entity"
+$geotest->getPointGeom()->getX(); // 1
+
+// Get many entities from the database
+$geotests = $geotestManager->findManyWhere("difficult = :Safe_Difficulty_Param", ['Safe_Difficulty_Param'=>1]);
+foreach($geotests as $geotest) {
+    echo $geotest->getTitle();
+}
+
+// Delete the entity
+$geotestManager->delete($geotest);
+
+// QueryBuilder: SELECT
+$geotests = $geotestManager
+    ->createQueryBuilder()
+    ->select('title', 'difficulty', 'linestring_geom') // if you want select(*) then you can omit this line
+    ->andWhereColumn('difficulty', '=', 1)
+    ->andWhereColumn('linestring_geom', '!=', null)
+    ->orderBy('difficulty', 'asc')
+    ->limit(0, 10)
+    ->groupBy('difficulty')
+    ->fetchManyEntity() // fetches many entities
+;
+// There are many fetches, like:
+//   ->fetchAllAssociative() // fetches all rows as associative array
+//   ->fetchOneEntity() // fetches 1 entity
+// You will find them all in the below documentation
+```
+
+Those are the basics. You can do more, like:
+
+- Create Foreign Keys in your database tables and CoolioORM will automatically create the relations in the Entity classes
+- There are many supported PostGIS geometry types, look into the `src/Geo/Shape` folder
+- Switch between databases (like copy something from production to your local dev database, or do a migration with data processing)
+- It supports everything that Doctrine DBAL supports, it just supports arrays and NULLs easier (and the parameterization with `andWhereColumn()` is easier too)
+
+**Enjoy!**
 
 ---
 

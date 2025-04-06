@@ -27,7 +27,7 @@ class ScaffoldCommand extends Command
 
     protected function configure()
     {
-        $this->setName('app:scaffold');
+        $this->setName('scaffold');
         $this->setDescription('Scaffolds Entity and Manager classes from your database');
     }
 
