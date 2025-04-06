@@ -3,6 +3,8 @@
 define('BASE_PATH', dirname(__DIR__));
 
 require BASE_PATH.'/vendor/autoload.php';
+require BASE_PATH.'/dotEnvLoader.php';
+dotEnvLoader(BASE_PATH.'/.env');
 
 spl_autoload_register(function ($class_name) {
     if(str_starts_with($class_name,'tests\\')) {

@@ -19,6 +19,18 @@ CREATE TABLE geometry_test (
    multicurve_geom geometry(MULTICURVE, 4326)
 );
 
+COMMENT ON column geometry_test.point_geom is 'Just any Point to test the Geo ORM';
+COMMENT ON column geometry_test.point_geom is 'Just any LineString to test the Geo ORM';
+COMMENT ON column geometry_test.point_geom is 'Just any Polygon to test the Geo ORM';
+COMMENT ON column geometry_test.point_geom is 'Just any MultiPoint to test the Geo ORM';
+COMMENT ON column geometry_test.point_geom is 'Just any MultiLineString to test the Geo ORM';
+COMMENT ON column geometry_test.point_geom is 'Just any MultiPolygon to test the Geo ORM';
+COMMENT ON column geometry_test.point_geom is 'Just any GeometryCollection to test the Geo ORM';
+COMMENT ON column geometry_test.point_geom is 'Just any CircularString to test the Geo ORM';
+COMMENT ON column geometry_test.point_geom is 'Just any CompoundCurve to test the Geo ORM';
+COMMENT ON column geometry_test.point_geom is 'Just any CurvePolygon to test the Geo ORM';
+COMMENT ON column geometry_test.point_geom is 'Just any MultiCurve to test the Geo ORM';
+
 INSERT INTO geometry_test (
     point_geom,
     linestring_geom,

@@ -304,7 +304,7 @@ class Entity extends \Milanmadar\CoolioORM\Entity
     
     /**
      * Sets the related \Model\OrmThird\Entity and synchronizes the 'orm_third_key' field
-     * @param rmThird\Entity|null $ormThird
+     * @param OrmThird\Entity|null $ormThird
      * @return $this
      */
     public function setOrmThird(?OrmThird\Entity $ormThird): self

@@ -516,7 +516,7 @@ abstract class Manager
                 $this->db->insert($this->dbTable, $dataToSave);
             }
             catch (\Doctrine\DBAL\Exception\ConnectionException|\Doctrine\DBAL\Exception\ConnectionLost|\Doctrine\DBAL\Exception\RetryableException $e) {
-                sleep(2);
+                sleep($_ENV['COOLIO_ORM_RETRY_SLEEP'] ?? 2);
                 $this->db->insert($this->dbTable, $dataToSave);
             }
             catch(\Doctrine\DBAL\Exception $e) {
@@ -548,7 +548,7 @@ abstract class Manager
             }
             catch (\Doctrine\DBAL\Exception\ConnectionException|\Doctrine\DBAL\Exception\ConnectionLost|\Doctrine\DBAL\Exception\RetryableException $e) {
                 try {
-                    sleep(2);
+                    sleep($_ENV['COOLIO_ORM_RETRY_SLEEP'] ?? 2);
                     $this->db->update($this->dbTable, $dataToSave, ['id' => $ent->_get('id')]);
                 }
                 catch (\Doctrine\DBAL\Exception $e) {
@@ -597,7 +597,7 @@ abstract class Manager
             }
             catch (\Doctrine\DBAL\Exception\ConnectionException|\Doctrine\DBAL\Exception\ConnectionLost|\Doctrine\DBAL\Exception\RetryableException $e) {
                 try {
-                    sleep(2);
+                    sleep($_ENV['COOLIO_ORM_RETRY_SLEEP'] ?? 2);
                     $this->db->delete($this->dbTable, ['id' => $oldId]);
                 }
                 catch (\Doctrine\DBAL\Exception $e) {

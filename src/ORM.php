@@ -5,6 +5,8 @@ namespace Milanmadar\CoolioORM;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Tools\DsnParser;
+use Doctrine\DBAL\Types\Type;
+use Milanmadar\CoolioORM\Geo\DoctrineDBALType\GeometryType;
 
 class ORM
 {
@@ -23,14 +25,22 @@ class ORM
     // Singleton
     private static ?ORM $instance;
 
+    private static $staticTypeAdded = false;
+
     /**
      * Singleton, using the same as Symfony service container
      * @return ORM
      */
     public static function instance(): ORM
     {
-        if(!isset(self::$instance)) {
+        if(!isset(self::$instance))
+        {
             self::$instance = new ORM();
+
+            if(!self::$staticTypeAdded) {
+                Type::addType('geometry', GeometryType::class);
+                self::$staticTypeAdded = true;
+            }
         }
         return self::$instance;
     }
@@ -64,6 +74,10 @@ class ORM
         if(!isset($this->doctrineConnectionsByUrl[$connUrl])) {
             $connectionParams = (new DsnParser())->parse($connUrl);
             $this->doctrineConnectionsByUrl[$connUrl] = DriverManager::getConnection($connectionParams);
+            if(str_contains($connUrl, 'pgsql')) {
+                $this->doctrineConnectionsByUrl[$connUrl]->getDatabasePlatform()->registerDoctrineTypeMapping('geometry', GeometryType::NAME);
+                //$this->doctrineConnectionsByUrl[$connUrl]->getDatabasePlatform()->registerDoctrineTypeMapping('geometry', 'string');
+            }
 //            /** @var \PDO $pdoConn */
 //            $pdoConn = $this->dbsByConnUrl[$connUrl]->getWrappedConnection()->getWrappedConnection(); @ php stan-ig nore-li ne
 ////            $pdoConn->setAttribute(\PDO::ATTR_PERSISTENT, true);

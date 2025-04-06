@@ -577,3 +577,9 @@ The result will be in `/_dev/scaffold/out`. You can take the inner contents of t
 - Every db table MUST have primary id called 'id': MySQL: `'id' int(11) NOT NULL AUTO_INCREMENT`, PostgreSQL: `id SERIAL PRIMARY KEY`
 - Use Foreign Keys properly (the Scaffolder will use them to generate the relations)
 - Having a `'create_time' int` or `'created_at'` field will automatically set the default value to `time()` in PHP (in the generated Manager::getDefaultValue() method)
+
+
+# Contribution Guide
+
+You need a `.env` file in the root of the project. You can copy it from `.env.example` and change the values to your needs. These keys are mandatory: `DB_MYSQL_DB1`, `DB_MYSQL_DB2`, `DB_POSTGRES_DB1`, `DB_POSTGRES_DB2`.   
+
