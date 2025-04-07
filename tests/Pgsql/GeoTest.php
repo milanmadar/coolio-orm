@@ -14,7 +14,6 @@ use Milanmadar\CoolioORM\Geo\Shape\MultiPolygon;
 use Milanmadar\CoolioORM\Geo\Shape\Point;
 use Milanmadar\CoolioORM\Geo\Shape\Polygon;
 use Milanmadar\CoolioORM\ORM;
-use Milanmadar\CoolioORM\Geo\Shape;
 use PHPUnit\Framework\TestCase;
 use tests\DbHelper;
 use tests\Model\GeoShapeAll;
@@ -218,7 +217,7 @@ class GeoTest extends TestCase
         //
         // Create All Shapes
         //
-        $point = new Shape\Point(6, 7, 4326);
+        $point = new Point(6, 7, 4326);
         $lineString = new LineString([
             new Point(1, 1), new Point(2, 2), new Point(3, 3), new Point(4, 4)
         ], 4326);
@@ -317,7 +316,7 @@ class GeoTest extends TestCase
         //
         // Create All Shapes
         //
-        $point = new Shape\Point(6, 7, 4326);
+        $point = new Point(6, 7, 4326);
         $lineString = new LineString([
             new Point(1, 1), new Point(2, 2), new Point(3, 3), new Point(4, 4)
         ], 4326);

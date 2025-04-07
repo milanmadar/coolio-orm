@@ -154,8 +154,8 @@ abstract class Manager
                         'boolean' => (bool)$v,
                         'array', 'simple_array' => unserialize($v),
                         'json', 'json_array' => json_decode($v, true),
-                        'geometry' => Geo\Shape\Factory::createFromGeoJSONString($v, $data[$k.'_srid'] ?? null),
-                        'geometry_curved' => Geo\Shape\Factory::createFromGeoEWKTString($v),
+                        'geometry' => Geo\Shape2D3DFactory::createFromGeoJSONString($v, $data[$k.'_srid'] ?? null),
+                        'geometry_curved' => Geo\Shape2D3DFactory::createFromGeoEWKTString($v),
                         default => Type::getType($this->fieldTypes[$k])->convertToPHPValue($v, $this->db->getDatabasePlatform()),
                     };
                 }
@@ -186,15 +186,6 @@ abstract class Manager
                 }
                 else
                 {
-                    if($this->fieldTypes[$k] == 'string' || $this->fieldTypes[$k] == 'text') {
-                        if(is_array($v)) {
-                            echo $this->getDbTable()."\n";
-                            echo $k."\n";
-                            print_r($v);
-                            exit();
-                        }
-                    }
-
                     // json may fail, handle that
                     if($this->fieldTypes[$k] == 'json' || $this->fieldTypes[$k] == 'json_array') {
                         $jsonStr = json_encode($v);

@@ -6,18 +6,6 @@ use Milanmadar\CoolioORM\Geo\Shape;
 
 class Entity extends \Milanmadar\CoolioORM\Entity
 {
-//    private Shape\Point $point_geom;
-//    private Shape\LineString $linestring_geom;
-//    private Shape\Polygon $polygon_geom;
-//    private Shape\MultiPoint $multipoint_geom;
-//    private Shape\MultiLineString $multilinestring_geom;
-//    private Shape\MultiPolygon $multipolygon_geom;
-//    private Shape\GeometryCollection $geomcollection_geom;
-//    private Shape\CircularString $circularstring_geom;
-//    private Shape\CompoundCurve $compoundcurve_geom;
-//    private Shape\CurvePolygon $curvepolygon_geom;
-//    private Shape\MultiCurve $multicurve_geom;
-
     public function getPointGeom(): Shape\Point
     {
         return $this->_get('point_geom');
