@@ -25,7 +25,7 @@ class ORM
     // Singleton
     private static ?ORM $instance;
 
-    private static $staticTypeAdded = false;
+    private static bool $staticTypeAdded = false;
 
     /**
      * Singleton, using the same as Symfony service container

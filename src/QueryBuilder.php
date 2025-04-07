@@ -541,6 +541,10 @@ class QueryBuilder extends DoctrineQueryBuilder
     public function setParameters(array $params, array $types = []): self
     {
         if(empty($types)) {
+            /**
+             * @var int<0, max>|string $k
+             * @var mixed $v
+             */
             foreach($params as $k=>$v) {
                 self::setParameter($k, $v);
             }

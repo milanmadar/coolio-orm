@@ -14,11 +14,25 @@ class Shape2D3DFactory
      */
     public static function createFromGeoJSONString(string $geoJsonStr, int|null $srid = null): Shape\Geometry|ShapeZ\GeometryZ
     {
+        if (!isset($srid)) $srid = $_ENV['GEO_DEFAULT_SRID'];
+
         $geoJsonData = json_decode($geoJsonStr, true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
             throw new \InvalidArgumentException('Invalid GeoJSON string.');
         }
+
+        return self::createFromGeoJSONData($geoJsonData, $srid);
+    }
+
+    /**
+     * @param array<mixed> $geoJsonData
+     * @param int|null $srid Optional SRID, defaults to the value in $_ENV['GEO_DEFAULT_SRID']
+     * @return Shape\Geometry|ShapeZ\GeometryZ
+     */
+    public static function createFromGeoJSONData(array $geoJsonData, int|null $srid = null): Shape\Geometry|ShapeZ\GeometryZ
+    {
+        if (!isset($srid)) $srid = $_ENV['GEO_DEFAULT_SRID'];
 
         // Check the type of geometry
         if (!isset($geoJsonData['type'])) {
@@ -83,12 +97,14 @@ class Shape2D3DFactory
             case 'GeometryCollection':
                 $geometries = [];
                 foreach ($geoJsonData['geometries'] as $geometry) {
-                    $geometries[] = self::createFromGeoJSONString(json_encode($geometry), $srid);
+                    $geometries[] = self::createFromGeoJSONString((string)json_encode($geometry), $srid);
                 }
 
                 if(!empty($geometries) && $geometries[0] instanceof ShapeZ\GeometryZ) {
+                    /** @var array<ShapeZ\GeometryZ> $geometries */
                     return new ShapeZ\GeometryCollectionZ($geometries, $srid);
                 }
+                /** @var array<Shape\Geometry> $geometries */
                 return new Shape\GeometryCollection($geometries, $srid);
 
             default:
@@ -121,6 +137,7 @@ class Shape2D3DFactory
             $coordinateString = trim($matches[3]);
             // Find the first coordinate tuple (split by comma, then split by space)
             $firstTuple = explode(',', $coordinateString)[0];
+            /** @var array<string> $dimensions */
             $dimensions = preg_split('/\s+/', trim($firstTuple));
             $is3D = count($dimensions) == 3;
         }
@@ -150,12 +167,6 @@ class Shape2D3DFactory
                 return $is3D
                     ? ShapeZ\MultiCurveZ::createFromGeoEWKTString($ewktString)
                     : Shape\MultiCurve::createFromGeoEWKTString($ewktString);
-
-            case 'MULTISURFACE':
-                return Shape\MultiSurface::createFromGeoEWKTString($ewktString);
-//                return $is3D
-//                    ? ShapeZ\MultiSurfaceZ::createFromGeoEWKTString($ewktString)
-//                    : Shape\MultiSurface::createFromGeoEWKTString($ewktString);
 
             default:
                 throw new \InvalidArgumentException('Unsupported EWKT type: ' . $type);

@@ -43,7 +43,7 @@
     },
     "require-dev": {
         "ext-xdebug": "*",
-        "phpstan/phpstan": "^2.1",
+        "phpstan/phpstan": "1.9",
         "phpunit/phpunit": "^12.0"
     }
 }

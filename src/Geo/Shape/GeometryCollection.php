@@ -2,6 +2,8 @@
 
 namespace Milanmadar\CoolioORM\Geo\Shape;
 
+use Milanmadar\CoolioORM\Geo\Shape2D3DFactory;
+
 class GeometryCollection extends Geometry
 {
     /** @var array<Geometry> */
@@ -22,9 +24,10 @@ class GeometryCollection extends Geometry
         }
 
         $geometries = [];
-
         foreach ($jsonData['geometries'] as $geometryData) {
-            $geometries[] = Factory::createFromGeoJSONData($geometryData, $srid);
+            /** @var Geometry $_ */
+            $_ = Shape2D3DFactory::createFromGeoJSONData($geometryData, $srid);
+            $geometries[] = $_;
         }
 
         return new GeometryCollection($geometries, $srid);

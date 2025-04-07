@@ -2,6 +2,8 @@
 
 namespace Milanmadar\CoolioORM\Geo\ShapeZ;
 
+use Milanmadar\CoolioORM\Geo\Shape2D3DFactory;
+
 class GeometryCollectionZ extends GeometryZ
 {
     /** @var array<GeometryZ> */
@@ -13,6 +15,8 @@ class GeometryCollectionZ extends GeometryZ
      */
     public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): GeometryCollectionZ
     {
+        if (!isset($srid)) $srid = $_ENV['GEO_DEFAULT_SRID'];
+
         if (
             !isset($jsonData['type'], $jsonData['geometries']) ||
             $jsonData['type'] !== 'GeometryCollection' ||
@@ -22,9 +26,10 @@ class GeometryCollectionZ extends GeometryZ
         }
 
         $geometries = [];
-
         foreach ($jsonData['geometries'] as $geometryData) {
-            $geometries[] = Factory::createFromGeoJSONData($geometryData, $srid);
+            /** @var GeometryZ $_ */
+            $_ = Shape2D3DFactory::createFromGeoJSONData($geometryData, $srid);
+            $geometries[] = $_;
         }
 
         return new GeometryCollectionZ($geometries, $srid);

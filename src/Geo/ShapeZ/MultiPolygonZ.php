@@ -33,7 +33,7 @@ class MultiPolygonZ extends GeometryZ
 
             $rings = [];
             foreach ($polygonCoords as $ringCoords) {
-                $points = array_map(fn($coords) => new PointZ((float)$coords[0], (float)$coords[1], (float)$coords[2] ?? 0, $srid), $ringCoords);
+                $points = array_map(fn($coords) => new PointZ((float)$coords[0], (float)$coords[1], (float)$coords[2], $srid), $ringCoords);
                 $rings[] = new LineStringZ($points, $srid);
             }
 

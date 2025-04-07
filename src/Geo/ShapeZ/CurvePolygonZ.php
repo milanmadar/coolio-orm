@@ -4,7 +4,7 @@ namespace Milanmadar\CoolioORM\Geo\ShapeZ;
 
 class CurvePolygonZ extends GeometryZ
 {
-    /** @var array<\Milanmadar\CoolioORM\Geo\Shape\LineStringZ|\Milanmadar\CoolioORM\Geo\Shape\CircularStringZ> */
+    /** @var array<LineStringZ|CircularStringZ> */
     private array $boundaries;
 
     /**
@@ -49,22 +49,18 @@ class CurvePolygonZ extends GeometryZ
             throw new \InvalidArgumentException('Invalid boundaries in CurvePolygonZ.');
         }
 
-        /** @var array<\Milanmadar\CoolioORM\Geo\Shape\LineStringZ|\Milanmadar\CoolioORM\Geo\Shape\CircularStringZ> $boundaries */
         $boundaries = [];
         foreach ($boundaryMatches[0] as $boundaryString) {
             $boundaryString = trim($boundaryString);
 
             if (strpos($boundaryString, 'CIRCULARSTRING') === 0) {
-                /** @var \Milanmadar\CoolioORM\Geo\Shape\CircularStringZ $_ */
                 $_ = CircularStringZ::createFromGeoEWKTString("SRID=$srid;$boundaryString");
                 $boundaries[] = $_;
             } elseif (strpos($boundaryString, 'LINESTRING') === 0) {
-                /** @var \Milanmadar\CoolioORM\Geo\Shape\LineStringZ $_ */
                 $_ = LineStringZ::createFromGeoEWKTString("SRID=$srid;$boundaryString");
                 $boundaries[] = $_;
             } else {
                 // Untyped boundary; assume it's an untyped 3D LineString
-                /** @var \Milanmadar\CoolioORM\Geo\Shape\LineStringZ $_ */
                 $_ = LineStringZ::createFromGeoEWKTString("SRID=$srid;LINESTRINGZ$boundaryString");
                 $boundaries[] = $_;
             }
@@ -74,7 +70,7 @@ class CurvePolygonZ extends GeometryZ
     }
 
     /**
-     * @param array<\Milanmadar\CoolioORM\Geo\Shape\LineStringZ|\Milanmadar\CoolioORM\Geo\Shape\CircularStringZ> $boundaries
+     * @param array<LineStringZ|CircularStringZ> $boundaries
      * @param int|null $srid
      */
     public function __construct(array $boundaries, int|null $srid = null)
@@ -105,7 +101,7 @@ class CurvePolygonZ extends GeometryZ
     }
 
     /**
-     * @return array<\Milanmadar\CoolioORM\Geo\Shape\LineStringZ|\Milanmadar\CoolioORM\Geo\Shape\CircularStringZ>
+     * @return array<LineStringZ|CircularStringZ>
      */
     public function getBoundaries(): array
     {
@@ -113,7 +109,7 @@ class CurvePolygonZ extends GeometryZ
     }
 
     /**
-     * @param array<\Milanmadar\CoolioORM\Geo\Shape\LineStringZ|\Milanmadar\CoolioORM\Geo\Shape\CircularStringZ> $boundaries
+     * @param array<LineStringZ|CircularStringZ> $boundaries
      * @return $this
      */
     public function setBoundaries(array $boundaries): self

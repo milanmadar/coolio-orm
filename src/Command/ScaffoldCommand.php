@@ -2,8 +2,9 @@
 
 namespace Milanmadar\CoolioORM\Command;
 
-use Milanmadar\CoolioORM\Geo\Shape;
 use Milanmadar\CoolioORM\ORM;
+use Milanmadar\CoolioORM\Geo\Shape;
+use Milanmadar\CoolioORM\Geo\ShapeZ;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -98,10 +99,13 @@ class ScaffoldCommand extends Command
             {
                 $modelsDir = $cwd.'/src/Model';
 
-                $subDirs = array_filter(glob($cwd.'/src/Model/*'), 'is_dir');
+                /** @var array<string> $glob */
+                $glob = glob($cwd.'/src/Model/*');
+                $subDirs = array_filter($glob, 'is_dir');
                 if (!empty($subDirs)) {
                     $firstSubdir = basename(reset($subDirs));
                     if(file_exists($cwd.'/src/Model/'.$firstSubdir.'/Entity.php')) {
+                        /** @var string $content */
                         $content = file_get_contents($cwd.'/src/Model/'.$firstSubdir.'/Entity.php');
                         $lines = explode("\n", $content);
                         foreach ($lines as $line) {
@@ -246,6 +250,7 @@ class ScaffoldCommand extends Command
                 {
                     $colType = 'geometry';
 
+                    // 2d
                     if(str_contains($nativeColType, '(point,')) {
                         $geoShapeType = Shape\Point::class;
                     } elseif(str_contains($nativeColType, '(linestring,')) {
@@ -272,7 +277,38 @@ class ScaffoldCommand extends Command
                     } elseif(str_contains($nativeColType, '(multicurve,')) {
                         $geoShapeType = Shape\MultiCurve::class;
                         $colType = 'geometry_curved';
-                    } else {
+                    }
+
+                    // 3d
+                    elseif(str_contains($nativeColType, '(pointz,')) {
+                        $geoShapeType = ShapeZ\PointZ::class;
+                    } elseif(str_contains($nativeColType, '(linestringz,')) {
+                        $geoShapeType = ShapeZ\LineStringZ::class;
+                    } elseif(str_contains($nativeColType, '(polygonz,')) {
+                        $geoShapeType = ShapeZ\PolygonZ::class;
+                    } elseif(str_contains($nativeColType, '(multipointz,')) {
+                        $geoShapeType = ShapeZ\MultiPointZ::class;
+                    } elseif(str_contains($nativeColType, '(multilinestringz,')) {
+                        $geoShapeType = ShapeZ\MultiLineStringZ::class;
+                    } elseif(str_contains($nativeColType, '(multipolygonz,')) {
+                        $geoShapeType = ShapeZ\MultiPolygonZ::class;
+                    } elseif(str_contains($nativeColType, '(geometrycollectionz,')) {
+                        $geoShapeType = ShapeZ\GeometryCollectionZ::class;
+                    } elseif(str_contains($nativeColType, '(circularstringz,')) {
+                        $geoShapeType = ShapeZ\CircularStringZ::class;
+                        $colType = 'geometry_curved';
+                    } elseif(str_contains($nativeColType, '(compoundcurvez,')) {
+                        $geoShapeType = ShapeZ\CompoundCurveZ::class;
+                        $colType = 'geometry_curved';
+                    } elseif(str_contains($nativeColType, '(curvepolygonz,')) {
+                        $geoShapeType = ShapeZ\CurvePolygonZ::class;
+                        $colType = 'geometry_curved';
+                    } elseif(str_contains($nativeColType, '(multicurvez,')) {
+                        $geoShapeType = ShapeZ\MultiCurveZ::class;
+                        $colType = 'geometry_curved';
+                    }
+
+                    else {
                         $io->error("ERROR: Unknown geometry type: ".$nativeColType);
                         return Command::FAILURE;
                     }
@@ -357,10 +393,14 @@ class ScaffoldCommand extends Command
                     break;
                 case 'geometry':
                 case 'geometry_curved':
-                    $_ = str_replace('Milanmadar\CoolioORM\Geo\\', '', $geoShapeType);
+                    $_ = str_replace('Milanmadar\CoolioORM\Geo\\', '', (string)$geoShapeType);
                     $paramType = $_;
                     $docParamType = $_;
-                    $this->addUses('Milanmadar\CoolioORM\Geo\Shape');
+                    if(str_contains($_, 'ShapeZ')) {
+                        $this->addUses('Milanmadar\CoolioORM\Geo\ShapeZ');
+                    } else {
+                        $this->addUses('Milanmadar\CoolioORM\Geo\Shape');
+                    }
                     break;
                 default:
                     exit("Can't scaffold column type: '".$colType."'\n");

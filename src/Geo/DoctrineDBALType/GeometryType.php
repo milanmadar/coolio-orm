@@ -7,7 +7,7 @@ use Doctrine\DBAL\Types\Type;
 
 class GeometryType extends Type
 {
-    const NAME = 'geometry'; // modify to match your type name
+    const NAME = 'geometry';
 
     public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
     {
@@ -27,7 +27,7 @@ class GeometryType extends Type
         return (string)$value;
     }
 
-    public function getName()
+    public function getName(): string
     {
         return self::NAME;
     }

@@ -292,6 +292,7 @@ class GeoTest extends TestCase
         //
         // Select All Shapes
         //
+        $mgr->_getEntityRepository()->clear();
         $ent = $mgr->findById(2);
 
         $this->assertTrue($point == $ent->getPointGeom());
@@ -386,6 +387,7 @@ class GeoTest extends TestCase
         // Insert All Shapes
         //
         $mgr->save($newEnt);
+        $mgr->_getEntityRepository()->clear();
         $this->assertEquals($oCnt+1, self::$dbHelper->countRows('geometry_test'));
 
         //

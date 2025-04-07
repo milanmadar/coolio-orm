@@ -54,7 +54,9 @@ class CircularStringZ extends GeometryZ implements HasStartEndPointZInterface
         $points = [];
 
         foreach ($pointsData as $pointData) {
-            $coords = array_map('trim', preg_split('/\s+/', $pointData));
+            /** @var array<string> $_ */
+            $_ = preg_split('/\s+/', $pointData);
+            $coords = array_map('trim', $_);
             if (count($coords) !== 3) {
                 throw new \InvalidArgumentException('Each point must contain exactly 3 coordinates.');
             }

@@ -4,7 +4,7 @@ namespace Milanmadar\CoolioORM\Geo\ShapeZ;
 
 class PolygonZ extends GeometryZ
 {
-    /* @var LineStringZ[] */
+    /** @var array<LineStringZ> */
     private array $lineStrings;
 
     /**
@@ -14,9 +14,7 @@ class PolygonZ extends GeometryZ
      */
     public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): PolygonZ
     {
-        if (!isset($srid)) {
-            $srid = $_ENV['GEO_DEFAULT_SRID'];
-        }
+        if (!isset($srid)) $srid = $_ENV['GEO_DEFAULT_SRID'];
 
         if (
             !isset($jsonData['type'], $jsonData['coordinates']) ||

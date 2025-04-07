@@ -14,9 +14,7 @@ class MultiPointZ extends GeometryZ
      */
     public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): MultiPointZ
     {
-        if (!isset($srid)) {
-            $srid = $_ENV['GEO_DEFAULT_SRID'];
-        }
+        if (!isset($srid)) $srid = $_ENV['GEO_DEFAULT_SRID'];
 
         if (
             !isset($jsonData['type'], $jsonData['coordinates']) ||

@@ -4,6 +4,7 @@ namespace Milanmadar\CoolioORM\Geo\ShapeZ;
 
 class LineStringZ extends GeometryZ implements HasStartEndPointZInterface
 {
+    /** @var array<PointZ> */
     private array $points;
 
     /**
@@ -13,9 +14,7 @@ class LineStringZ extends GeometryZ implements HasStartEndPointZInterface
      */
     public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): LineStringZ
     {
-        if (!isset($srid)) {
-            $srid = $_ENV['GEO_DEFAULT_SRID'];
-        }
+        if (!isset($srid)) $srid = $_ENV['GEO_DEFAULT_SRID'];
 
         if (
             !isset($jsonData['type'], $jsonData['coordinates']) ||
@@ -84,6 +83,10 @@ class LineStringZ extends GeometryZ implements HasStartEndPointZInterface
         return new LineStringZ($points, $srid);
     }
 
+    /**
+     * @param array<PointZ> $coordinates
+     * @param int|null $srid Optional SRID, defaults to the value in $_ENV['GEO_DEFAULT_SRID']
+     */
     public function __construct(array $coordinates, int|null $srid = null)
     {
         parent::__construct($srid);

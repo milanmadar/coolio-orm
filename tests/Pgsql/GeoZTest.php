@@ -137,6 +137,7 @@ class GeoZTest extends TestCase
         //
         // Select All Shapes
         //
+        $mgr->_getEntityRepository()->clear();
         $ent = $mgr->findById(2);
 
         $this->assertTrue($pointZ == $ent->getPointZGeom());
@@ -231,6 +232,7 @@ class GeoZTest extends TestCase
         // Insert All Shapes
         //
         $mgr->save($newEnt);
+        $mgr->_getEntityRepository()->clear();
         $this->assertEquals($oCnt+1, self::$dbHelper->countRows('geometryz_test'));
 
         //
