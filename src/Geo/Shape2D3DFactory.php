@@ -63,23 +63,21 @@ class Shape2D3DFactory
                 break;
 
             case 'MultiLineString':
-                return Shape\MultiLineString::createFromGeoJSONData($geoJsonData, $srid);
-//                $coordCount = count($geoJsonData['coordinates'][0][0]);
-//                if ($coordCount == 2) {
-//                    return Shape\MultiLineString::createFromGeoJSONData($geoJsonData, $srid);
-//                } elseif ($coordCount == 3) {
-//                    return ShapeZ\MultiLineStringZ::createFromGeoJSONData($geoJsonData, $srid);
-//                }
+                $coordCount = count($geoJsonData['coordinates'][0][0]);
+                if ($coordCount == 2) {
+                    return Shape\MultiLineString::createFromGeoJSONData($geoJsonData, $srid);
+                } elseif ($coordCount == 3) {
+                    return ShapeZ\MultiLineStringZ::createFromGeoJSONData($geoJsonData, $srid);
+                }
                 break;
 
             case 'MultiPolygon':
-                return Shape\MultiPolygon::createFromGeoJSONData($geoJsonData, $srid);
-//                $coordCount = count($geoJsonData['coordinates'][0][0][0]);
-//                if ($coordCount == 2) {
-//                    return Shape\MultiPolygon::createFromGeoJSONData($geoJsonData, $srid);
-//                } elseif ($coordCount == 3) {
-//                    return ShapeZ\MultiPolygonZ::createFromGeoJSONData($geoJsonData, $srid);
-//                }
+                $coordCount = count($geoJsonData['coordinates'][0][0][0]);
+                if ($coordCount == 2) {
+                    return Shape\MultiPolygon::createFromGeoJSONData($geoJsonData, $srid);
+                } elseif ($coordCount == 3) {
+                    return ShapeZ\MultiPolygonZ::createFromGeoJSONData($geoJsonData, $srid);
+                }
                 break;
 
             case 'GeometryCollection':
@@ -89,7 +87,7 @@ class Shape2D3DFactory
                 }
 
                 if(!empty($geometries) && $geometries[0] instanceof ShapeZ\GeometryZ) {
-                    //return new ShapeZ\GeometryCollectionZ($geometries, $srid);
+                    return new ShapeZ\GeometryCollectionZ($geometries, $srid);
                 }
                 return new Shape\GeometryCollection($geometries, $srid);
 

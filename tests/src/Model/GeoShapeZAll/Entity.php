@@ -50,4 +50,37 @@ class Entity extends \Milanmadar\CoolioORM\Entity
         return $this;
     }
 
+    public function getMultilinestringZGeom(): ShapeZ\MultiLineStringZ
+    {
+        return $this->_get('multilinestringz_geom');
+    }
+
+    public function setMultilinestringZGeom(ShapeZ\MultiLineStringZ $val): self
+    {
+        $this->_set('multilinestringz_geom', $val);
+        return $this;
+    }
+
+    public function getMultipolygonZGeom(): ShapeZ\MultiPolygonZ
+    {
+        return $this->_get('multipolygonz_geom');
+    }
+
+    public function setMultipolygonZGeom(ShapeZ\MultiPolygonZ $val): self
+    {
+        $this->_set('multipolygonz_geom', $val);
+        return $this;
+    }
+
+    public function getGeomcollectionZGeom(): ShapeZ\GeometryCollectionZ
+    {
+        return $this->_get('geomcollectionz_geom');
+    }
+
+    public function setGeomcollectionZGeom(ShapeZ\GeometryCollectionZ $val): self
+    {
+        $this->_set('geomcollectionz_geom', $val);
+        return $this;
+    }
+
 }

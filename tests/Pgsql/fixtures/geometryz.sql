@@ -7,17 +7,26 @@ CREATE TABLE geometryz_test (
   pointz_geom             geometry(PointZ, 4326),
   linestringz_geom        geometry(LineStringZ, 4326),
   polygonz_geom           geometry(PolygonZ, 4326),
-  multipointz_geom        geometry(MultiPointZ, 4326)
+  multipointz_geom        geometry(MultiPointZ, 4326),
+  multilinestringz_geom   geometry(MultiLineStringZ, 4326),
+  multipolygonz_geom      geometry(MultiPolygonZ, 4326),
+  geomcollectionz_geom    geometry(GeometryCollectionZ, 4326)
 );
 
 INSERT INTO geometryz_test (
     pointz_geom,
     linestringz_geom,
     polygonz_geom,
-    multipointz_geom
+    multipointz_geom,
+    multilinestringz_geom,
+    multipolygonz_geom,
+    geomcollectionz_geom
 ) VALUES (
      ST_GeomFromEWKT('SRID=4326;POINT Z(1 2 3)'),
      ST_GeomFromEWKT('SRID=4326;LINESTRING Z(0 0 0, 1 1 1, 2 2 2)'),
      ST_GeomFromEWKT('SRID=4326;POLYGON Z((0 0 0,0 5 0,5 5 0,5 0 0,0 0 0))'),
-     ST_GeomFromEWKT('SRID=4326;MULTIPOINT Z((1 1 1),(2 2 2),(3 3 3))')
+     ST_GeomFromEWKT('SRID=4326;MULTIPOINT Z((1 1 1),(2 2 2),(3 3 3))'),
+     ST_GeomFromEWKT('SRID=4326;MULTILINESTRING Z((0 0 0,1 1 1),(2 2 2,3 3 3))'),
+     ST_GeomFromEWKT('SRID=4326;MULTIPOLYGON Z(((0 0 0,0 3 0,3 3 0,3 0 0,0 0 0)),((4 4 4,4 6 4,6 6 4,6 4 4,4 4 4)))'),
+     ST_GeomFromEWKT('SRID=4326;GEOMETRYCOLLECTION Z(POINT Z(1 2 3),LINESTRING Z(0 0 0,1 1 1))')
  );
