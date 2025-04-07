@@ -147,10 +147,9 @@ class Shape2D3DFactory
                     : Shape\CurvePolygon::createFromGeoEWKTString($ewktString);
 
             case 'MULTICURVE':
-                return Shape\MultiCurve::createFromGeoEWKTString($ewktString);
-//                return $is3D
-//                    ? ShapeZ\MultiCurveZ::createFromGeoEWKTString($ewktString)
-//                    : Shape\MultiCurve::createFromGeoEWKTString($ewktString);
+                return $is3D
+                    ? ShapeZ\MultiCurveZ::createFromGeoEWKTString($ewktString)
+                    : Shape\MultiCurve::createFromGeoEWKTString($ewktString);
 
             case 'MULTISURFACE':
                 return Shape\MultiSurface::createFromGeoEWKTString($ewktString);
