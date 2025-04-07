@@ -2,7 +2,7 @@
 
 namespace Milanmadar\CoolioORM\Geo\ShapeZ;
 
-class LineStringZ extends GeometryZ
+class LineStringZ extends GeometryZ implements HasStartEndPointZInterface
 {
     private array $points;
 
@@ -134,5 +134,15 @@ class LineStringZ extends GeometryZ
             'type' => 'LineString',
             'coordinates' => $coordinates,
         ];
+    }
+
+    public function getStartPointZ(): PointZ
+    {
+        return $this->points[0];
+    }
+
+    public function getEndPointZ(): PointZ
+    {
+        return $this->points[count($this->points) - 1];
     }
 }

@@ -21,8 +21,8 @@ class Shape2D3DFactory
         }
 
         // Check the type of geometry
-        if (!isset($geoJsonData['type'], $geoJsonData['coordinates'])) {
-            throw new \InvalidArgumentException('GeoJSON must contain "type" and "coordinates".');
+        if (!isset($geoJsonData['type'])) {
+            throw new \InvalidArgumentException('GeoJSON must contain "type".');
         }
 
         switch ($geoJsonData['type']) {
@@ -61,39 +61,37 @@ class Shape2D3DFactory
                     return ShapeZ\MultiPointZ::createFromGeoJSONData($geoJsonData, $srid);
                 }
                 break;
-//
-//            case 'MultiLineString':
-//                // Check MultiLineString geometry (all points should be 2D or 3D)
-//                if (count($geoJsonData['coordinates'][0][0]) === 2) {
-//                    // 2D MultiLineString
-//                    return MultiLineString::createFromGeoJSONData($geoJsonData, $srid);
-//                } elseif (count($geoJsonData['coordinates'][0][0]) === 3) {
-//                    // 3D MultiLineString
-//                    return MultiLineStringZ::createFromGeoJSONData($geoJsonData, $srid);
-//                }
-//                break;
-//
-//            case 'MultiPolygon':
-//                // Check MultiPolygon geometry (all points should be 2D or 3D)
-//                if (count($geoJsonData['coordinates'][0][0][0]) === 2) {
-//                    // 2D MultiPolygon
-//                    return MultiPolygon::createFromGeoJSONData($geoJsonData, $srid);
-//                } elseif (count($geoJsonData['coordinates'][0][0][0]) === 3) {
-//                    // 3D MultiPolygon
-//                    return MultiPolygonZ::createFromGeoJSONData($geoJsonData, $srid);
-//                }
-//                break;
 
-//            case 'GeometryCollection':
-//                // For GeometryCollection, we would check for 2D or 3D types inside the collection
-//                // For simplicity, we'll assume all geometries inside are consistent in terms of 2D or 3D.
-//                // This part would require more careful checking in a real-world scenario.
-//                $geometries = [];
-//                foreach ($geoJsonData['geometries'] as $geometry) {
-//                    $geometries[] = self::createFromGeoJSONString(json_encode($geometry), $srid);
+            case 'MultiLineString':
+                return Shape\MultiLineString::createFromGeoJSONData($geoJsonData, $srid);
+//                $coordCount = count($geoJsonData['coordinates'][0][0]);
+//                if ($coordCount == 2) {
+//                    return Shape\MultiLineString::createFromGeoJSONData($geoJsonData, $srid);
+//                } elseif ($coordCount == 3) {
+//                    return ShapeZ\MultiLineStringZ::createFromGeoJSONData($geoJsonData, $srid);
 //                }
-//
-//                return new GeometryCollection($geometries, $srid);
+                break;
+
+            case 'MultiPolygon':
+                return Shape\MultiPolygon::createFromGeoJSONData($geoJsonData, $srid);
+//                $coordCount = count($geoJsonData['coordinates'][0][0][0]);
+//                if ($coordCount == 2) {
+//                    return Shape\MultiPolygon::createFromGeoJSONData($geoJsonData, $srid);
+//                } elseif ($coordCount == 3) {
+//                    return ShapeZ\MultiPolygonZ::createFromGeoJSONData($geoJsonData, $srid);
+//                }
+                break;
+
+            case 'GeometryCollection':
+                $geometries = [];
+                foreach ($geoJsonData['geometries'] as $geometry) {
+                    $geometries[] = self::createFromGeoJSONString(json_encode($geometry), $srid);
+                }
+
+                if(!empty($geometries) && $geometries[0] instanceof ShapeZ\GeometryZ) {
+                    //return new ShapeZ\GeometryCollectionZ($geometries, $srid);
+                }
+                return new Shape\GeometryCollection($geometries, $srid);
 
             default:
                 throw new \InvalidArgumentException('Unsupported GeoJSON type: ' . $geoJsonData['type']);
@@ -104,6 +102,6 @@ class Shape2D3DFactory
 
     public static function createFromGeoEWKTString(string $ewktString): Shape\Geometry|ShapeZ\GeometryZ
     {
-        return ShapeZ\PointZ::createFromGeoEWKTString($ewktString);
+        return Shape\Factory::createFromGeoEWKTString($ewktString);
     }
 }
