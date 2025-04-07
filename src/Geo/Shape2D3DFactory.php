@@ -137,16 +137,14 @@ class Shape2D3DFactory
                     :  Shape\CircularString::createFromGeoEWKTString($ewktString);
 
             case 'COMPOUNDCURVE':
-                return Shape\CompoundCurve::createFromGeoEWKTString($ewktString);
-//                return $is3D
-//                    ? ShapeZ\CompoundCurveZ::createFromGeoEWKTString($ewktString)
-//                    : Shape\CompoundCurve::createFromGeoEWKTString($ewktString);
+                return $is3D
+                    ? ShapeZ\CompoundCurveZ::createFromGeoEWKTString($ewktString)
+                    : Shape\CompoundCurve::createFromGeoEWKTString($ewktString);
 
             case 'CURVEPOLYGON':
-                return Shape\CurvePolygon::createFromGeoEWKTString($ewktString);
-//                return $is3D
-//                    ? ShapeZ\CurvePolygonZ::createFromGeoEWKTString($ewktString)
-//                    : Shape\CurvePolygon::createFromGeoEWKTString($ewktString);
+                return $is3D
+                    ? ShapeZ\CurvePolygonZ::createFromGeoEWKTString($ewktString)
+                    : Shape\CurvePolygon::createFromGeoEWKTString($ewktString);
 
             case 'MULTICURVE':
                 return Shape\MultiCurve::createFromGeoEWKTString($ewktString);

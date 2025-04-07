@@ -10,6 +10,8 @@ use Milanmadar\CoolioORM\Geo\ShapeZ\MultiLineStringZ;
 use Milanmadar\CoolioORM\Geo\ShapeZ\MultiPolygonZ;
 use Milanmadar\CoolioORM\Geo\ShapeZ\GeometryCollectionZ;
 use Milanmadar\CoolioORM\Geo\ShapeZ\CircularStringZ;
+use Milanmadar\CoolioORM\Geo\ShapeZ\CompoundCurveZ;
+use Milanmadar\CoolioORM\Geo\ShapeZ\CurvePolygonZ;
 use Milanmadar\CoolioORM\ORM;
 use PHPUnit\Framework\TestCase;
 use tests\DbHelper;
@@ -96,6 +98,16 @@ class GeoZTest extends TestCase
         $circularStringZ = new CircularStringZ([
             new PointZ(0, 0, 9), new PointZ(4, 0, 3), new PointZ(4, 4, 3), new PointZ(0, 4, 3), new PointZ(0, 0, 9)
         ], 4326);
+        $compoundCurveZ = new CompoundCurveZ([
+            new LineStringZ([new PointZ(2, 0, 0), new PointZ(3, 1, 0)]),
+            new CircularStringZ([new PointZ(3, 1, 0), new PointZ(4, 2, 0), new PointZ(5, 1, 0)]),
+            new LineStringZ([new PointZ(5, 1, 0), new PointZ(6, 0, 0)]),
+        ], 4326);
+        $curvePolygonZ = new CurvePolygonZ([
+            new CircularStringZ([new PointZ(0, 0, 2.3, 4326), new PointZ(6, 0, 2.3, 4326), new PointZ(6, 6, 2.3, 4326), new PointZ(0, 6, 2.3, 4326), new PointZ(0, 0, 2.3, 4326)], 4326),
+            new LineStringZ([new PointZ(2, 2, 2.3, 4326), new PointZ(3, 2, 2.3, 4326), new PointZ(3, 3, 2.3, 4326), new PointZ(2, 3, 2.3, 4326), new PointZ(2, 2, 2.3, 4326)], 4326),
+            new CircularStringZ([new PointZ(1, 1, 2.3, 4326), new PointZ(2, 1, 2.3, 4326), new PointZ(2, 2, 2.3, 4326), new PointZ(1, 2, 2.3, 4326), new PointZ(1, 1, 2.3, 4326)], 4326)
+        ], 4326);
 
         //
         // Insert All Shapes
@@ -110,6 +122,8 @@ class GeoZTest extends TestCase
             ->setValue('multipolygonz_geom', $multiPolygonZ)
             ->setValue('geomcollectionz_geom', $geometryCollectionZ)
             ->setValue('circularstringz_geom', $circularStringZ)
+            ->setValue('compoundcurvez_geom', $compoundCurveZ)
+            ->setValue('curvedpolygonz_geom', $curvePolygonZ)
             ->executeStatement()
         ;
         $this->assertEquals($oCnt+1, self::$dbHelper->countRows('geometryz_test'));
@@ -127,6 +141,8 @@ class GeoZTest extends TestCase
         $this->assertTrue($multiPolygonZ == $ent->getMultipolygonZGeom());
         $this->assertTrue($geometryCollectionZ == $ent->getGeomcollectionZGeom());
         $this->assertTrue($circularStringZ == $ent->getCircularstringZGeom());
+        $this->assertTrue($compoundCurveZ == $ent->getCompoundcurvezGeom());
+        $this->assertTrue($curvePolygonZ == $ent->getCurvepolygonzGeom());
     }
 
     public function testInsert_asEntity()
@@ -175,6 +191,16 @@ class GeoZTest extends TestCase
         $circularStringZ = new CircularStringZ([
             new PointZ(0, 0, 9), new PointZ(4, 0, 3), new PointZ(4, 4, 3), new PointZ(0, 4, 3), new PointZ(0, 0, 9)
         ], 4326);
+        $compoundCurveZ = new CompoundCurveZ([
+            new LineStringZ([new PointZ(2, 0, 0), new PointZ(3, 1, 0)]),
+            new CircularStringZ([new PointZ(3, 1, 0), new PointZ(4, 2, 0), new PointZ(5, 1, 0)]),
+            new LineStringZ([new PointZ(5, 1, 0), new PointZ(6, 0, 0)]),
+        ], 4326);
+        $curvePolygonZ = new CurvePolygonZ([
+            new CircularStringZ([new PointZ(0, 0, 2.3, 4326), new PointZ(6, 0, 2.3, 4326), new PointZ(6, 6, 2.3, 4326), new PointZ(0, 6, 2.3, 4326), new PointZ(0, 0, 2.3, 4326)], 4326),
+            new LineStringZ([new PointZ(2, 2, 2.3, 4326), new PointZ(3, 2, 2.3, 4326), new PointZ(3, 3, 2.3, 4326), new PointZ(2, 3, 2.3, 4326), new PointZ(2, 2, 2.3, 4326)], 4326),
+            new CircularStringZ([new PointZ(1, 1, 2.3, 4326), new PointZ(2, 1, 2.3, 4326), new PointZ(2, 2, 2.3, 4326), new PointZ(1, 2, 2.3, 4326), new PointZ(1, 1, 2.3, 4326)], 4326)
+        ], 4326);
 
         $newEnt = $mgr->createEntity()
             ->setPointZGeom($pointZ)
@@ -185,6 +211,8 @@ class GeoZTest extends TestCase
             ->setMultipolygonZGeom($multiPolygonZ)
             ->setGeomcollectionZGeom($geometryCollectionZ)
             ->setCircularstringZGeom($circularStringZ)
+            ->setCompoundcurvezGeom($compoundCurveZ)
+            ->setCurvepolygonZGeom($curvePolygonZ)
         ;
 
         //
@@ -206,5 +234,7 @@ class GeoZTest extends TestCase
         $this->assertTrue($multiPolygonZ == $ent->getMultipolygonZGeom());
         $this->assertTrue($geometryCollectionZ == $ent->getGeomcollectionZGeom());
         $this->assertTrue($circularStringZ == $ent->getCircularstringZGeom());
+        $this->assertTrue($compoundCurveZ == $ent->getCompoundcurvezGeom());
+        $this->assertTrue($curvePolygonZ == $ent->getCurvepolygonzGeom());
     }
 }

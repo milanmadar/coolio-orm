@@ -64,7 +64,8 @@ class LineStringZ extends GeometryZ implements HasStartEndPointZInterface
 
         $srid = (int) substr($sridPart, 5);
 
-        // Validate and extract the LINESTRING Z coordinates
+        $geometryPart = str_replace('((', '(', $geometryPart);
+        $geometryPart = str_replace('))', ')', $geometryPart);
         preg_match('/LINESTRING ?Z?\((.*)\)/', $geometryPart, $matches);
         if (empty($matches)) {
             throw new \InvalidArgumentException('Invalid LINESTRING Z format in EWKT.');

@@ -94,4 +94,26 @@ class Entity extends \Milanmadar\CoolioORM\Entity
         return $this->_get('circularstringz_geom');
     }
 
+    public function getCompoundcurveZGeom(): ShapeZ\CompoundCurveZ
+    {
+        return $this->_get('compoundcurvez_geom');
+    }
+
+    public function setCompoundcurveZGeom(ShapeZ\CompoundCurveZ $val): self
+    {
+        $this->_set('compoundcurvez_geom', $val);
+        return $this;
+    }
+
+    public function getCurvepolygonZGeom(): ShapeZ\CurvePolygonZ
+    {
+        return $this->_get('curvedpolygonz_geom');
+    }
+
+    public function setCurvepolygonZGeom(ShapeZ\CurvePolygonZ $val): self
+    {
+        $this->_set('curvedpolygonz_geom', $val);
+        return $this;
+    }
+
 }
