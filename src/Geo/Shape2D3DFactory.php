@@ -44,27 +44,23 @@ class Shape2D3DFactory
                 }
                 break;
 
-//            case 'Polygon':
-//                // For polygons, we would similarly check for 2D or 3D based on coordinates
-//                if (count($geoJsonData['coordinates'][0][0]) === 2) {
-//                    // 2D Polygon
-//                    return Polygon::createFromGeoJSONData($geoJsonData, $srid);
-//                } elseif (count($geoJsonData['coordinates'][0][0]) === 3) {
-//                    // 3D Polygon
-//                    return PolygonZ::createFromGeoJSONData($geoJsonData, $srid);
-//                }
-//                break;
-//
-//            case 'MultiPoint':
-//                // Check MultiPoint geometry (all points should be 2D or 3D)
-//                if (count($geoJsonData['coordinates'][0]) === 2) {
-//                    // 2D MultiPoint
-//                    return MultiPoint::createFromGeoJSONData($geoJsonData, $srid);
-//                } elseif (count($geoJsonData['coordinates'][0]) === 3) {
-//                    // 3D MultiPoint
-//                    return MultiPointZ::createFromGeoJSONData($geoJsonData, $srid);
-//                }
-//                break;
+            case 'Polygon':
+                $coordCount = count($geoJsonData['coordinates'][0][0]);
+                if ($coordCount == 2) {
+                    return Shape\Polygon::createFromGeoJSONData($geoJsonData, $srid);
+                } elseif ($coordCount == 3) {
+                    return ShapeZ\PolygonZ::createFromGeoJSONData($geoJsonData, $srid);
+                }
+                break;
+
+            case 'MultiPoint':
+                $coordCount = count($geoJsonData['coordinates'][0]);
+                if ($coordCount == 2) {
+                    return Shape\MultiPoint::createFromGeoJSONData($geoJsonData, $srid);
+                } elseif ($coordCount == 3) {
+                    return ShapeZ\MultiPointZ::createFromGeoJSONData($geoJsonData, $srid);
+                }
+                break;
 //
 //            case 'MultiLineString':
 //                // Check MultiLineString geometry (all points should be 2D or 3D)

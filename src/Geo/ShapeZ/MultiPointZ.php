@@ -1,50 +1,52 @@
 <?php
 
-namespace Milanmadar\CoolioORM\Geo\Shape;
+namespace Milanmadar\CoolioORM\Geo\ShapeZ;
 
-class MultiPoint extends Geometry
+class MultiPointZ extends GeometryZ
 {
-    /** @var array<Point> */
+    /** @var array<PointZ> */
     private array $points;
 
     /**
      * @param array<mixed> $jsonData
      * @param int|null $srid Optional SRID, defaults to the value in $_ENV['GEO_DEFAULT_SRID']
-     * @return MultiPoint
+     * @return MultiPointZ
      */
-    public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): MultiPoint
+    public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): MultiPointZ
     {
-        if (!isset($srid)) $srid = $_ENV['GEO_DEFAULT_SRID'];
+        if (!isset($srid)) {
+            $srid = $_ENV['GEO_DEFAULT_SRID'];
+        }
 
         if (
             !isset($jsonData['type'], $jsonData['coordinates']) ||
             $jsonData['type'] !== 'MultiPoint' ||
             !is_array($jsonData['coordinates'])
         ) {
-            throw new \InvalidArgumentException('Invalid GeoJSON for MultiPoint');
+            throw new \InvalidArgumentException('Invalid GeoJSON for MultiPointZ');
         }
 
         $points = [];
 
         foreach ($jsonData['coordinates'] as $coords) {
-            if (!is_array($coords) || count($coords) !== 2) {
-                throw new \InvalidArgumentException('Invalid coordinate in MultiPoint');
+            if (!is_array($coords) || count($coords) !== 3) {
+                throw new \InvalidArgumentException('Invalid coordinate in MultiPointZ');
             }
-            $points[] = new Point((float)$coords[0], (float)$coords[1], $srid);
+            $points[] = new PointZ((float)$coords[0], (float)$coords[1], (float)$coords[2], $srid);
         }
 
-        return new MultiPoint($points, $srid);
+        return new MultiPointZ($points, $srid);
     }
 
     /**
      * @param string $ewktString
-     * @return MultiPoint
+     * @return MultiPointZ
      */
-    public static function createFromGeoEWKTString(string $ewktString): MultiPoint
+    public static function createFromGeoEWKTString(string $ewktString): MultiPointZ
     {
-        // Parse the EWKT string, expected format: SRID=<srid>;MULTIPOINT(<x1> <y1>, <x2> <y2>, ...)
-        if (strpos($ewktString, 'MULTIPOINT') === false) {
-            throw new \InvalidArgumentException('Invalid EWKT format. Expected MULTIPOINT type.');
+        // Parse the EWKT string, expected format: SRID=<srid>;MULTIPOINT Z(<x1> <y1> <z1>, <x2> <y2> <z2>, ...)
+        if (strpos($ewktString, 'MULTIPOINT Z') === false) {
+            throw new \InvalidArgumentException('Invalid EWKT format. Expected MULTIPOINT Z type.');
         }
 
         // Extract the SRID and the WKT string
@@ -63,10 +65,10 @@ class MultiPoint extends Geometry
 
         $srid = (int) substr($sridPart, 5);
 
-        // Validate and extract the MULTIPOINT coordinates
-        preg_match('/MULTIPOINT\((.*)\)/', $geometryPart, $matches);
+        // Validate and extract the MULTIPOINT Z coordinates
+        preg_match('/MULTIPOINT Z\((.*)\)/', $geometryPart, $matches);
         if (empty($matches)) {
-            throw new \InvalidArgumentException('Invalid MULTIPOINT format in EWKT.');
+            throw new \InvalidArgumentException('Invalid MULTIPOINT Z format in EWKT.');
         }
 
         $pointsData = explode(',', $matches[1]);
@@ -74,24 +76,24 @@ class MultiPoint extends Geometry
 
         foreach ($pointsData as $pointData) {
             $coords = array_map('trim', explode(' ', $pointData));
-            if (count($coords) !== 2) {
-                throw new \InvalidArgumentException('Each point must have exactly 2 coordinates.');
+            if (count($coords) !== 3) {
+                throw new \InvalidArgumentException('Each point must have exactly 3 coordinates.');
             }
 
-            $points[] = new Point((float) $coords[0], (float) $coords[1], $srid);
+            $points[] = new PointZ((float) $coords[0], (float) $coords[1], (float) $coords[2], $srid);
         }
 
-        return new MultiPoint($points, $srid);
+        return new MultiPointZ($points, $srid);
     }
 
     /**
-     * @param array<Point> $points
+     * @param array<PointZ> $points
      * @param int|null $srid
      */
     public function __construct(array $points, int|null $srid = null)
     {
         if (empty($points)) {
-            throw new \InvalidArgumentException('MultiPoint must contain at least one Point.');
+            throw new \InvalidArgumentException('MultiPointZ must contain at least one PointZ.');
         }
 
         parent::__construct($srid);
@@ -99,7 +101,7 @@ class MultiPoint extends Geometry
     }
 
     /**
-     * @return array<Point>
+     * @return array<PointZ>
      */
     public function getPoints(): array
     {
@@ -107,13 +109,13 @@ class MultiPoint extends Geometry
     }
 
     /**
-     * @param array<Point> $points
+     * @param array<PointZ> $points
      * @return $this
      */
-    public function setPoints(array $points): MultiPoint
+    public function setPoints(array $points): MultiPointZ
     {
         if (empty($points)) {
-            throw new \InvalidArgumentException('MultiPoint must contain at least one Point.');
+            throw new \InvalidArgumentException('MultiPointZ must contain at least one PointZ.');
         }
 
         $this->points = $points;
@@ -126,11 +128,11 @@ class MultiPoint extends Geometry
     public function toWKT(): string
     {
         $pointStrings = array_map(
-            fn(Point $p) => sprintf('%s %s', $p->getX(), $p->getY()),
+            fn(PointZ $p) => sprintf('%s %s %s', $p->getX(), $p->getY(), $p->getZ()),
             $this->points
         );
 
-        return 'MULTIPOINT(' . implode(',', $pointStrings) . ')';
+        return 'MULTIPOINT Z(' . implode(',', $pointStrings) . ')';
     }
 
     /**
@@ -141,7 +143,7 @@ class MultiPoint extends Geometry
         return [
             'type' => 'MultiPoint',
             'coordinates' => array_map(
-                fn(Point $p) => [$p->getX(), $p->getY()],
+                fn(PointZ $p) => [$p->getX(), $p->getY(), $p->getZ()],
                 $this->points
             )
         ];

@@ -4,7 +4,7 @@ namespace Milanmadar\CoolioORM\Geo\ShapeZ;
 
 class LineStringZ extends GeometryZ
 {
-    private array $coordinates;
+    private array $points;
 
     /**
      * @param array<mixed> $jsonData
@@ -85,15 +85,28 @@ class LineStringZ extends GeometryZ
     public function __construct(array $coordinates, int|null $srid = null)
     {
         parent::__construct($srid);
-        $this->coordinates = $coordinates;
+        $this->points = $coordinates;
     }
 
     /**
      * @return array<PointZ>
      */
-    public function getCoordinates(): array
+    public function getPoints(): array
     {
-        return $this->coordinates;
+        return $this->points;
+    }
+
+    /**
+     * @param array<PointZ> $points
+     * @return $this
+     */
+    public function setPoints(array $points): self
+    {
+        if(count($points) < 2) {
+            throw new \InvalidArgumentException("A LineString must have at least two points.");
+        }
+        $this->points = $points;
+        return $this;
     }
 
     /**
@@ -103,7 +116,7 @@ class LineStringZ extends GeometryZ
     {
         $coordinateStrings = array_map(function (PointZ $point) {
             return sprintf('%s %s %s', $point->getX(), $point->getY(), $point->getZ());
-        }, $this->coordinates);
+        }, $this->points);
 
         return sprintf('LINESTRING Z(%s)', implode(',', $coordinateStrings));
     }
@@ -115,7 +128,7 @@ class LineStringZ extends GeometryZ
     {
         $coordinates = array_map(function (PointZ $point) {
             return [$point->getX(), $point->getY(), $point->getZ()];
-        }, $this->coordinates);
+        }, $this->points);
 
         return [
             'type' => 'LineString',

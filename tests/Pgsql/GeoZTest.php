@@ -4,6 +4,8 @@ namespace Pgsql;
 
 use Milanmadar\CoolioORM\Geo\ShapeZ\PointZ;
 use Milanmadar\CoolioORM\Geo\ShapeZ\LineStringZ;
+use Milanmadar\CoolioORM\Geo\ShapeZ\PolygonZ;
+use Milanmadar\CoolioORM\Geo\ShapeZ\MultiPointZ;
 use Milanmadar\CoolioORM\ORM;
 use PHPUnit\Framework\TestCase;
 use tests\DbHelper;
@@ -57,6 +59,13 @@ class GeoZTest extends TestCase
         $lineStringZ = new LineStringZ([
             new PointZ(1, 1, 1), new PointZ(2, 2, 2), new PointZ(3, 3, 3), new PointZ(4, 4, 4)
         ], 4326);
+        $multiPointZ = new MultiPointZ([
+            new PointZ(1, 1, 1), new PointZ(2, 2, 2), new PointZ(3, 3, 3), new PointZ(4, 4, 4)
+        ], 4326);
+        $polygonZ = new PolygonZ([
+            new LineStringZ([new PointZ(0, 0, 1), new PointZ(0, 5, 2), new PointZ(5, 5, 3), new PointZ(5, 0, 4), new PointZ(0, 0, 1)]),
+            new LineStringZ([new PointZ(1, 1, 1), new PointZ(1, 2, 2), new PointZ(2, 2,3 ), new PointZ(2, 1, 4), new PointZ(1, 1, 1)])
+        ], 4326);
 
         //
         // Insert All Shapes
@@ -65,6 +74,8 @@ class GeoZTest extends TestCase
             ->insert()
             ->setValue('pointz_geom', $pointZ)
             ->setValue('linestringz_geom', $lineStringZ)
+            ->setValue('polygonz_geom', $polygonZ)
+            ->setValue('multipointz_geom', $multiPointZ)
             ->executeStatement()
         ;
         $this->assertEquals($oCnt+1, self::$dbHelper->countRows('geometryz_test'));
@@ -76,6 +87,8 @@ class GeoZTest extends TestCase
 
         $this->assertTrue($pointZ == $ent->getPointZGeom());
         $this->assertTrue($lineStringZ == $ent->getLinestringZGeom());
+        $this->assertTrue($polygonZ == $ent->getPolygonZGeom());
+        $this->assertTrue($multiPointZ == $ent->getMultipointZGeom());
     }
 
     public function testInsert_asEntity()
@@ -91,10 +104,19 @@ class GeoZTest extends TestCase
         $lineStringZ = new LineStringZ([
             new PointZ(1, 1, 1), new PointZ(2, 2, 2), new PointZ(3, 3, 3), new PointZ(4, 4, 4)
         ], 4326);
+        $multiPointZ = new MultiPointZ([
+            new PointZ(1, 1, 1), new PointZ(2, 2, 2), new PointZ(3, 3, 3), new PointZ(4, 4, 4)
+        ], 4326);
+        $polygonZ = new PolygonZ([
+            new LineStringZ([new PointZ(0, 0, 1), new PointZ(0, 5, 2), new PointZ(5, 5, 3), new PointZ(5, 0, 4), new PointZ(0, 0, 1)]),
+            new LineStringZ([new PointZ(1, 1, 1), new PointZ(1, 2, 2), new PointZ(2, 2,3 ), new PointZ(2, 1, 4), new PointZ(1, 1, 1)])
+        ], 4326);
 
         $newEnt = $mgr->createEntity()
             ->setPointZGeom($pointZ)
             ->setLinestringZGeom($lineStringZ)
+            ->setPolygonZGeom($polygonZ)
+            ->setMultipointZGeom($multiPointZ)
         ;
 
         //
@@ -110,5 +132,7 @@ class GeoZTest extends TestCase
 
         $this->assertTrue($pointZ == $ent->getPointZGeom());
         $this->assertTrue($lineStringZ == $ent->getLinestringZGeom());
+        $this->assertTrue($polygonZ == $ent->getPolygonZGeom());
+        $this->assertTrue($multiPointZ == $ent->getMultipointZGeom());
     }
 }
