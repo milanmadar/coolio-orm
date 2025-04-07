@@ -55,7 +55,8 @@ class MultiLineStringZ extends GeometryZ
     public static function createFromGeoEWKTString(string $ewktString): MultiLineStringZ
     {
         // Parse the EWKT string, expected format: SRID=<srid>;MULTILINESTRING Z((<x1> <y1> <z1>, <x2> <y2> <z2>, ...), ...)
-        if (strpos($ewktString, 'MULTILINESTRING Z') === false) {
+        //if (strpos($ewktString, 'MULTILINESTRING Z') === false) {
+        if (strpos($ewktString, 'MULTILINESTRING') === false) {
             throw new \InvalidArgumentException('Invalid EWKT format. Expected MULTILINESTRING Z type.');
         }
 
@@ -76,7 +77,7 @@ class MultiLineStringZ extends GeometryZ
         $srid = (int) substr($sridPart, 5);
 
         // Validate and extract the MULTILINESTRING Z coordinates
-        preg_match('/MULTILINESTRING Z\((.*)\)/', $geometryPart, $matches);
+        preg_match('/MULTILINESTRING ?Z?\((.*)\)/', $geometryPart, $matches);
         if (empty($matches)) {
             throw new \InvalidArgumentException('Invalid MULTILINESTRING Z format in EWKT.');
         }

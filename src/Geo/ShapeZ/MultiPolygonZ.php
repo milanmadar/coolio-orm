@@ -50,7 +50,8 @@ class MultiPolygonZ extends GeometryZ
     public static function createFromGeoEWKTString(string $ewktString): MultiPolygonZ
     {
         // Parse the EWKT string, expected format: SRID=<srid>;MULTIPOLYGONZ(((<x1> <y1> <z1>, <x2> <y2> <z2>, ...), (<x3> <y3> <z3>, <x4> <y4> <z4>, ...)), ((...)))
-        if (strpos($ewktString, 'MULTIPOLYGONZ') === false) {
+        //if (strpos($ewktString, 'MULTIPOLYGONZ') === false) {
+        if (strpos($ewktString, 'MULTIPOLYGON') === false) {
             throw new \InvalidArgumentException('Invalid EWKT format. Expected MULTIPOLYGONZ type.');
         }
 
@@ -71,7 +72,7 @@ class MultiPolygonZ extends GeometryZ
         $srid = (int) substr($sridPart, 5);
 
         // Validate and extract the MULTIPOLYGONZ coordinates
-        preg_match('/MULTIPOLYGONZ\((.*)\)/', $geometryPart, $matches);
+        preg_match('/MULTIPOLYGON ?Z?\((.*)\)/', $geometryPart, $matches);
         if (empty($matches)) {
             throw new \InvalidArgumentException('Invalid MULTIPOLYGONZ format in EWKT.');
         }

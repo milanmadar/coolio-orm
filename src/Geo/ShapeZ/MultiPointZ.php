@@ -45,7 +45,8 @@ class MultiPointZ extends GeometryZ
     public static function createFromGeoEWKTString(string $ewktString): MultiPointZ
     {
         // Parse the EWKT string, expected format: SRID=<srid>;MULTIPOINT Z(<x1> <y1> <z1>, <x2> <y2> <z2>, ...)
-        if (strpos($ewktString, 'MULTIPOINT Z') === false) {
+        //if (strpos($ewktString, 'MULTIPOINT Z') === false) {
+        if (strpos($ewktString, 'MULTIPOINT') === false) {
             throw new \InvalidArgumentException('Invalid EWKT format. Expected MULTIPOINT Z type.');
         }
 
@@ -66,7 +67,7 @@ class MultiPointZ extends GeometryZ
         $srid = (int) substr($sridPart, 5);
 
         // Validate and extract the MULTIPOINT Z coordinates
-        preg_match('/MULTIPOINT Z\((.*)\)/', $geometryPart, $matches);
+        preg_match('/MULTIPOINT ?Z?\((.*)\)/', $geometryPart, $matches);
         if (empty($matches)) {
             throw new \InvalidArgumentException('Invalid MULTIPOINT Z format in EWKT.');
         }

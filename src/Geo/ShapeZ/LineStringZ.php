@@ -43,7 +43,8 @@ class LineStringZ extends GeometryZ implements HasStartEndPointZInterface
     public static function createFromGeoEWKTString(string $ewktString): LineStringZ
     {
         // Parse the EWKT string, expected format: SRID=<srid>;LINESTRING Z(<x1> <y1> <z1>, <x2> <y2> <z2>, ...)
-        if (strpos($ewktString, 'LINESTRING Z') === false) {
+        //if (strpos($ewktString, 'LINESTRING Z') === false) {
+        if (strpos($ewktString, 'LINESTRING') === false) {
             throw new \InvalidArgumentException('Invalid EWKT format. Expected LINESTRING Z type.');
         }
 
@@ -64,7 +65,7 @@ class LineStringZ extends GeometryZ implements HasStartEndPointZInterface
         $srid = (int) substr($sridPart, 5);
 
         // Validate and extract the LINESTRING Z coordinates
-        preg_match('/LINESTRING Z\((.*)\)/', $geometryPart, $matches);
+        preg_match('/LINESTRING ?Z?\((.*)\)/', $geometryPart, $matches);
         if (empty($matches)) {
             throw new \InvalidArgumentException('Invalid LINESTRING Z format in EWKT.');
         }

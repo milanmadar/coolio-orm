@@ -83,4 +83,15 @@ class Entity extends \Milanmadar\CoolioORM\Entity
         return $this;
     }
 
+    public function setCircularStringZGeom(ShapeZ\CircularStringZ $val): self
+    {
+        $this->_set('circularstringz_geom', $val);
+        return $this;
+    }
+
+    public function getCircularStringZGeom(): ShapeZ\CircularStringZ
+    {
+        return $this->_get('circularstringz_geom');
+    }
+
 }

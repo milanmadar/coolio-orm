@@ -100,6 +100,68 @@ class Shape2D3DFactory
 
     public static function createFromGeoEWKTString(string $ewktString): Shape\Geometry|ShapeZ\GeometryZ
     {
-        return Shape\Factory::createFromGeoEWKTString($ewktString);
+        // Quick check for SRID part
+        if (!str_starts_with($ewktString, 'SRID=')) {
+            throw new \InvalidArgumentException('Invalid EWKT string: Missing SRID.');
+        }
+
+        // Extract the geometry type and coordinates
+        $typePattern = '/SRID=\d+;([A-Z]+)(\s*Z)?\s*\((.+)\)/s';
+        if (!preg_match($typePattern, $ewktString, $matches)) {
+            throw new \InvalidArgumentException('Invalid EWKT string: Cannot detect geometry type and coordinates.');
+        }
+
+        $type = strtoupper(trim($matches[1]));
+
+        // is it 3D coordinates?
+        $explicitZ = !empty(trim($matches[2]));
+        if($explicitZ) {
+            $is3D = true;
+        } else {
+            $coordinateString = trim($matches[3]);
+            // Find the first coordinate tuple (split by comma, then split by space)
+            $firstTuple = explode(',', $coordinateString)[0];
+            $dimensions = preg_split('/\s+/', trim($firstTuple));
+            $is3D = count($dimensions) == 3;
+        }
+
+//        if(!$is3D) {
+//            return Shape\Factory::createFromGeoEWKTString($ewktString);
+//        }
+
+        // Now switch based on the type
+        switch ($type) {
+            case 'CIRCULARSTRING':
+                return $is3D
+                    ? ShapeZ\CircularStringZ::createFromGeoEWKTString($ewktString)
+                    :  Shape\CircularString::createFromGeoEWKTString($ewktString);
+
+            case 'COMPOUNDCURVE':
+                return Shape\CompoundCurve::createFromGeoEWKTString($ewktString);
+//                return $is3D
+//                    ? ShapeZ\CompoundCurveZ::createFromGeoEWKTString($ewktString)
+//                    : Shape\CompoundCurve::createFromGeoEWKTString($ewktString);
+
+            case 'CURVEPOLYGON':
+                return Shape\CurvePolygon::createFromGeoEWKTString($ewktString);
+//                return $is3D
+//                    ? ShapeZ\CurvePolygonZ::createFromGeoEWKTString($ewktString)
+//                    : Shape\CurvePolygon::createFromGeoEWKTString($ewktString);
+
+            case 'MULTICURVE':
+                return Shape\MultiCurve::createFromGeoEWKTString($ewktString);
+//                return $is3D
+//                    ? ShapeZ\MultiCurveZ::createFromGeoEWKTString($ewktString)
+//                    : Shape\MultiCurve::createFromGeoEWKTString($ewktString);
+
+            case 'MULTISURFACE':
+                return Shape\MultiSurface::createFromGeoEWKTString($ewktString);
+//                return $is3D
+//                    ? ShapeZ\MultiSurfaceZ::createFromGeoEWKTString($ewktString)
+//                    : Shape\MultiSurface::createFromGeoEWKTString($ewktString);
+
+            default:
+                throw new \InvalidArgumentException('Unsupported EWKT type: ' . $type);
+        }
     }
 }

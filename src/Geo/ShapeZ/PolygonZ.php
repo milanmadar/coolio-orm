@@ -47,7 +47,8 @@ class PolygonZ extends GeometryZ
     public static function createFromGeoEWKTString(string $ewktString): PolygonZ
     {
         // Parse the EWKT string, expected format: SRID=<srid>;POLYGON Z((<x1> <y1> <z1>, <x2> <y2> <z2>, ...), (<x3> <y3> <z3>, <x4> <y4> <z4>, ...))
-        if (strpos($ewktString, 'POLYGON Z') === false) {
+        //if (strpos($ewktString, 'POLYGON Z') === false) {
+        if (strpos($ewktString, ';POLYGON') === false) {
             throw new \InvalidArgumentException('Invalid EWKT format. Expected POLYGON Z type.');
         }
 
@@ -68,7 +69,7 @@ class PolygonZ extends GeometryZ
         $srid = (int) substr($sridPart, 5);
 
         // Validate and extract the POLYGON Z coordinates
-        preg_match('/POLYGON Z\((.*)\)/', $geometryPart, $matches);
+        preg_match('/POLYGON ?Z?\((.*)\)/', $geometryPart, $matches);
         if (empty($matches)) {
             throw new \InvalidArgumentException('Invalid POLYGON Z format in EWKT.');
         }

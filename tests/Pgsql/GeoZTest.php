@@ -9,6 +9,7 @@ use Milanmadar\CoolioORM\Geo\ShapeZ\MultiPointZ;
 use Milanmadar\CoolioORM\Geo\ShapeZ\MultiLineStringZ;
 use Milanmadar\CoolioORM\Geo\ShapeZ\MultiPolygonZ;
 use Milanmadar\CoolioORM\Geo\ShapeZ\GeometryCollectionZ;
+use Milanmadar\CoolioORM\Geo\ShapeZ\CircularStringZ;
 use Milanmadar\CoolioORM\ORM;
 use PHPUnit\Framework\TestCase;
 use tests\DbHelper;
@@ -92,6 +93,9 @@ class GeoZTest extends TestCase
                 new LineStringZ([new PointZ(1, 1, 5, 4326), new PointZ(1, 2, 5, 4326), new PointZ(2, 2, 5, 4326), new PointZ(2, 1, 5, 4326), new PointZ(1, 1, 5, 4326),], 4326)
             ], 4326)
         ], 4326);
+        $circularStringZ = new CircularStringZ([
+            new PointZ(0, 0, 9), new PointZ(4, 0, 3), new PointZ(4, 4, 3), new PointZ(0, 4, 3), new PointZ(0, 0, 9)
+        ], 4326);
 
         //
         // Insert All Shapes
@@ -105,6 +109,7 @@ class GeoZTest extends TestCase
             ->setValue('multilinestringz_geom', $multiLineStringZ)
             ->setValue('multipolygonz_geom', $multiPolygonZ)
             ->setValue('geomcollectionz_geom', $geometryCollectionZ)
+            ->setValue('circularstringz_geom', $circularStringZ)
             ->executeStatement()
         ;
         $this->assertEquals($oCnt+1, self::$dbHelper->countRows('geometryz_test'));
@@ -121,6 +126,7 @@ class GeoZTest extends TestCase
         $this->assertTrue($multiLineStringZ == $ent->getMultilinestringZGeom());
         $this->assertTrue($multiPolygonZ == $ent->getMultipolygonZGeom());
         $this->assertTrue($geometryCollectionZ == $ent->getGeomcollectionZGeom());
+        $this->assertTrue($circularStringZ == $ent->getCircularstringZGeom());
     }
 
     public function testInsert_asEntity()
@@ -166,6 +172,9 @@ class GeoZTest extends TestCase
                 new LineStringZ([new PointZ(1, 1, 5, 4326), new PointZ(1, 2, 5, 4326), new PointZ(2, 2, 5, 4326), new PointZ(2, 1, 5, 4326), new PointZ(1, 1, 5, 4326),], 4326)
             ], 4326)
         ], 4326);
+        $circularStringZ = new CircularStringZ([
+            new PointZ(0, 0, 9), new PointZ(4, 0, 3), new PointZ(4, 4, 3), new PointZ(0, 4, 3), new PointZ(0, 0, 9)
+        ], 4326);
 
         $newEnt = $mgr->createEntity()
             ->setPointZGeom($pointZ)
@@ -175,6 +184,7 @@ class GeoZTest extends TestCase
             ->setMultilinestringZGeom($multiLineStringZ)
             ->setMultipolygonZGeom($multiPolygonZ)
             ->setGeomcollectionZGeom($geometryCollectionZ)
+            ->setCircularstringZGeom($circularStringZ)
         ;
 
         //
@@ -195,5 +205,6 @@ class GeoZTest extends TestCase
         $this->assertTrue($multiLineStringZ == $ent->getMultilinestringZGeom());
         $this->assertTrue($multiPolygonZ == $ent->getMultipolygonZGeom());
         $this->assertTrue($geometryCollectionZ == $ent->getGeomcollectionZGeom());
+        $this->assertTrue($circularStringZ == $ent->getCircularstringZGeom());
     }
 }

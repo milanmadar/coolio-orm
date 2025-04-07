@@ -46,7 +46,8 @@ class PointZ extends GeometryZ
     public static function createFromGeoEWKTString(string $ewktString): PointZ
     {
         // Parse the EWKT string, expected format: SRID=<srid>;POINTZ(<x> <y> <z>)
-        if (strpos($ewktString, 'POINTZ') === false) {
+        //if (strpos($ewktString, 'POINTZ') === false) {
+        if (strpos($ewktString, ';POINT') === false) {
             throw new \InvalidArgumentException('Invalid EWKT format for PointZ.');
         }
 
@@ -67,7 +68,7 @@ class PointZ extends GeometryZ
         $srid = (int) substr($sridPart, 5);
 
         // Validate and extract the POINTZ coordinates
-        preg_match('/POINTZ\(([-0-9\.]+) ([-0-9\.]+) ([-0-9\.]+)\)/', $geometryPart, $matches);
+        preg_match('/POINT ?Z?\(([-0-9\.]+) ([-0-9\.]+) ([-0-9\.]+)\)/', $geometryPart, $matches);
         if (empty($matches)) {
             throw new \InvalidArgumentException('Invalid POINTZ format in EWKT.');
         }
