@@ -1,8 +1,8 @@
 <?php
 
-namespace Milanmadar\CoolioORM\Geo\Shape;
+namespace Milanmadar\CoolioORM\Geo\Shape2D;
 
-class CurvePolygon extends Geometry
+class CurvePolygon extends AbstractShape2D
 {
     /** @var array<LineString|CircularString> */
     private array $boundaries;

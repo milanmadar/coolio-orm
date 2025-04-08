@@ -1,8 +1,8 @@
 <?php
 
-namespace Milanmadar\CoolioORM\Geo\Shape;
+namespace Milanmadar\CoolioORM\Geo\Shape2D;
 
-class CircularString extends Geometry implements HasStartEndPointInterface
+class CircularString extends AbstractShape2D implements HasStartEndPointInterface
 {
     /** @var array<Point> */
     private  array $points;

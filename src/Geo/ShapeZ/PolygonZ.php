@@ -2,7 +2,7 @@
 
 namespace Milanmadar\CoolioORM\Geo\ShapeZ;
 
-class PolygonZ extends GeometryZ
+class PolygonZ extends AbstractShapeZ
 {
     /** @var array<LineStringZ> */
     private array $lineStrings;

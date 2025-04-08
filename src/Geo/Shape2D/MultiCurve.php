@@ -1,8 +1,8 @@
 <?php
 
-namespace Milanmadar\CoolioORM\Geo\Shape;
+namespace Milanmadar\CoolioORM\Geo\Shape2D;
 
-class MultiCurve extends Geometry
+class MultiCurve extends AbstractShape2D
 {
 
     /** @var array<LineString|CircularString|CompoundCurve> */

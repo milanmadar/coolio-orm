@@ -2,10 +2,10 @@
 
 namespace Geo\Shape;
 
-use Milanmadar\CoolioORM\Geo\Shape\LineString;
-use Milanmadar\CoolioORM\Geo\Shape\Point;
-use Milanmadar\CoolioORM\Geo\Shape\Polygon;
-use Milanmadar\CoolioORM\Geo\Shape\MultiPolygon;
+use Milanmadar\CoolioORM\Geo\Shape2D\LineString;
+use Milanmadar\CoolioORM\Geo\Shape2D\Point;
+use Milanmadar\CoolioORM\Geo\Shape2D\Polygon;
+use Milanmadar\CoolioORM\Geo\Shape2D\MultiPolygon;
 use PHPUnit\Framework\TestCase;
 
 class MultiPolygonTest extends TestCase

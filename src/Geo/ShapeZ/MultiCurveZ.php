@@ -2,7 +2,7 @@
 
 namespace Milanmadar\CoolioORM\Geo\ShapeZ;
 
-class MultiCurveZ extends GeometryZ
+class MultiCurveZ extends AbstractShapeZ
 {
     /** @var array<LineStringZ|CircularStringZ|CompoundCurveZ> */
     private array $curves;

@@ -2,7 +2,7 @@
 
 namespace Milanmadar\CoolioORM\Geo\ShapeZ;
 
-class CircularStringZ extends GeometryZ implements HasStartEndPointZInterface
+class CircularStringZ extends AbstractShapeZ implements HasStartEndPointZInterface
 {
     /** @var array<PointZ> */
     private array $points;

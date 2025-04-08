@@ -1,8 +1,8 @@
 <?php
 
-namespace Milanmadar\CoolioORM\Geo\Shape;
+namespace Milanmadar\CoolioORM\Geo\Shape2D;
 
-class MultiPoint extends Geometry
+class MultiPoint extends AbstractShape2D
 {
     /** @var array<Point> */
     private array $points;

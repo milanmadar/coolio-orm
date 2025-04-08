@@ -3,7 +3,7 @@
 namespace Milanmadar\CoolioORM\Command;
 
 use Milanmadar\CoolioORM\ORM;
-use Milanmadar\CoolioORM\Geo\Shape;
+use Milanmadar\CoolioORM\Geo\Shape2D;
 use Milanmadar\CoolioORM\Geo\ShapeZ;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -252,30 +252,30 @@ class ScaffoldCommand extends Command
 
                     // 2d
                     if(str_contains($nativeColType, '(point,')) {
-                        $geoShapeType = Shape\Point::class;
+                        $geoShapeType = Shape2D\Point::class;
                     } elseif(str_contains($nativeColType, '(linestring,')) {
-                        $geoShapeType = Shape\LineString::class;
+                        $geoShapeType = Shape2D\LineString::class;
                     } elseif(str_contains($nativeColType, '(polygon,')) {
-                        $geoShapeType = Shape\Polygon::class;
+                        $geoShapeType = Shape2D\Polygon::class;
                     } elseif(str_contains($nativeColType, '(multipoint,')) {
-                        $geoShapeType = Shape\MultiPoint::class;
+                        $geoShapeType = Shape2D\MultiPoint::class;
                     } elseif(str_contains($nativeColType, '(multilinestring,')) {
-                        $geoShapeType = Shape\MultiLineString::class;
+                        $geoShapeType = Shape2D\MultiLineString::class;
                     } elseif(str_contains($nativeColType, '(multipolygon,')) {
-                        $geoShapeType = Shape\MultiPolygon::class;
+                        $geoShapeType = Shape2D\MultiPolygon::class;
                     } elseif(str_contains($nativeColType, '(geometrycollection,')) {
-                        $geoShapeType = Shape\GeometryCollection::class;
+                        $geoShapeType = Shape2D\GeometryCollection::class;
                     } elseif(str_contains($nativeColType, '(circularstring,')) {
-                        $geoShapeType = Shape\CircularString::class;
+                        $geoShapeType = Shape2D\CircularString::class;
                         $colType = 'geometry_curved';
                     } elseif(str_contains($nativeColType, '(compoundcurve,')) {
-                        $geoShapeType = Shape\CompoundCurve::class;
+                        $geoShapeType = Shape2D\CompoundCurve::class;
                         $colType = 'geometry_curved';
                     } elseif(str_contains($nativeColType, '(curvepolygon,')) {
-                        $geoShapeType = Shape\CurvePolygon::class;
+                        $geoShapeType = Shape2D\CurvePolygon::class;
                         $colType = 'geometry_curved';
                     } elseif(str_contains($nativeColType, '(multicurve,')) {
-                        $geoShapeType = Shape\MultiCurve::class;
+                        $geoShapeType = Shape2D\MultiCurve::class;
                         $colType = 'geometry_curved';
                     }
 

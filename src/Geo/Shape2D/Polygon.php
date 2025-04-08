@@ -1,8 +1,8 @@
 <?php
 
-namespace Milanmadar\CoolioORM\Geo\Shape;
+namespace Milanmadar\CoolioORM\Geo\Shape2D;
 
-class Polygon extends Geometry
+class Polygon extends AbstractShape2D
 {
     /**
      * @var LineString[] The first LineString is the outer ring, others are holes.

@@ -2,7 +2,7 @@
 
 namespace Milanmadar\CoolioORM\Geo\ShapeZ;
 
-class PointZ extends GeometryZ
+class PointZ extends AbstractShapeZ
 {
     private float $x;
     private float $y;

@@ -9,10 +9,10 @@ class Shape2D3DFactory
      *
      * @param string $geoJsonStr The GeoJSON string to parse.
      * @param int|null $srid Optional SRID to assign to the geometry.
-     * @return Shape\Geometry|ShapeZ\GeometryZ The created geometry (Point, PointZ, LineString, LineStringZ, etc.).
+     * @return Shape2D\AbstractShape2D|ShapeZ\AbstractShapeZ The created geometry (Point, PointZ, LineString, LineStringZ, etc.).
      * @throws \InvalidArgumentException If the GeoJSON is invalid or unsupported.
      */
-    public static function createFromGeoJSONString(string $geoJsonStr, int|null $srid = null): Shape\Geometry|ShapeZ\GeometryZ
+    public static function createFromGeoJSONString(string $geoJsonStr, int|null $srid = null): Shape2D\AbstractShape2D|ShapeZ\AbstractShapeZ
     {
         if (!isset($srid)) $srid = $_ENV['GEO_DEFAULT_SRID'];
 
@@ -28,9 +28,9 @@ class Shape2D3DFactory
     /**
      * @param array<mixed> $geoJsonData
      * @param int|null $srid Optional SRID, defaults to the value in $_ENV['GEO_DEFAULT_SRID']
-     * @return Shape\Geometry|ShapeZ\GeometryZ
+     * @return Shape2D\AbstractShape2D|ShapeZ\AbstractShapeZ
      */
-    public static function createFromGeoJSONData(array $geoJsonData, int|null $srid = null): Shape\Geometry|ShapeZ\GeometryZ
+    public static function createFromGeoJSONData(array $geoJsonData, int|null $srid = null): Shape2D\AbstractShape2D|ShapeZ\AbstractShapeZ
     {
         if (!isset($srid)) $srid = $_ENV['GEO_DEFAULT_SRID'];
 
@@ -43,7 +43,7 @@ class Shape2D3DFactory
             case 'Point':
                 $coordCount = count($geoJsonData['coordinates']);
                 if ($coordCount == 2) {
-                    return Shape\Point::createFromGeoJSONData($geoJsonData, $srid);
+                    return Shape2D\Point::createFromGeoJSONData($geoJsonData, $srid);
                 } elseif ($coordCount == 3) {
                     return ShapeZ\PointZ::createFromGeoJSONData($geoJsonData, $srid);
                 }
@@ -52,7 +52,7 @@ class Shape2D3DFactory
             case 'LineString':
                 $coordCount = count($geoJsonData['coordinates'][0]);
                 if ($coordCount == 2) {
-                    return Shape\LineString::createFromGeoJSONData($geoJsonData, $srid);
+                    return Shape2D\LineString::createFromGeoJSONData($geoJsonData, $srid);
                 } elseif ($coordCount == 3) {
                     return ShapeZ\LineStringZ::createFromGeoJSONData($geoJsonData, $srid);
                 }
@@ -61,7 +61,7 @@ class Shape2D3DFactory
             case 'Polygon':
                 $coordCount = count($geoJsonData['coordinates'][0][0]);
                 if ($coordCount == 2) {
-                    return Shape\Polygon::createFromGeoJSONData($geoJsonData, $srid);
+                    return Shape2D\Polygon::createFromGeoJSONData($geoJsonData, $srid);
                 } elseif ($coordCount == 3) {
                     return ShapeZ\PolygonZ::createFromGeoJSONData($geoJsonData, $srid);
                 }
@@ -70,7 +70,7 @@ class Shape2D3DFactory
             case 'MultiPoint':
                 $coordCount = count($geoJsonData['coordinates'][0]);
                 if ($coordCount == 2) {
-                    return Shape\MultiPoint::createFromGeoJSONData($geoJsonData, $srid);
+                    return Shape2D\MultiPoint::createFromGeoJSONData($geoJsonData, $srid);
                 } elseif ($coordCount == 3) {
                     return ShapeZ\MultiPointZ::createFromGeoJSONData($geoJsonData, $srid);
                 }
@@ -79,7 +79,7 @@ class Shape2D3DFactory
             case 'MultiLineString':
                 $coordCount = count($geoJsonData['coordinates'][0][0]);
                 if ($coordCount == 2) {
-                    return Shape\MultiLineString::createFromGeoJSONData($geoJsonData, $srid);
+                    return Shape2D\MultiLineString::createFromGeoJSONData($geoJsonData, $srid);
                 } elseif ($coordCount == 3) {
                     return ShapeZ\MultiLineStringZ::createFromGeoJSONData($geoJsonData, $srid);
                 }
@@ -88,7 +88,7 @@ class Shape2D3DFactory
             case 'MultiPolygon':
                 $coordCount = count($geoJsonData['coordinates'][0][0][0]);
                 if ($coordCount == 2) {
-                    return Shape\MultiPolygon::createFromGeoJSONData($geoJsonData, $srid);
+                    return Shape2D\MultiPolygon::createFromGeoJSONData($geoJsonData, $srid);
                 } elseif ($coordCount == 3) {
                     return ShapeZ\MultiPolygonZ::createFromGeoJSONData($geoJsonData, $srid);
                 }
@@ -100,12 +100,12 @@ class Shape2D3DFactory
                     $geometries[] = self::createFromGeoJSONString((string)json_encode($geometry), $srid);
                 }
 
-                if(!empty($geometries) && $geometries[0] instanceof ShapeZ\GeometryZ) {
-                    /** @var array<ShapeZ\GeometryZ> $geometries */
+                if(!empty($geometries) && $geometries[0] instanceof ShapeZ\AbstractShapeZ) {
+                    /** @var array<ShapeZ\AbstractShapeZ> $geometries */
                     return new ShapeZ\GeometryCollectionZ($geometries, $srid);
                 }
-                /** @var array<Shape\Geometry> $geometries */
-                return new Shape\GeometryCollection($geometries, $srid);
+                /** @var array<Shape2D\AbstractShape2D> $geometries */
+                return new Shape2D\GeometryCollection($geometries, $srid);
 
             default:
                 throw new \InvalidArgumentException('Unsupported GeoJSON type: ' . $geoJsonData['type']);
@@ -114,7 +114,7 @@ class Shape2D3DFactory
         throw new \InvalidArgumentException('Invalid number of coordinates for the given geometry type.');
     }
 
-    public static function createFromGeoEWKTString(string $ewktString): Shape\Geometry|ShapeZ\GeometryZ
+    public static function createFromGeoEWKTString(string $ewktString): Shape2D\AbstractShape2D|ShapeZ\AbstractShapeZ
     {
         // Quick check for SRID part
         if (!str_starts_with($ewktString, 'SRID=')) {
@@ -151,22 +151,22 @@ class Shape2D3DFactory
             case 'CIRCULARSTRING':
                 return $is3D
                     ? ShapeZ\CircularStringZ::createFromGeoEWKTString($ewktString)
-                    :  Shape\CircularString::createFromGeoEWKTString($ewktString);
+                    :  Shape2D\CircularString::createFromGeoEWKTString($ewktString);
 
             case 'COMPOUNDCURVE':
                 return $is3D
                     ? ShapeZ\CompoundCurveZ::createFromGeoEWKTString($ewktString)
-                    : Shape\CompoundCurve::createFromGeoEWKTString($ewktString);
+                    : Shape2D\CompoundCurve::createFromGeoEWKTString($ewktString);
 
             case 'CURVEPOLYGON':
                 return $is3D
                     ? ShapeZ\CurvePolygonZ::createFromGeoEWKTString($ewktString)
-                    : Shape\CurvePolygon::createFromGeoEWKTString($ewktString);
+                    : Shape2D\CurvePolygon::createFromGeoEWKTString($ewktString);
 
             case 'MULTICURVE':
                 return $is3D
                     ? ShapeZ\MultiCurveZ::createFromGeoEWKTString($ewktString)
-                    : Shape\MultiCurve::createFromGeoEWKTString($ewktString);
+                    : Shape2D\MultiCurve::createFromGeoEWKTString($ewktString);
 
             default:
                 throw new \InvalidArgumentException('Unsupported EWKT type: ' . $type);

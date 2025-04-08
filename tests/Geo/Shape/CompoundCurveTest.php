@@ -2,10 +2,10 @@
 
 namespace Geo\Shape;
 
-use Milanmadar\CoolioORM\Geo\Shape\Point;
-use Milanmadar\CoolioORM\Geo\Shape\LineString;
-use Milanmadar\CoolioORM\Geo\Shape\CircularString;
-use Milanmadar\CoolioORM\Geo\Shape\CompoundCurve;
+use Milanmadar\CoolioORM\Geo\Shape2D\Point;
+use Milanmadar\CoolioORM\Geo\Shape2D\LineString;
+use Milanmadar\CoolioORM\Geo\Shape2D\CircularString;
+use Milanmadar\CoolioORM\Geo\Shape2D\CompoundCurve;
 use PHPUnit\Framework\TestCase;
 
 class CompoundCurveTest extends TestCase

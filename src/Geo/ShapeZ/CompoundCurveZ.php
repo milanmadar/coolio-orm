@@ -2,7 +2,7 @@
 
 namespace Milanmadar\CoolioORM\Geo\ShapeZ;
 
-class CompoundCurveZ extends GeometryZ implements HasStartEndPointZInterface
+class CompoundCurveZ extends AbstractShapeZ implements HasStartEndPointZInterface
 {
     /** @var array<LineStringZ|CircularStringZ> */
     private array $segments;

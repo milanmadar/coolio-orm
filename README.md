@@ -81,7 +81,7 @@ In this example we scaffolded `GeometryTest`, so we have `GeometryTest\Entity` a
 
 ```php
 use Milanmadar\CoolioORM\ORM;
-use Milanmadar\CoolioORM\Geo\Shape;
+use Milanmadar\CoolioORM\Geo\Shape2D;
 use App\Model\GeometryTest;
 
 $orm = ORM::instance();
@@ -92,7 +92,7 @@ $geotestManager = $orm->entityManager( GeometryTest\Manager::class );
 $geotest = $geotestManager->createEntity()
     ->setTitle("My first Geometry enabled Entity")
     ->setDifficulty( 1 )
-    ->setPointGeom( new Shape\Point(1, 2) )
+    ->setPointGeom( new Shape2D\Point(1, 2) )
     ->setLinestringGeom( new LineString([ new Point(1, 1), new Point(2, 2), new Point(3, 3), new Point(4, 4) ], 4326));
 
 // Save it to the database

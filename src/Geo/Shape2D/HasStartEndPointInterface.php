@@ -1,6 +1,6 @@
 <?php
 
-namespace Milanmadar\CoolioORM\Geo\Shape;
+namespace Milanmadar\CoolioORM\Geo\Shape2D;
 
 interface HasStartEndPointInterface
 {

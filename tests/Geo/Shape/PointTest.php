@@ -2,7 +2,7 @@
 
 namespace Geo\Shape;
 
-use Milanmadar\CoolioORM\Geo\Shape\Point;
+use Milanmadar\CoolioORM\Geo\Shape2D\Point;
 use PHPUnit\Framework\TestCase;
 
 class PointTest extends TestCase

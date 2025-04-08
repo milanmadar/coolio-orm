@@ -2,8 +2,8 @@
 
 namespace Geo\Shape;
 
-use Milanmadar\CoolioORM\Geo\Shape\Point;
-use Milanmadar\CoolioORM\Geo\Shape\CircularString;
+use Milanmadar\CoolioORM\Geo\Shape2D\Point;
+use Milanmadar\CoolioORM\Geo\Shape2D\CircularString;
 use PHPUnit\Framework\TestCase;
 
 class CircularStringTest extends TestCase

@@ -2,17 +2,17 @@
 
 namespace Pgsql;
 
-use Milanmadar\CoolioORM\Geo\Shape\CircularString;
-use Milanmadar\CoolioORM\Geo\Shape\CompoundCurve;
-use Milanmadar\CoolioORM\Geo\Shape\CurvePolygon;
-use Milanmadar\CoolioORM\Geo\Shape\GeometryCollection;
-use Milanmadar\CoolioORM\Geo\Shape\LineString;
-use Milanmadar\CoolioORM\Geo\Shape\MultiCurve;
-use Milanmadar\CoolioORM\Geo\Shape\MultiLineString;
-use Milanmadar\CoolioORM\Geo\Shape\MultiPoint;
-use Milanmadar\CoolioORM\Geo\Shape\MultiPolygon;
-use Milanmadar\CoolioORM\Geo\Shape\Point;
-use Milanmadar\CoolioORM\Geo\Shape\Polygon;
+use Milanmadar\CoolioORM\Geo\Shape2D\CircularString;
+use Milanmadar\CoolioORM\Geo\Shape2D\CompoundCurve;
+use Milanmadar\CoolioORM\Geo\Shape2D\CurvePolygon;
+use Milanmadar\CoolioORM\Geo\Shape2D\GeometryCollection;
+use Milanmadar\CoolioORM\Geo\Shape2D\LineString;
+use Milanmadar\CoolioORM\Geo\Shape2D\MultiCurve;
+use Milanmadar\CoolioORM\Geo\Shape2D\MultiLineString;
+use Milanmadar\CoolioORM\Geo\Shape2D\MultiPoint;
+use Milanmadar\CoolioORM\Geo\Shape2D\MultiPolygon;
+use Milanmadar\CoolioORM\Geo\Shape2D\Point;
+use Milanmadar\CoolioORM\Geo\Shape2D\Polygon;
 use Milanmadar\CoolioORM\ORM;
 use PHPUnit\Framework\TestCase;
 use tests\DbHelper;
@@ -49,8 +49,8 @@ class GeoTest extends TestCase
             ->fetchOneEntity()
         ;
 
-        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape\Polygon', $ent->getPolygonGeom());
-        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape\CircularString', $ent->getCircularStringGeom());
+        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\Polygon', $ent->getPolygonGeom());
+        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\CircularString', $ent->getCircularStringGeom());
     }
 
     public function testSelectAllShapes_FindOne_QueryBuilder_Star()
@@ -65,17 +65,17 @@ class GeoTest extends TestCase
             ->fetchOneEntity()
         ;
 
-        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape\Point', $ent->getPointGeom());
-        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape\LineString', $ent->getLinestringGeom());
-        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape\Polygon', $ent->getPolygonGeom());
-        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape\MultiPoint', $ent->getMultipointGeom());
-        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape\MultiLineString', $ent->getMultilinestringGeom());
-        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape\MultiPolygon', $ent->getMultipolygonGeom());
-        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape\GeometryCollection', $ent->getGeomcollectionGeom());
-        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape\CircularString', $ent->getCircularStringGeom());
-        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape\CompoundCurve', $ent->getCompoundcurveGeom());
-        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape\CurvePolygon', $ent->getCurvepolygonGeom());
-        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape\MultiCurve', $ent->getMulticurveGeom());
+        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\Point', $ent->getPointGeom());
+        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\LineString', $ent->getLinestringGeom());
+        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\Polygon', $ent->getPolygonGeom());
+        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\MultiPoint', $ent->getMultipointGeom());
+        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\MultiLineString', $ent->getMultilinestringGeom());
+        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\MultiPolygon', $ent->getMultipolygonGeom());
+        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\GeometryCollection', $ent->getGeomcollectionGeom());
+        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\CircularString', $ent->getCircularStringGeom());
+        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\CompoundCurve', $ent->getCompoundcurveGeom());
+        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\CurvePolygon', $ent->getCurvepolygonGeom());
+        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\MultiCurve', $ent->getMulticurveGeom());
     }
 
     public function testSelectAllShapes_FindOne_QueryBuilder_NoSELECT()
@@ -89,8 +89,8 @@ class GeoTest extends TestCase
             ->fetchOneEntity()
         ;
 
-        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape\Polygon', $ent->getPolygonGeom());
-        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape\CircularString', $ent->getCircularStringGeom());
+        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\Polygon', $ent->getPolygonGeom());
+        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\CircularString', $ent->getCircularStringGeom());
     }
 
     public function testSelectAllShapes_FindOne_noQueryBuilder()
@@ -100,8 +100,8 @@ class GeoTest extends TestCase
         /** @var GeoShapeAll\Entity $ent */
         $ent = $mgr->findById(1);
 
-        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape\Polygon', $ent->getPolygonGeom());
-        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape\CircularString', $ent->getCircularStringGeom());
+        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\Polygon', $ent->getPolygonGeom());
+        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\CircularString', $ent->getCircularStringGeom());
     }
     public function testSelectAllShapes_FindMany_QueryBuilder_ExplicitSELECTlist()
     {
@@ -120,8 +120,8 @@ class GeoTest extends TestCase
             ->fetchManyEntity()
         ;
 
-        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape\Polygon', $ents[0]->getPolygonGeom());
-        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape\CircularString', $ents[0]->getCircularStringGeom());
+        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\Polygon', $ents[0]->getPolygonGeom());
+        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\CircularString', $ents[0]->getCircularStringGeom());
     }
 
     public function testSelectAllShapes_FindMany_QueryBuilder_Star()
@@ -136,8 +136,8 @@ class GeoTest extends TestCase
             ->fetchManyEntity()
         ;
 
-        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape\Polygon', $ents[0]->getPolygonGeom());
-        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape\CircularString', $ents[0]->getCircularStringGeom());
+        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\Polygon', $ents[0]->getPolygonGeom());
+        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\CircularString', $ents[0]->getCircularStringGeom());
     }
 
     public function testSelectAllShapes_FindMany_QueryBuilder_NoSELECT()
@@ -151,8 +151,8 @@ class GeoTest extends TestCase
             ->fetchManyEntity()
         ;
 
-        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape\Polygon', $ents[0]->getPolygonGeom());
-        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape\CircularString', $ents[0]->getCircularStringGeom());
+        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\Polygon', $ents[0]->getPolygonGeom());
+        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\CircularString', $ents[0]->getCircularStringGeom());
     }
 
     public function testgetSQLNamedParameters()
@@ -176,8 +176,8 @@ class GeoTest extends TestCase
         /** @var GeoShapeAll\Entity[] $ents */
         $ents = $mgr->findManyWhere("1=1");
 
-        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape\Polygon', $ents[0]->getPolygonGeom());
-        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape\CircularString', $ents[0]->getCircularStringGeom());
+        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\Polygon', $ents[0]->getPolygonGeom());
+        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\CircularString', $ents[0]->getCircularStringGeom());
     }
 
     public function testInsert_asText()

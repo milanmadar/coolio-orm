@@ -1,8 +1,8 @@
 <?php
 
-namespace Milanmadar\CoolioORM\Geo\Shape;
+namespace Milanmadar\CoolioORM\Geo\Shape2D;
 
-class Point extends Geometry
+class Point extends AbstractShape2D
 {
     private float $x;
     private float $y;

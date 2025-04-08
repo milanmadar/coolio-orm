@@ -2,7 +2,7 @@
 
 namespace Milanmadar\CoolioORM\Geo\ShapeZ;
 
-class MultiPointZ extends GeometryZ
+class MultiPointZ extends AbstractShapeZ
 {
     /** @var array<PointZ> */
     private array $points;

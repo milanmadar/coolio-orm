@@ -4,9 +4,9 @@ namespace Milanmadar\CoolioORM\Geo\ShapeZ;
 
 use Milanmadar\CoolioORM\Geo\Shape2D3DFactory;
 
-class GeometryCollectionZ extends GeometryZ
+class GeometryCollectionZ extends AbstractShapeZ
 {
-    /** @var array<GeometryZ> */
+    /** @var array<AbstractShapeZ> */
     private array $geometries;
 
     /**
@@ -27,7 +27,7 @@ class GeometryCollectionZ extends GeometryZ
 
         $geometries = [];
         foreach ($jsonData['geometries'] as $geometryData) {
-            /** @var GeometryZ $_ */
+            /** @var AbstractShapeZ $_ */
             $_ = Shape2D3DFactory::createFromGeoJSONData($geometryData, $srid);
             $geometries[] = $_;
         }
@@ -99,7 +99,7 @@ class GeometryCollectionZ extends GeometryZ
     }
 
     /**
-     * @param array<GeometryZ> $geometries
+     * @param array<AbstractShapeZ> $geometries
      * @param int|null $srid
      */
     public function __construct(array $geometries, int|null $srid = null)
@@ -113,7 +113,7 @@ class GeometryCollectionZ extends GeometryZ
      */
     public function toWKT(): string
     {
-        $wktGeometries = array_map(fn(GeometryZ $g) => $g->toWKT(), $this->geometries);
+        $wktGeometries = array_map(fn(AbstractShapeZ $g) => $g->toWKT(), $this->geometries);
         return 'GEOMETRYCOLLECTIONZ(' . implode(',', $wktGeometries) . ')';
     }
 
@@ -124,12 +124,12 @@ class GeometryCollectionZ extends GeometryZ
     {
         return [
             'type' => 'GeometryCollection',
-            'geometries' => array_map(fn(GeometryZ $g) => $g->toGeoJSON(), $this->geometries)
+            'geometries' => array_map(fn(AbstractShapeZ $g) => $g->toGeoJSON(), $this->geometries)
         ];
     }
 
     /**
-     * @return GeometryZ[]
+     * @return AbstractShapeZ[]
      */
     public function getGeometries(): array
     {

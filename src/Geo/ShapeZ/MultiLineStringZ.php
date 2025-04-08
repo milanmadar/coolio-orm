@@ -2,7 +2,7 @@
 
 namespace Milanmadar\CoolioORM\Geo\ShapeZ;
 
-class MultiLineStringZ extends GeometryZ
+class MultiLineStringZ extends AbstractShapeZ
 {
     /** @var array<LineStringZ> */
     private array $lineStrings;

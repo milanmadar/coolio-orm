@@ -1,23 +1,23 @@
 <?php
 
-namespace Milanmadar\CoolioORM\Geo\Shape;
+namespace Milanmadar\CoolioORM\Geo;
 
-abstract class Geometry
+abstract class AbstractShape
 {
     protected int $srid;
 
     /**
      * @param array<mixed> $jsonData
      * @param int|null $srid Optional SRID, defaults to the value in $_ENV['GEO_DEFAULT_SRID']
-     * @return Geometry
+     * @return AbstractShape
      */
-    abstract public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): Geometry;
+    abstract public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): AbstractShape;
 
     /**
      * @param string $ewktString
-     * @return Geometry
+     * @return AbstractShape
      */
-    abstract public static function createFromGeoEWKTString(string $ewktString): Geometry;
+    abstract public static function createFromGeoEWKTString(string $ewktString): AbstractShape;
 
     public function __construct(int|null $srid = null)
     {

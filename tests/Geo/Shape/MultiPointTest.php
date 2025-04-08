@@ -2,8 +2,8 @@
 
 namespace Geo\Shape;
 
-use Milanmadar\CoolioORM\Geo\Shape\Point;
-use Milanmadar\CoolioORM\Geo\Shape\MultiPoint;
+use Milanmadar\CoolioORM\Geo\Shape2D\Point;
+use Milanmadar\CoolioORM\Geo\Shape2D\MultiPoint;
 use PHPUnit\Framework\TestCase;
 
 class MultiPointTest extends TestCase

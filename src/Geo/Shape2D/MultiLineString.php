@@ -1,8 +1,8 @@
 <?php
 
-namespace Milanmadar\CoolioORM\Geo\Shape;
+namespace Milanmadar\CoolioORM\Geo\Shape2D;
 
-class MultiLineString extends Geometry
+class MultiLineString extends AbstractShape2D
 {
     /** @var array<LineString> */
     private array $lineStrings;

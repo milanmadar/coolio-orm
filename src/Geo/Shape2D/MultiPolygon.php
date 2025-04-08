@@ -1,8 +1,8 @@
 <?php
 
-namespace Milanmadar\CoolioORM\Geo\Shape;
+namespace Milanmadar\CoolioORM\Geo\Shape2D;
 
-class MultiPolygon extends Geometry
+class MultiPolygon extends AbstractShape2D
 {
     /** @var array<Polygon> */
     private array $polygons;

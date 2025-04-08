@@ -2,7 +2,7 @@
 
 namespace Milanmadar\CoolioORM\Geo\ShapeZ;
 
-class CurvePolygonZ extends GeometryZ
+class CurvePolygonZ extends AbstractShapeZ
 {
     /** @var array<LineStringZ|CircularStringZ> */
     private array $boundaries;

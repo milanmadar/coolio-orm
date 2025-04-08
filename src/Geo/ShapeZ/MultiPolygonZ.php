@@ -2,7 +2,7 @@
 
 namespace Milanmadar\CoolioORM\Geo\ShapeZ;
 
-class MultiPolygonZ extends GeometryZ
+class MultiPolygonZ extends AbstractShapeZ
 {
     /** @var array<PolygonZ> */
     private array $polygons;

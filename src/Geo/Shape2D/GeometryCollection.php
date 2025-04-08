@@ -1,12 +1,12 @@
 <?php
 
-namespace Milanmadar\CoolioORM\Geo\Shape;
+namespace Milanmadar\CoolioORM\Geo\Shape2D;
 
 use Milanmadar\CoolioORM\Geo\Shape2D3DFactory;
 
-class GeometryCollection extends Geometry
+class GeometryCollection extends AbstractShape2D
 {
-    /** @var array<Geometry> */
+    /** @var array<AbstractShape2D> */
     private array $geometries;
 
     /**
@@ -25,7 +25,7 @@ class GeometryCollection extends Geometry
 
         $geometries = [];
         foreach ($jsonData['geometries'] as $geometryData) {
-            /** @var Geometry $_ */
+            /** @var AbstractShape2D $_ */
             $_ = Shape2D3DFactory::createFromGeoJSONData($geometryData, $srid);
             $geometries[] = $_;
         }
@@ -97,7 +97,7 @@ class GeometryCollection extends Geometry
     }
 
     /**
-     * @param array<Geometry> $geometries
+     * @param array<AbstractShape2D> $geometries
      * @param int|null $srid
      */
     public function __construct(array $geometries, int|null $srid = null)
@@ -111,7 +111,7 @@ class GeometryCollection extends Geometry
      */
     public function toWKT(): string
     {
-        $wktGeometries = array_map(fn(Geometry $g) => $g->toWKT(), $this->geometries);
+        $wktGeometries = array_map(fn(AbstractShape2D $g) => $g->toWKT(), $this->geometries);
         return 'GEOMETRYCOLLECTION(' . implode(',', $wktGeometries) . ')';
     }
 
@@ -122,12 +122,12 @@ class GeometryCollection extends Geometry
     {
         return [
             'type' => 'GeometryCollection',
-            'geometries' => array_map(fn(Geometry $g) => $g->toGeoJSON(), $this->geometries)
+            'geometries' => array_map(fn(AbstractShape2D $g) => $g->toGeoJSON(), $this->geometries)
         ];
     }
 
     /**
-     * @return Geometry[]
+     * @return AbstractShape2D[]
      */
     public function getGeometries(): array
     {
