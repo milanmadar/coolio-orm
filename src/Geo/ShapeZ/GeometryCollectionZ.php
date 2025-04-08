@@ -73,26 +73,10 @@ class GeometryCollectionZ extends AbstractShapeZ
         $geometries = [];
 
         foreach ($geometryData as $geometry) {
-            // Clean up each geometry string (remove extra spaces)
             $geometry = trim($geometry);
-
-            // Check the type of the geometry and delegate to the appropriate create method
-            if (str_starts_with($geometry, 'POINT')) {
-                $geometries[] = PointZ::createFromGeoEWKTString("SRID=$srid;$geometry");
-            } elseif (str_starts_with($geometry, 'LINESTRING')) {
-                $geometries[] = LineStringZ::createFromGeoEWKTString("SRID=$srid;$geometry");
-            } elseif (str_starts_with($geometry, 'POLYGON')) {
-                $geometries[] = PolygonZ::createFromGeoEWKTString("SRID=$srid;$geometry");
-            } elseif (str_starts_with($geometry, 'MULTIPOINT')) {
-                $geometries[] = MultiPointZ::createFromGeoEWKTString("SRID=$srid;$geometry");
-            } elseif (str_starts_with($geometry, 'MULTILINESTRING')) {
-                $geometries[] = MultiLineStringZ::createFromGeoEWKTString("SRID=$srid;$geometry");
-            } elseif (str_starts_with($geometry, 'MULTIPOLYGON')) {
-                $geometries[] = MultiPolygonZ::createFromGeoEWKTString("SRID=$srid;$geometry");
-            } else {
-                // Handle other geometries or throw an error if unknown type
-                throw new \InvalidArgumentException("Unsupported geometry type in GeometryCollectionZ: $geometry");
-            }
+            /** @var AbstractShapeZ $_ */
+            $_ = Shape2D3DFactory::createFromGeoEWKTString("SRID=$srid;$geometry");
+            $geometries[] = $_;
         }
 
         return new GeometryCollectionZ($geometries, $srid);
