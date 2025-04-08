@@ -92,6 +92,10 @@ class Utils
             $binds = $_bindsCopy;
         }
 
+        // for phpstan
+        /** @var array<int|string, mixed> $binds */
+        /** @var array<int<0, max>|string,\Doctrine\DBAL\ParameterType|\Doctrine\DBAL\Types\Type|string> $paramTypes */
+
         // Postgres already cries on $db->prepare() (inside $statementRepo->get()) if we have mixed params (so questionmarks and named params too)
         try {
             if(isset($statementRepo)) {
@@ -158,6 +162,10 @@ class Utils
             }
             $binds = $_bindsCopy;
         }
+
+        // for phpstan
+        /** @var array<int|string, mixed> $binds */
+        /** @var array<int<0, max>|string,\Doctrine\DBAL\ParameterType|\Doctrine\DBAL\Types\Type|string> $paramTypes */
 
         // Postgres already cries on $db->prepare() (inside $statementRepo->get()) if we have mixed params (so questionmarks and named params too)
         try {
