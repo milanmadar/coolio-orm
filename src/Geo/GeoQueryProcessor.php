@@ -22,22 +22,7 @@ class GeoQueryProcessor
                 $columns = $mgr->getFields();
             }
 
-            $_cols = [];
-            $fieldTypes = $mgr->getFieldTypes();
-            foreach($columns as $c) {
-                if(isset($fieldTypes[$c])) {
-                    if($fieldTypes[$c] == 'geometry') {
-                        $_cols[] = "ST_AsGeoJSON({$c}) AS {$c}";
-                        $_cols[] = "ST_SRID({$c}) AS {$c}_srid";
-                    } elseif($fieldTypes[$c] == 'geometry_curved') {
-                        $_cols[] = "ST_AsEWKT({$c}) as {$c}";
-                    } else {
-                        $_cols[] = $c;
-                    }
-                } else {
-                    $_cols[] = $c;
-                }
-            }
+            $_cols = self::geometryToPostGISformat($mgr->getFieldTypes(), $columns);
 
             $processedSelect = implode(", ", array_map(fn($c) => $c, $_cols));
 
@@ -47,6 +32,38 @@ class GeoQueryProcessor
         }
 
         return $sql;
+    }
+
+    /**
+     * Converts geometry fields to PostGIS format for SQL queries. Leaves other fields as they were
+     *
+     * @param array<string, string> $managerFieldTypes $manager->getFieldTypes()
+     * @param array<string> $fieldsInTheSQLstring
+     * @return array<string> The formatted fields, geometries transformed to 'ST_As...` for PostGIS.
+     */
+    public static function geometryToPostGISformat(array $managerFieldTypes, array $fieldsInTheSQLstring): array
+    {
+        $cols = [];
+        foreach($fieldsInTheSQLstring as $c) {
+            if(isset($managerFieldTypes[$c])) {
+                /*if($managerFieldTypes[$c] == 'geometry') {
+                    $cols[] = "ST_AsGeoJSON({$c}) AS {$c}";
+                    $cols[] = "ST_SRID({$c}) AS {$c}_srid";
+                } elseif($managerFieldTypes[$c] == 'geometry_curved' || $managerFieldTypes[$c] == 'topogeometry') {
+                    $cols[] = "ST_AsEWKT({$c}) AS {$c}";
+                } else {
+                    $cols[] = $c;
+                }*/
+                if($managerFieldTypes[$c] == 'geometry' || $managerFieldTypes[$c] == 'geometry_curved' || $managerFieldTypes[$c] == 'topogeometry') {
+                    $cols[] = "ST_AsEWKT({$c}) AS {$c}";
+                } else {
+                    $cols[] = $c;
+                }
+            } else {
+                $cols[] = $c;
+            }
+        }
+        return $cols;
     }
 
     /**

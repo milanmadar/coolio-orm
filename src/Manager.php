@@ -154,8 +154,9 @@ abstract class Manager
                         'boolean' => (bool)$v,
                         'array', 'simple_array' => unserialize($v),
                         'json', 'json_array' => json_decode($v, true),
-                        'geometry' => Geo\Shape2D3DFactory::createFromGeoJSONString($v, $data[$k.'_srid'] ?? null),
-                        'geometry_curved' => Geo\Shape2D3DFactory::createFromGeoEWKTString($v),
+//                        'geometry' => Geo\Shape2D3DFactory::createFromGeoJSONString($v, $data[$k.'_srid'] ?? null),
+//                        'geometry_curved', 'topogeometry' => Geo\Shape2D3DFactory::createFromGeoEWKTString($v),
+                        'geometry' , 'geometry_curved', 'topogeometry' => Geo\Shape2D3DFactory::createFromGeoEWKTString($v),
                         default => Type::getType($this->fieldTypes[$k])->convertToPHPValue($v, $this->db->getDatabasePlatform()),
                     };
                 }
@@ -200,6 +201,7 @@ abstract class Manager
                             'array', 'simple_array' => serialize($v),
                             'json', 'json_array' => json_encode($v),
                             'geometry', 'geometry_curved' => $v->toEWKT(),
+                            'topogeometry' => 'toTopoGeom('.$v->toEWKT().')',
                             default => Type::getType($this->fieldTypes[$k])->convertToDatabaseValue($v, $this->db->getDatabasePlatform()),
                         };
                     }

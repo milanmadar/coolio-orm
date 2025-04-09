@@ -7,6 +7,7 @@ use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Tools\DsnParser;
 use Doctrine\DBAL\Types\Type;
 use Milanmadar\CoolioORM\Geo\DoctrineDBALType\GeometryType;
+use Milanmadar\CoolioORM\Geo\DoctrineDBALType\TopoGeometryType;
 
 class ORM
 {
@@ -39,6 +40,7 @@ class ORM
 
             if(!self::$staticTypeAdded) {
                 Type::addType('geometry', GeometryType::class);
+                Type::addType('topogeometry', TopoGeometryType::class);
                 self::$staticTypeAdded = true;
             }
         }
@@ -76,6 +78,7 @@ class ORM
             $this->doctrineConnectionsByUrl[$connUrl] = DriverManager::getConnection($connectionParams);
             if(str_contains($connUrl, 'pgsql')) {
                 $this->doctrineConnectionsByUrl[$connUrl]->getDatabasePlatform()->registerDoctrineTypeMapping('geometry', GeometryType::NAME);
+                $this->doctrineConnectionsByUrl[$connUrl]->getDatabasePlatform()->registerDoctrineTypeMapping('topogeometry', TopoGeometryType::NAME);
                 //$this->doctrineConnectionsByUrl[$connUrl]->getDatabasePlatform()->registerDoctrineTypeMapping('geometry', 'string');
             }
 //            /** @var \PDO $pdoConn */

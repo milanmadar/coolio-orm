@@ -42,7 +42,7 @@ class GeometryCollectionZ extends AbstractShapeZ
     public static function createFromGeoEWKTString(string $ewktString): GeometryCollectionZ
     {
         // Parse the EWKT string, expected format: SRID=<srid>;GEOMETRYCOLLECTIONZ(<geometry1>, <geometry2>, <geometry3>, ...)
-        if (strpos($ewktString, 'GEOMETRYCOLLECTIONZ') === false) {
+        if (strpos($ewktString, 'GEOMETRYCOLLECTION') === false) {
             throw new \InvalidArgumentException('Invalid EWKT format. Expected GEOMETRYCOLLECTIONZ type.');
         }
 
@@ -63,16 +63,45 @@ class GeometryCollectionZ extends AbstractShapeZ
         $srid = (int) substr($sridPart, 5);
 
         // Validate and extract the GEOMETRYCOLLECTIONZ coordinates
-        preg_match('/GEOMETRYCOLLECTIONZ\((.*)\)/', $geometryPart, $matches);
+        preg_match('/GEOMETRYCOLLECTION ?Z?\((.*)\)/', $geometryPart, $matches);
         if (empty($matches)) {
             throw new \InvalidArgumentException('Invalid GEOMETRYCOLLECTIONZ format in EWKT.');
         }
 
-        // Get the geometries within the collection
-        $geometryData = explode(',', $matches[1]);
-        $geometries = [];
+        // Now we need to split the segments inside the CompoundCurve.
+        // We will use a more careful approach to handle commas within parentheses.
+        $geometryPart = $matches[1];
+        $segments = [];
+        $parenCount = 0;
+        $currentSegment = '';
 
-        foreach ($geometryData as $geometry) {
+        // Iterate through the geometry part and properly extract the segments
+        for ($i = 0; $i < strlen($geometryPart); $i++) {
+            $char = $geometryPart[$i];
+            if ($char === '(') {
+                $parenCount++;
+            } elseif ($char === ')') {
+                $parenCount--;
+            }
+
+            // We only split the segments when the parentheses are balanced
+            if ($parenCount === 0 && $char === ',') {
+                // End of one segment, add it to the segments array
+                $segments[] = trim($currentSegment);
+                $currentSegment = '';
+            } else {
+                // Continue building the current segment
+                $currentSegment .= $char;
+            }
+        }
+
+        // Add the last segment
+        if (!empty($currentSegment)) {
+            $segments[] = trim($currentSegment);
+        }
+
+        $geometries = [];
+        foreach ($segments as $geometry) {
             $geometry = trim($geometry);
             /** @var AbstractShapeZ $_ */
             $_ = Shape2D3DFactory::createFromGeoEWKTString("SRID=$srid;$geometry");

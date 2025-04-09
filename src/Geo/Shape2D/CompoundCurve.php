@@ -50,14 +50,12 @@ class CompoundCurve extends AbstractShape2D implements HasStartEndPointInterface
         $segments = [];
         $parenCount = 0;
         $currentSegment = '';
-        $inSegment = false;
 
         // Iterate through the geometry part and properly extract the segments
         for ($i = 0; $i < strlen($geometryPart); $i++) {
             $char = $geometryPart[$i];
             if ($char === '(') {
                 $parenCount++;
-                $inSegment = true;
             } elseif ($char === ')') {
                 $parenCount--;
             }
@@ -67,7 +65,6 @@ class CompoundCurve extends AbstractShape2D implements HasStartEndPointInterface
                 // End of one segment, add it to the segments array
                 $segments[] = trim($currentSegment);
                 $currentSegment = '';
-                $inSegment = false;
             } else {
                 // Continue building the current segment
                 $currentSegment .= $char;

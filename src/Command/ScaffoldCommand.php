@@ -34,6 +34,29 @@ class ScaffoldCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+//        $mgr = $this->orm->entityManager(\Milanmadar\CoolioORM\Model\GeometryFindtype\Manager::class);
+//
+//        $point = new Shape2D\Point(1, 2);
+//        $line = new Shape2D\LineString([new Shape2D\Point(1, 2), new Shape2D\Point(3, 4)]);
+//        $polygon = new Shape2D\Polygon([
+//            new Shape2D\LineString([new Shape2D\Point(0, 0), new Shape2D\Point(0, 5), new Shape2D\Point(5, 5), new Shape2D\Point(5, 0), new Shape2D\Point(0, 0)]),
+//            new Shape2D\LineString([new Shape2D\Point(1, 1), new Shape2D\Point(1, 2), new Shape2D\Point(2, 2), new Shape2D\Point(2, 1), new Shape2D\Point(1, 1)])
+//        ], 4326);
+//
+//        $ent = $mgr->createEntity()
+//            ->setTopoGeomPoint($point)
+//            ->setTopoGeomLinestring($line)
+//            ->setTopoGeomPolygon($polygon)
+//            ;
+//        $mgr->save($ent);
+//
+//        return 0;
+
+
+
+
+
+
         $io = new SymfonyStyle($input, $output);
 
         //
@@ -71,12 +94,6 @@ class ScaffoldCommand extends Command
         $db = $this->orm->getDbByUrl($_ENV[$dbSelect]);
         $sm = $db->createSchemaManager();
 
-        $IS_POSTGIS = str_contains($_ENV[$dbSelect], 'pgsql') && $db->getDatabasePlatform()->hasDoctrineTypeMappingFor('geometry');
-        $CURR_POSTGIS_SCHEMA = 'public';
-        if($IS_POSTGIS) {
-            $CURR_POSTGIS_SCHEMA = $db->executeQuery("SELECT current_schema()")->fetchOne();
-        }
-
         //
         // table
         do {
@@ -89,10 +106,29 @@ class ScaffoldCommand extends Command
             }
         } while(empty($tableColumns));
 
+        // PostgreSQL: We need the schema
+        $IS_POSTGIS = str_contains($_ENV[$dbSelect], 'pgsql') && $db->getDatabasePlatform()->hasDoctrineTypeMappingFor('geometry');
+        $POSTGIS_SCHEMA = null;
+        if($IS_POSTGIS) {
+            // if the table name has a dot, then thats the schema name
+            if(strpos($tbl, '.')) {
+                $POSTGIS_SCHEMA = explode('.', $tbl)[0];
+            } else {
+                $POSTGIS_SCHEMA = $db->executeQuery("SELECT current_schema()")->fetchOne();
+                $tbl = $POSTGIS_SCHEMA . '.' . $tbl;
+            }
+        }
+
         //
         // try to guess the model name with the full namespace
         $modelsDir = '';
         $guessModelName = str_replace(' ', '', ucwords(str_replace(['-','_'], ' ', strtolower($tbl))));
+        if(strpos($guessModelName, 'Public.') === 0) {
+            $guessModelName = explode('.', $guessModelName)[1];
+            $guessModelName = ucfirst($guessModelName);
+        } else {
+            $guessModelName = str_replace(' ', '_', ucwords(str_replace('.', ' ', $guessModelName)));
+        }
         $cwd = getcwd();
         if(is_dir($cwd.'/src')) {
             if(is_dir($cwd.'/src/Model'))
@@ -132,6 +168,7 @@ class ScaffoldCommand extends Command
         $modelName = $io->ask("Name of the new Model name (with namespace, like 'App\Model\Product') ", $guessModelName);
         $modelName = str_replace("/", "\\", $modelName);
         $modelName = trim($modelName, "\\");
+        $modelName = str_replace('.', '_', $modelName);
         if(str_ends_with($modelName, "Entity")) {
             $modelName = substr($modelName, 0, -6);
             $modelName = rtrim($modelName, '\\');
@@ -194,7 +231,7 @@ class ScaffoldCommand extends Command
                 }
                 $otherModelName_Entity = $otherModelName . '\\Entity';
 
-                $ok = class_exists($otherModelName_Entity);
+                $ok = class_exists('\\'.$otherModelName_Entity);
                 if(!$ok) {
                     $ok = $io->confirm("Class doesn't exist: " . $otherModelName_Entity.". Ok? [Y=use that anyway, N=type again] ", false);
                 }
@@ -227,17 +264,23 @@ class ScaffoldCommand extends Command
             $colComment = $col->getComment();
             if(empty($colComment)) $colComment = '';
 
-            // for coltype, we need 'geometry(point...'
+            // for Postgis coltype, we need 'geometry(point...'
             $geoShapeType = null;
             if($IS_POSTGIS)
             {
+                if(strpos($tbl, '.')) {
+                    $relName = explode('.', $tbl)[1];
+                } else {
+                    $relName = $tbl;
+                }
+
                 $SQL = "
                     SELECT pg_catalog.format_type(a.atttypid, a.atttypmod) AS full_data_type
                     FROM pg_catalog.pg_attribute a
                     JOIN pg_catalog.pg_class c ON a.attrelid = c.oid
                     JOIN pg_catalog.pg_namespace n ON c.relnamespace = n.oid
-                    WHERE c.relname = '".$tbl."'
-                      AND n.nspname = '".$CURR_POSTGIS_SCHEMA."'
+                    WHERE c.relname = '".$relName."'
+                      AND n.nspname = '".$POSTGIS_SCHEMA."'
                       AND a.attname = '".$colName."'
                       AND a.attnum > 0
                       AND NOT a.attisdropped;
@@ -246,7 +289,24 @@ class ScaffoldCommand extends Command
                 $nativeColType = strtolower($db->executeQuery($SQL)->fetchOne());
                 $colType = $nativeColType;
 
-                if(str_starts_with($nativeColType, 'geometry'))
+                if(str_starts_with($nativeColType, 'topogeometry'))
+                {
+                    $SQL = "
+                        SELECT feature_type
+                        FROM topology.layer
+                        WHERE schema_name = '".$POSTGIS_SCHEMA."'
+                          AND table_name = '".$relName."'
+                          AND feature_column = '".$colName."';
+                    ";
+                    $nativeTopoColType_int = (int)$db->executeQuery($SQL)->fetchOne();
+                    $geoShapeType = match($nativeTopoColType_int) {
+                        1 => Shape2D\MultiPoint::class,
+                        2 => Shape2D\MultiLineString::class,
+                        3 => Shape2D\MultiPolygon::class,
+                        default => Shape2D\GeometryCollection::class
+                    };
+                }
+                elseif(str_starts_with($nativeColType, 'geometry'))
                 {
                     $colType = 'geometry';
 
@@ -330,7 +390,7 @@ class ScaffoldCommand extends Command
             }
 
             // default values
-            if(!is_null($colDefVal) && $colType != 'geometry' && $colType != 'geometry_curved')
+            if(!is_null($colDefVal) && $colType != 'geometry' && $colType != 'geometry_curved' && $colType != 'topogeometry')
             {
                 if($colType == 'string' || $colType == 'text') {
                     $defValSrc = "'".str_replace("'", "\\'", $colDefVal)."'";
@@ -352,10 +412,12 @@ class ScaffoldCommand extends Command
                     $isBool = $io->confirm("\n ".$colName.' is "'.$colType.'" in the database. Is that bool or int in php? [Y=bool , N=int] ', false);
                     if($isBool) {
                         $io->writeln(" ".$colName.": boolean");
+                        $colType = 'boolean';
                         $paramType = 'bool';
                         $docParamType = 'bool';
                     } else {
                         $io->writeln(" ".$colName.": integer");
+                        $colType = 'integer';
                         $paramType = 'int';
                         $docParamType = 'int';
                     }
@@ -393,18 +455,21 @@ class ScaffoldCommand extends Command
                     break;
                 case 'geometry':
                 case 'geometry_curved':
+                case 'topogeometry':
                     $_ = str_replace('Milanmadar\CoolioORM\Geo\\', '', (string)$geoShapeType);
                     $paramType = $_;
                     $docParamType = $_;
                     if(str_contains($_, 'ShapeZ')) {
                         $this->addUses('Milanmadar\CoolioORM\Geo\ShapeZ');
                     } else {
-                        $this->addUses('Milanmadar\CoolioORM\Geo\Shape');
+                        $this->addUses('Milanmadar\CoolioORM\Geo\Shape2D');
                     }
                     break;
                 default:
                     exit("Can't scaffold column type: '".$colType."'\n");
             }
+
+            $mgrFldTypes .= "\n        '".$colName."' => '".$colType."',";
 
             //
             $methodName = str_replace(' ', '', ucwords( str_replace(['_','-'], ' ', strtolower($colName) ) ) );
@@ -515,7 +580,7 @@ class ScaffoldCommand extends Command
             $guessOutDir .= '/'.$lastPart;
 
             $outDir = $io->ask("The directory where we should save the Entity.php and Manager.php ", $guessOutDir);
-            $ok = $io->confirm("The files will be:\n   ".$outDir."/Entity.php\n   ".$outDir."/Manager.php\n Ok? [Y=ok, N=type again] ", false);
+            $ok = $io->confirm("The files will be:\n   ".$outDir."/Entity.php\n   ".$outDir."/Manager.php\n Ok? [Y=ok, N=type again] ", true);
         } while(!$ok);
         if(!is_dir($outDir)) {
             mkdir($outDir, 0775, true);

@@ -40,6 +40,7 @@ class GeoTest extends TestCase
     public function testSelectAllShapes_FindOne_QueryBuilder_ExplicitSELECTlist()
     {
         $mgr = self::$dbHelper->getManager(GeoShapeAll\Manager::class);
+        $mgr->clearRepository(false);
 
         /** @var GeoShapeAll\Entity $ent */
         $ent = $mgr->createQueryBuilder()
@@ -56,6 +57,7 @@ class GeoTest extends TestCase
     public function testSelectAllShapes_FindOne_QueryBuilder_Star()
     {
         $mgr = self::$dbHelper->getManager(GeoShapeAll\Manager::class);
+        $mgr->clearRepository(false);
 
         /** @var GeoShapeAll\Entity $ent */
         $ent = $mgr->createQueryBuilder()
@@ -81,6 +83,7 @@ class GeoTest extends TestCase
     public function testSelectAllShapes_FindOne_QueryBuilder_NoSELECT()
     {
         $mgr = self::$dbHelper->getManager(GeoShapeAll\Manager::class);
+        $mgr->clearRepository(false);
 
         /** @var GeoShapeAll\Entity $ent */
         $ent = $mgr->createQueryBuilder()
@@ -96,6 +99,7 @@ class GeoTest extends TestCase
     public function testSelectAllShapes_FindOne_noQueryBuilder()
     {
         $mgr = self::$dbHelper->getManager(GeoShapeAll\Manager::class);
+        $mgr->clearRepository(false);
 
         /** @var GeoShapeAll\Entity $ent */
         $ent = $mgr->findById(1);
@@ -103,17 +107,14 @@ class GeoTest extends TestCase
         $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\Polygon', $ent->getPolygonGeom());
         $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\CircularString', $ent->getCircularStringGeom());
     }
+
     public function testSelectAllShapes_FindMany_QueryBuilder_ExplicitSELECTlist()
     {
         $mgr = self::$dbHelper->getManager(GeoShapeAll\Manager::class);
+        $mgr->clearRepository(false);
 
         /** @var GeoShapeAll\Entity[] $ents */
         $ents = $mgr->createQueryBuilder()
-//            ->select(
-//                'ST_AsGeoJSON(polygon_geom) AS polygon_geom',
-//                'ST_SRID(polygon_geom) AS polygon_geom_srid',
-//                'ST_AsEWKT(circularstring_geom) AS circularstring_geom'
-//            )
             ->select('polygon_geom','circularstring_geom')
             ->andWhere('1=1')
             ->limit(0, 1)
@@ -127,6 +128,7 @@ class GeoTest extends TestCase
     public function testSelectAllShapes_FindMany_QueryBuilder_Star()
     {
         $mgr = self::$dbHelper->getManager(GeoShapeAll\Manager::class);
+        $mgr->clearRepository(false);
 
         /** @var GeoShapeAll\Entity[] $ents */
         $ents = $mgr->createQueryBuilder()
@@ -143,6 +145,7 @@ class GeoTest extends TestCase
     public function testSelectAllShapes_FindMany_QueryBuilder_NoSELECT()
     {
         $mgr = self::$dbHelper->getManager(GeoShapeAll\Manager::class);
+        $mgr->clearRepository(false);
 
         /** @var GeoShapeAll\Entity[] $ents */
         $ents = $mgr->createQueryBuilder()
@@ -158,8 +161,10 @@ class GeoTest extends TestCase
     public function testgetSQLNamedParameters()
     {
         $mgr = self::$dbHelper->getManager(GeoShapeAll\Manager::class);
+        $mgr->clearRepository(false);
 
-        $expect = "SELECT id, ST_AsGeoJSON(point_geom) AS point_geom, ST_SRID(point_geom) AS point_geom_srid, ST_AsGeoJSON(linestring_geom) AS linestring_geom, ST_SRID(linestring_geom) AS linestring_geom_srid, ST_AsGeoJSON(polygon_geom) AS polygon_geom, ST_SRID(polygon_geom) AS polygon_geom_srid, ST_AsGeoJSON(multipoint_geom) AS multipoint_geom, ST_SRID(multipoint_geom) AS multipoint_geom_srid, ST_AsGeoJSON(multilinestring_geom) AS multilinestring_geom, ST_SRID(multilinestring_geom) AS multilinestring_geom_srid, ST_AsGeoJSON(multipolygon_geom) AS multipolygon_geom, ST_SRID(multipolygon_geom) AS multipolygon_geom_srid, ST_AsGeoJSON(geomcollection_geom) AS geomcollection_geom, ST_SRID(geomcollection_geom) AS geomcollection_geom_srid, ST_AsEWKT(circularstring_geom) as circularstring_geom, ST_AsEWKT(compoundcurve_geom) as compoundcurve_geom, ST_AsEWKT(curvedpolygon_geom) as curvedpolygon_geom, ST_AsEWKT(multicurve_geom) as multicurve_geom FROM geometry_test WHERE 1=1 LIMIT 1";
+        //$expect = "SELECT id, ST_AsGeoJSON(point_geom) AS point_geom, ST_SRID(point_geom) AS point_geom_srid, ST_AsGeoJSON(linestring_geom) AS linestring_geom, ST_SRID(linestring_geom) AS linestring_geom_srid, ST_AsGeoJSON(polygon_geom) AS polygon_geom, ST_SRID(polygon_geom) AS polygon_geom_srid, ST_AsGeoJSON(multipoint_geom) AS multipoint_geom, ST_SRID(multipoint_geom) AS multipoint_geom_srid, ST_AsGeoJSON(multilinestring_geom) AS multilinestring_geom, ST_SRID(multilinestring_geom) AS multilinestring_geom_srid, ST_AsGeoJSON(multipolygon_geom) AS multipolygon_geom, ST_SRID(multipolygon_geom) AS multipolygon_geom_srid, ST_AsGeoJSON(geomcollection_geom) AS geomcollection_geom, ST_SRID(geomcollection_geom) AS geomcollection_geom_srid, ST_AsEWKT(circularstring_geom) AS circularstring_geom, ST_AsEWKT(compoundcurve_geom) AS compoundcurve_geom, ST_AsEWKT(curvedpolygon_geom) AS curvedpolygon_geom, ST_AsEWKT(multicurve_geom) AS multicurve_geom FROM public.geometry_test WHERE 1=1 LIMIT 1";
+        $expect = "SELECT id, ST_AsEWKT(point_geom) AS point_geom, ST_AsEWKT(linestring_geom) AS linestring_geom, ST_AsEWKT(polygon_geom) AS polygon_geom, ST_AsEWKT(multipoint_geom) AS multipoint_geom, ST_AsEWKT(multilinestring_geom) AS multilinestring_geom, ST_AsEWKT(multipolygon_geom) AS multipolygon_geom, ST_AsEWKT(geomcollection_geom) AS geomcollection_geom, ST_AsEWKT(circularstring_geom) AS circularstring_geom, ST_AsEWKT(compoundcurve_geom) AS compoundcurve_geom, ST_AsEWKT(curvedpolygon_geom) AS curvedpolygon_geom, ST_AsEWKT(multicurve_geom) AS multicurve_geom FROM public.geometry_test WHERE 1=1 LIMIT 1";
         $sql = $mgr->createQueryBuilder()
             ->andWhere('1=1')
             ->limit(0, 1)
@@ -172,6 +177,7 @@ class GeoTest extends TestCase
     public function testSelectAllShapes_FindMany_noQueryBuilder()
     {
         $mgr = self::$dbHelper->getManager(GeoShapeAll\Manager::class);
+        $mgr->clearRepository(false);
 
         /** @var GeoShapeAll\Entity[] $ents */
         $ents = $mgr->findManyWhere("1=1");
@@ -183,6 +189,7 @@ class GeoTest extends TestCase
     public function testInsert_asText()
     {
         $mgr = self::$dbHelper->getManager(GeoShapeAll\Manager::class);
+        $mgr->clearRepository(false);
 
         $oCnt = self::$dbHelper->countRows('geometry_test');
 
@@ -197,6 +204,7 @@ class GeoTest extends TestCase
     public function testInsert_asEWKT()
     {
         $mgr = self::$dbHelper->getManager(GeoShapeAll\Manager::class);
+        $mgr->clearRepository(false);
 
         $oCnt = self::$dbHelper->countRows('geometry_test');
 
@@ -211,6 +219,7 @@ class GeoTest extends TestCase
     public function testInsert_asObjects()
     {
         $mgr = self::$dbHelper->getManager(GeoShapeAll\Manager::class);
+        $mgr->clearRepository(false);
 
         $oCnt = self::$dbHelper->countRows('geometry_test');
 
@@ -295,6 +304,8 @@ class GeoTest extends TestCase
         $mgr->_getEntityRepository()->clear();
         $ent = $mgr->findById(2);
 
+        $this->assertEquals($multiPolygon->toEWKT(), $ent->getMultipolygonGeom()->toEWKT());
+
         $this->assertTrue($point == $ent->getPointGeom());
         $this->assertTrue($lineString == $ent->getLinestringGeom());
         $this->assertTrue($polygon == $ent->getPolygonGeom());
@@ -311,6 +322,7 @@ class GeoTest extends TestCase
     public function testInsert_asEntity()
     {
         $mgr = self::$dbHelper->getManager(GeoShapeAll\Manager::class);
+        $mgr->clearRepository(false);
 
         $oCnt = self::$dbHelper->countRows('geometry_test');
 

@@ -168,6 +168,41 @@ class Shape2D3DFactory
                     ? ShapeZ\MultiCurveZ::createFromGeoEWKTString($ewktString)
                     : Shape2D\MultiCurve::createFromGeoEWKTString($ewktString);
 
+            case 'MULTILINESTRING':
+                return $is3D
+                    ? ShapeZ\MultiLineStringZ::createFromGeoEWKTString($ewktString)
+                    : Shape2D\MultiLineString::createFromGeoEWKTString($ewktString);
+
+            case 'GEOMETRYCOLLECTION':
+                return $is3D
+                    ? ShapeZ\GeometryCollectionZ::createFromGeoEWKTString($ewktString)
+                    : Shape2D\GeometryCollection::createFromGeoEWKTString($ewktString);
+
+            case 'MULTIPOLYGON':
+                return $is3D
+                    ? ShapeZ\MultiPolygonZ::createFromGeoEWKTString($ewktString)
+                    : Shape2D\MultiPolygon::createFromGeoEWKTString($ewktString);
+
+            case 'POLYGON':
+                return $is3D
+                    ? ShapeZ\PolygonZ::createFromGeoEWKTString($ewktString)
+                    : Shape2D\Polygon::createFromGeoEWKTString($ewktString);
+
+            case 'LINESTRING':
+                return $is3D
+                    ? ShapeZ\LineStringZ::createFromGeoEWKTString($ewktString)
+                    : Shape2D\LineString::createFromGeoEWKTString($ewktString);
+
+            case 'MULTIPOINT':
+                return $is3D
+                    ? ShapeZ\MultiPointZ::createFromGeoEWKTString($ewktString)
+                    : Shape2D\MultiPoint::createFromGeoEWKTString($ewktString);
+
+            case 'POINT':
+                return $is3D
+                    ? ShapeZ\PointZ::createFromGeoEWKTString($ewktString)
+                    : Shape2D\Point::createFromGeoEWKTString($ewktString);
+
             default:
                 throw new \InvalidArgumentException('Unsupported EWKT type: ' . $type);
         }

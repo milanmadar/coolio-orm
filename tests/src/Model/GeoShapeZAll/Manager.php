@@ -91,7 +91,7 @@ class Manager extends \Milanmadar\CoolioORM\Manager
      * @inheritDoc
      */
     public function getDefaultDbTable(): string {
-        return 'geometryz_test';
+        return 'public.geometryz_test';
     }
 
     /**

@@ -10,6 +10,7 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Result;
 use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Types\Type;
+use Milanmadar\CoolioORM\Geo\GeoQueryProcessor;
 
 class QueryBuilder extends DoctrineQueryBuilder
 {
@@ -88,22 +89,7 @@ class QueryBuilder extends DoctrineQueryBuilder
                 $expressions = $this->entityMgr->getFields();
             }
 
-            $_exps = [];
-            $fieldTypes = $this->entityMgr->getFieldTypes();
-            foreach($expressions as $e) {
-                if(isset($fieldTypes[$e])) {
-                    if($fieldTypes[$e] == 'geometry') {
-                        $_exps[] = "ST_AsGeoJSON({$e}) AS {$e}";
-                        $_exps[] = "ST_SRID({$e}) AS {$e}_srid";
-                    } elseif($fieldTypes[$e] == 'geometry_curved') {
-                        $_exps[] = "ST_AsEWKT({$e}) as {$e}";
-                    } else {
-                        $_exps[] = $e;
-                    }
-                } else {
-                    $_exps[] = $e;
-                }
-            }
+            $_exps = GeoQueryProcessor::geometryToPostGISformat($this->entityMgr->getFieldTypes(), $expressions);
         }
         else {
             $_exps = $expressions;
@@ -979,7 +965,8 @@ class QueryBuilder extends DoctrineQueryBuilder
         if(!isset($this->entityMgr)) {
             throw new \LogicException("To get entities you must set a Manager in the QueryBuilder constructor() or setEntityManager()");
         }
-        return $this->entityMgr->findOne($this->getSQL(), $this->getParameters(), $forceToGetFromDb);
+        $sql = $this->getSQL();
+        return $this->entityMgr->findOne($sql, $this->getParameters(), $forceToGetFromDb);
     }
 
     /**

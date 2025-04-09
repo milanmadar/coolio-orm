@@ -76,12 +76,43 @@ class MultiPolygon extends AbstractShape2D
             throw new \InvalidArgumentException('Invalid MULTIPOLYGON format in EWKT.');
         }
 
-        $polygonsData = explode('),(', $matches[1]);
-        $polygons = [];
+        // Now we need to split the segments inside the CompoundCurve.
+        // We will use a more careful approach to handle commas within parentheses.
+        $geometryPart = $matches[1];
+        $segments = [];
+        $parenCount = 0;
+        $currentSegment = '';
 
-        foreach ($polygonsData as $polygonData) {
-            // Clean up the polygon (remove extra spaces and commas)
+        // Iterate through the geometry part and properly extract the segments
+        for ($i = 0; $i < strlen($geometryPart); $i++) {
+            $char = $geometryPart[$i];
+            if ($char === '(') {
+                $parenCount++;
+            } elseif ($char === ')') {
+                $parenCount--;
+            }
+
+            // We only split the segments when the parentheses are balanced
+            if ($parenCount === 0 && $char === ',') {
+                // End of one segment, add it to the segments array
+                $segments[] = trim($currentSegment);
+                $currentSegment = '';
+            } else {
+                // Continue building the current segment
+                $currentSegment .= $char;
+            }
+        }
+
+        // Add the last segment
+        if (!empty($currentSegment)) {
+            $segments[] = trim($currentSegment);
+        }
+
+        $polygons = [];
+        foreach ($segments as $polygonData)
+        {
             $polygonData = trim($polygonData);
+
             if ($polygonData[0] === '(') {
                 $polygonData = substr($polygonData, 1);
             }
@@ -89,12 +120,12 @@ class MultiPolygon extends AbstractShape2D
                 $polygonData = substr($polygonData, 0, -1);
             }
 
-            $ringsData = explode('),', $polygonData);
             $rings = [];
-
-            foreach ($ringsData as $ringData) {
-                // Clean up the ring (remove extra spaces and commas)
+            $ringsData = explode('),', $polygonData);
+            foreach ($ringsData as $ringData)
+            {
                 $ringData = trim($ringData);
+
                 if ($ringData[0] === '(') {
                     $ringData = substr($ringData, 1);
                 }

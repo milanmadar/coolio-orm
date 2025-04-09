@@ -66,11 +66,41 @@ class GeometryCollection extends AbstractShape2D
             throw new \InvalidArgumentException('Invalid GEOMETRYCOLLECTION format in EWKT.');
         }
 
-        // Get the geometries within the collection
-        $geometryData = explode(',', $matches[1]);
-        $geometries = [];
+        // Now we need to split the segments inside the CompoundCurve.
+        // We will use a more careful approach to handle commas within parentheses.
+        $geometryPart = $matches[1];
+        $segments = [];
+        $parenCount = 0;
+        $currentSegment = '';
 
-        foreach ($geometryData as $geometry) {
+        // Iterate through the geometry part and properly extract the segments
+        for ($i = 0; $i < strlen($geometryPart); $i++) {
+            $char = $geometryPart[$i];
+            if ($char === '(') {
+                $parenCount++;
+            } elseif ($char === ')') {
+                $parenCount--;
+            }
+
+            // We only split the segments when the parentheses are balanced
+            if ($parenCount === 0 && $char === ',') {
+                // End of one segment, add it to the segments array
+                $segments[] = trim($currentSegment);
+                $currentSegment = '';
+            } else {
+                // Continue building the current segment
+                $currentSegment .= $char;
+            }
+        }
+
+        // Add the last segment
+        if (!empty($currentSegment)) {
+            $segments[] = trim($currentSegment);
+        }
+
+        // Get the geometries within the collection
+        $geometries = [];
+        foreach ($segments as $geometry) {
             $geometry = trim($geometry);
             /** @var AbstractShape2D $_ */
             $_ = Shape2D3DFactory::createFromGeoEWKTString("SRID=$srid;$geometry");
