@@ -671,12 +671,14 @@ abstract class Manager
 
     /**
      * @param array<string, mixed> $data
-     * @return array{ array<string>, array<mixed>, array<string>, array<mixed> }
+     * @return array{ array<string>, array<string, mixed>, array<string>, array<string, mixed> }
      * @throws \Doctrine\DBAL\Exception
      * @throws \Doctrine\DBAL\Types\ConversionException
      */
     private function fromPHPdata_toDBdata(array $data): array
     {
+        $placeholderNameIndex = 0;
+
         $columns      = [];
         $values       = [];
         $placeholders = [];
@@ -688,49 +690,55 @@ abstract class Manager
 
             if(!isset($v))
             {
-                $placeholders[] = '?';
-                $values[] = null;
-                $types[] = ParameterType::STRING;
+                $p = 'manager_p' . ++$placeholderNameIndex;
+                $placeholders[] = $p;
+                $values[$p] = null;
+                $types[$p] = ParameterType::STRING;
             }
             elseif(isset($this->fieldTypes[$k]))
             {
                 switch ($this->fieldTypes[$k]) {
                     case 'string':
                     case 'text':
-                        $placeholders[] = '?';
-                        $values[] = (string)$v;
-                        $types[] = ParameterType::STRING;
+                        $p = 'manager_p' . ++$placeholderNameIndex;
+                        $placeholders[] = ':'.$p;
+                        $values[$p] = (string)$v;
+                        $types[$p] = ParameterType::STRING;
                         break;
                     case 'integer':
                     case 'smallint':
                     case 'bigint':
                     case 'boolean':
-                        $placeholders[] = '?';
-                        $values[] = (int)$v;
-                        $types[] = ParameterType::INTEGER;
+                        $p = 'manager_p' . ++$placeholderNameIndex;
+                        $placeholders[] = ':'.$p;
+                        $values[$p] = (int)$v;
+                        $types[$p] = ParameterType::INTEGER;
                         break;
                     case 'float':
                     case 'decimal':
-                        $placeholders[] = '?';
-                        $values[] = (float)$v;
-                        $types[] = ParameterType::STRING;
+                        $p = 'manager_p' . ++$placeholderNameIndex;
+                        $placeholders[] = ':'.$p;
+                        $values[$p] = (float)$v;
+                        $types[$p] = ParameterType::STRING;
                         break;
                     case 'array':
                     case 'simple_array':
-                        $placeholders[] = '?';
-                        $values[] = serialize($v);
-                        $types[] = ParameterType::STRING;
+                        $p = 'manager_p' . ++$placeholderNameIndex;
+                        $placeholders[] = ':'.$p;
+                        $values[$p] = serialize($v);
+                        $types[$p] = ParameterType::STRING;
                         break;
                     case 'json':
                     case 'json_array':
-                        $placeholders[] = '?';
+                        $p = 'manager_p' . ++$placeholderNameIndex;
+                        $placeholders[] = ':'.$p;
                         $jsonStr = json_encode($v);
                         if($jsonStr === false) {
-                            $values[] = json_encode(['json'=>'errored']);
+                            $values[$p] = json_encode(['json'=>'errored']);
                         } else {
-                            $values[] = $jsonStr;
+                            $values[$p] = $jsonStr;
                         }
-                        $types[] = ParameterType::STRING;
+                        $types[$p] = ParameterType::STRING;
                         break;
                     case 'geometry':
                     case 'geometry_curved':
@@ -743,7 +751,7 @@ abstract class Manager
                     case 'topogeometry':
                         $topoGeomFieldInfo_column = $this->getTopoGeometryFieldInfo_column($k);
                         if(!isset($topoGeomFieldInfo_column)) {
-                            throw new \InvalidArgumentException("Field '$k' type in manager->getFieldTypes() is 'topogeometry' but there is no field for it in manager->getTopoGeometryFieldInfo()");
+                            throw new \InvalidArgumentException("Manager::fromPHPdata_toDBdata() Field '$k' type in manager->getFieldTypes() is 'topogeometry' but there is no field for it in manager->getTopoGeometryFieldInfo()");
                         }
                         $placeholders[] = Geo\GeoFunctions::toTopoGeom_param(
                             $v,
@@ -755,17 +763,19 @@ abstract class Manager
                         );
                         break;
                     default:
-                        $placeholders[] = '?';
-                        $values[] = Type::getType($this->fieldTypes[$k])->convertToDatabaseValue($v, $this->db->getDatabasePlatform());
-                        $types[] = ParameterType::STRING;
+                        $p = 'manager_p' . ++$placeholderNameIndex;
+                        $placeholders[] = ':'.$p;
+                        $values[$p] = Type::getType($this->fieldTypes[$k])->convertToDatabaseValue($v, $this->db->getDatabasePlatform());
+                        $types[$p] = ParameterType::STRING;
                         break;
                 }
             }
             else
             {
-                $placeholders[] = '?';
-                $values[$k] = $v;
-                $types[] = ParameterType::STRING;
+                $p = 'manager_p' . ++$placeholderNameIndex;
+                $placeholders[] = ':'.$p;
+                $values[$p] = $v;
+                $types[$p] = ParameterType::STRING;
             }
         }
 

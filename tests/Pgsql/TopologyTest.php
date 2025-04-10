@@ -118,6 +118,41 @@ class TopologyTest extends TestCase
         $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\GeometryCollection', $ents[0]->getTopoGeomGeometrycollection());
     }
 
+    public function testInsert_asObjects_small()
+    {
+        $mgr = self::$dbHelper->getManager(TopologyTestEnt\Manager::class);
+        $mgr->clearRepository(false);
+
+        $oCnt = self::$dbHelper->countRows('topology_test');
+
+        //
+        // Create All Shapes
+        //
+        $multiPoint = new MultiPoint([
+            new Point(0, 1), new Point(2, 3), new Point(4, 5), new Point(6, 7)
+        ], 4326);
+
+        //
+        // Insert All Shapes
+        //
+        $mgr->createQueryBuilder()
+            ->insert()
+            ->setValue('name', 'Nice Name')
+            ->setValue('topo_geom_point', $multiPoint)
+            ->executeStatement()
+        ;
+        $this->assertEquals($oCnt+1, self::$dbHelper->countRows('topology_test'));
+
+        //
+        // Select All Shapes
+        //
+        $mgr->_getEntityRepository()->clear();
+        $ent = $mgr->findById(2);
+
+        $this->assertEquals('Nice Name', $ent->getName());
+        $this->assertTrue($multiPoint == $ent->getTopoGeomPoint());
+    }
+
     public function testInsert_asObjects()
     {
         $mgr = self::$dbHelper->getManager(TopologyTestEnt\Manager::class);

@@ -6,6 +6,8 @@ use Doctrine\DBAL\ParameterType;
 
 class GeoFunctions
 {
+    private static $parameterIndex = 0;
+
     /**
      * @param AbstractShape $shape
      * @param string $topologyName
@@ -25,13 +27,20 @@ class GeoFunctions
     ): string
     {
         $geomFromEWKT = self::ST_GeomFromEWKT_param($shape, $paramsWillBe, $paramTypesWilleBe);
-        $paramsWillBe[] = $topologyName;
-        $paramTypesWilleBe[] = ParameterType::STRING;
-        $paramsWillBe[] = $topologyLayerId;
-        $paramTypesWilleBe[] = ParameterType::INTEGER;
-        $paramsWillBe[] = $tolerance;
-        $paramTypesWilleBe[] = ParameterType::STRING;
-        return "toTopoGeom({$geomFromEWKT}, ?, ?, ?)";
+
+        $p1 = 'toTopoGeom_p' . ++self::$parameterIndex;
+        $paramsWillBe[$p1] = $topologyName;
+        $paramTypesWilleBe[$p1] = ParameterType::STRING;
+
+        $p2 = 'toTopoGeom_p' . ++self::$parameterIndex;
+        $paramsWillBe[$p2] = $topologyLayerId;
+        $paramTypesWilleBe[$p2] = ParameterType::INTEGER;
+
+        $p3 = 'toTopoGeom_p' . ++self::$parameterIndex;
+        $paramsWillBe[$p3] = $tolerance;
+        $paramTypesWilleBe[$p3] = ParameterType::STRING;
+
+        return "toTopoGeom({$geomFromEWKT}, :{$p1}, :{$p2}, :{$p3})";
     }
 
     /**
@@ -46,18 +55,10 @@ class GeoFunctions
         array &$paramTypesWilleBe
     ): string
     {
-        $paramValuesWillBe[] = $shape->toEWKT();
-        $paramTypesWilleBe[] = ParameterType::STRING;
-        return 'ST_GeomFromEWKT(?)';
-    }
+        $p1 = 'GeomFromEWKT_p' . ++self::$parameterIndex;
+        $paramValuesWillBe[$p1] = $shape->toEWKT();
+        $paramTypesWilleBe[$p1] = ParameterType::STRING;
 
-    public static function ST_AsGeoJSON(string $geometry): string
-    {
-        return sprintf('ST_AsGeoJSON(%s)', $geometry);
-    }
-
-    public static function ST_AsText(string $geometry): string
-    {
-        return sprintf('ST_AsText(%s)', $geometry);
+        return "ST_GeomFromEWKT(:{$p1})";
     }
 }

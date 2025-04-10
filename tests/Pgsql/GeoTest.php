@@ -184,36 +184,6 @@ class GeoTest extends TestCase
         $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\CircularString', $ents[0]->getCircularStringGeom());
     }
 
-    public function testInsert_asText()
-    {
-        $mgr = self::$dbHelper->getManager(GeoShapeAll\Manager::class);
-        $mgr->clearRepository(false);
-
-        $oCnt = self::$dbHelper->countRows('geometry_test');
-
-        $mgr->createQueryBuilder()
-            ->insert()
-            ->setValue('point_geom', 'ST_GeomFromText(\'POINT(1 2)\', 4326)')
-            ->executeStatement()
-        ;
-        $this->assertEquals($oCnt+1, self::$dbHelper->countRows('geometry_test'));
-    }
-
-    public function testInsert_asEWKT()
-    {
-        $mgr = self::$dbHelper->getManager(GeoShapeAll\Manager::class);
-        $mgr->clearRepository(false);
-
-        $oCnt = self::$dbHelper->countRows('geometry_test');
-
-        $mgr->createQueryBuilder()
-            ->insert()
-            ->setValue('point_geom', 'ST_GeomFromEWKT(\'SRID=4326;POINT(1 2)\')')
-            ->executeStatement()
-        ;
-        $this->assertEquals($oCnt+1, self::$dbHelper->countRows('geometry_test'));
-    }
-
     public function testInsert_asObjects()
     {
         $mgr = self::$dbHelper->getManager(GeoShapeAll\Manager::class);
