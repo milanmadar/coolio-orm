@@ -47,7 +47,7 @@ class TopologyTest extends TestCase
         ;
 
         $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\MultiPoint', $ent->getTopoGeomPoint());
-        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\GeometryCollection', $ent->getTopoGeomGeometrycollection());
+        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\GeometryCollection', $ent->getTopoGeomCollection());
     }
 
     public function testSelectAllShapes_FindOne_QueryBuilder_Star()
@@ -66,7 +66,7 @@ class TopologyTest extends TestCase
         $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\MultiPoint', $ent->getTopoGeomPoint());
         $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\MultiLineString', $ent->getTopoGeomLinestring());
         $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\MultiPolygon', $ent->getTopoGeomPolygon());
-        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\GeometryCollection', $ent->getTopoGeomGeometrycollection());
+        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\GeometryCollection', $ent->getTopoGeomCollection());
     }
 
     public function testSelectAllShapes_FindOne_QueryBuilder_NoSELECT()
@@ -84,7 +84,7 @@ class TopologyTest extends TestCase
         $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\MultiPoint', $ent->getTopoGeomPoint());
         $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\MultiLineString', $ent->getTopoGeomLinestring());
         $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\MultiPolygon', $ent->getTopoGeomPolygon());
-        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\GeometryCollection', $ent->getTopoGeomGeometrycollection());
+        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\GeometryCollection', $ent->getTopoGeomCollection());
     }
 
     public function testSelectAllShapes_FindOne_noQueryBuilder()
@@ -98,7 +98,7 @@ class TopologyTest extends TestCase
         $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\MultiPoint', $ent->getTopoGeomPoint());
         $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\MultiLineString', $ent->getTopoGeomLinestring());
         $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\MultiPolygon', $ent->getTopoGeomPolygon());
-        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\GeometryCollection', $ent->getTopoGeomGeometrycollection());
+        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\GeometryCollection', $ent->getTopoGeomCollection());
     }
 
     public function testSelectAllShapes_FindMany_QueryBuilder_ExplicitSELECTlist()
@@ -115,7 +115,7 @@ class TopologyTest extends TestCase
         ;
 
         $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\MultiPoint', $ents[0]->getTopoGeomPoint());
-        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\GeometryCollection', $ents[0]->getTopoGeomGeometrycollection());
+        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\GeometryCollection', $ents[0]->getTopoGeomCollection());
     }
 
     public function testInsert_asObjects()
@@ -181,7 +181,7 @@ class TopologyTest extends TestCase
         // Topology changes the geometries when they are entered, so we can only validate the points
 //        $this->assertTrue($multiLineString == $ent->getTopoGeomLinestring());
 //        $this->assertTrue($multiPolygon == $ent->getTopoGeomPolygon());
-//        $this->assertTrue($geometryCollection == $ent->getTopoGeomGeometrycollection());
+//        $this->assertTrue($geometryCollection == $ent->getTopoGeomCollection());
     }
 
     public function testInsert_asEntity()
@@ -246,7 +246,7 @@ class TopologyTest extends TestCase
         // Topology changes the geometries when they are entered, so we can only validate the points
 //        $this->assertTrue($multiLineString == $ent->getTopoGeomLinestring());
 //        $this->assertTrue($multiPolygon == $ent->getTopoGeomPolygon());
-//        $this->assertTrue($geometryCollection == $ent->getTopoGeomGeometrycollection());
+//        $this->assertTrue($geometryCollection == $ent->getTopoGeomCollection());
     }
 
     public function testUpdate_asObjects()
@@ -312,6 +312,6 @@ class TopologyTest extends TestCase
         $this->assertFalse($ent1->getTopoGeomPoint() == $ent2->getTopoGeomPoint());
         $this->assertFalse($ent1->getTopoGeomLinestring() == $ent2->getTopoGeomLinestring());
         $this->assertFalse($ent1->getTopoGeomPolygon() == $ent2->getTopoGeomPolygon());
-        $this->assertFalse($ent1->getTopoGeomGeometrycollection() == $ent2->getTopoGeomGeometrycollection());
+        $this->assertFalse($ent1->getTopoGeomCollection() == $ent2->getTopoGeomCollection());
     }
 }

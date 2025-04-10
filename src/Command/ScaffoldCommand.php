@@ -34,29 +34,6 @@ class ScaffoldCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-//        $mgr = $this->orm->entityManager(\Milanmadar\CoolioORM\Model\GeometryFindtype\Manager::class);
-//
-//        $point = new Shape2D\Point(1, 2);
-//        $line = new Shape2D\LineString([new Shape2D\Point(1, 2), new Shape2D\Point(3, 4)]);
-//        $polygon = new Shape2D\Polygon([
-//            new Shape2D\LineString([new Shape2D\Point(0, 0), new Shape2D\Point(0, 5), new Shape2D\Point(5, 5), new Shape2D\Point(5, 0), new Shape2D\Point(0, 0)]),
-//            new Shape2D\LineString([new Shape2D\Point(1, 1), new Shape2D\Point(1, 2), new Shape2D\Point(2, 2), new Shape2D\Point(2, 1), new Shape2D\Point(1, 1)])
-//        ], 4326);
-//
-//        $ent = $mgr->createEntity()
-//            ->setTopoGeomPoint($point)
-//            ->setTopoGeomLinestring($line)
-//            ->setTopoGeomPolygon($polygon)
-//            ;
-//        $mgr->save($ent);
-//
-//        return 0;
-
-
-
-
-
-
         $io = new SymfonyStyle($input, $output);
 
         //
@@ -254,6 +231,7 @@ class ScaffoldCommand extends Command
         $attributeDefs = '';
         $accessorMethodsSrc = '';
         $mgrFldTypes = '';
+        $mgrTopogeoFldTypes = '';
         $mgrDefVals = '';
 
         foreach($tableColumns as $col)
@@ -274,7 +252,7 @@ class ScaffoldCommand extends Command
                     $relName = $tbl;
                 }
 
-                $SQL = "
+                $nativeColType = strtolower($db->executeQuery("
                     SELECT pg_catalog.format_type(a.atttypid, a.atttypmod) AS full_data_type
                     FROM pg_catalog.pg_attribute a
                     JOIN pg_catalog.pg_class c ON a.attrelid = c.oid
@@ -283,28 +261,41 @@ class ScaffoldCommand extends Command
                       AND n.nspname = '".$POSTGIS_SCHEMA."'
                       AND a.attname = '".$colName."'
                       AND a.attnum > 0
-                      AND NOT a.attisdropped;
-                ";
-
-                $nativeColType = strtolower($db->executeQuery($SQL)->fetchOne());
+                      AND NOT a.attisdropped
+                ")->fetchOne());
                 $colType = $nativeColType;
 
                 if(str_starts_with($nativeColType, 'topogeometry'))
                 {
-                    $SQL = "
-                        SELECT feature_type
+                    $topoGeo_field_info_row = $db->executeQuery("
+                        SELECT *
                         FROM topology.layer
                         WHERE schema_name = '".$POSTGIS_SCHEMA."'
                           AND table_name = '".$relName."'
-                          AND feature_column = '".$colName."';
-                    ";
-                    $nativeTopoColType_int = (int)$db->executeQuery($SQL)->fetchOne();
-                    $geoShapeType = match($nativeTopoColType_int) {
+                          AND feature_column = '".$colName."'
+                    ")->fetchAssociative();
+
+                    $geoShapeType = match((int)$topoGeo_field_info_row['feature_type']) {
                         1 => Shape2D\MultiPoint::class,
                         2 => Shape2D\MultiLineString::class,
                         3 => Shape2D\MultiPolygon::class,
                         default => Shape2D\GeometryCollection::class
                     };
+
+                    // info for the Manager::getTopoGeometryFieldInfo()
+                    $topology_layer = (int)$topoGeo_field_info_row['layer_id'];
+                    $tolerance = '$_ENV["TOPOGEOMETRY_DEFAULT_TOLERANCE"]';
+                    $topology_name = $db->executeQuery("
+                        SELECT name
+                        FROM topology.topology
+                        WHERE id = ".$topoGeo_field_info_row['topology_id']
+                    )->fetchOne();
+
+                    $mgrTopogeoFldTypes .= "\n        '".$colName."' => [\n";
+                    $mgrTopogeoFldTypes .= "            'topology_name'  => '".$topology_name."',\n";
+                    $mgrTopogeoFldTypes .= "            'topology_layer' => ".$topology_layer.",\n";
+                    $mgrTopogeoFldTypes .= "            'tolerance'  => ".$tolerance."\n";
+                    $mgrTopogeoFldTypes .= "        ],";
                 }
                 elseif(str_starts_with($nativeColType, 'geometry'))
                 {
@@ -446,10 +437,14 @@ class ScaffoldCommand extends Command
                     $docParamType = 'array<string|int>';
                     break;
                 case 'string':
-                case 'text':
                 case 'varchar':
                 case 'char':
                 case 'character':
+                    $colType = 'string';
+                    $paramType = 'string';
+                    $docParamType = 'string';
+                    break;
+                case 'text':
                     $paramType = 'string';
                     $docParamType = 'string';
                     break;
@@ -581,7 +576,14 @@ class ScaffoldCommand extends Command
 
             $outDir = $io->ask("The directory where we should save the Entity.php and Manager.php ", $guessOutDir);
             $ok = $io->confirm("The files will be:\n   ".$outDir."/Entity.php\n   ".$outDir."/Manager.php\n Ok? [Y=ok, N=type again] ", true);
+
+            if($ok) {
+                if (file_exists($outDir . '/Entity.php') || file_exists($outDir . '/Manager.php')) {
+                    $ok = $io->confirm("Those files already exist. Do you want to overwrite them? [Y=overwrite, N=type again] ", false);
+                }
+            }
         } while(!$ok);
+
         if(!is_dir($outDir)) {
             mkdir($outDir, 0775, true);
         }
@@ -615,6 +617,7 @@ class ScaffoldCommand extends Command
         $managerClassSrc = str_replace('_DB_ENV_NAME_', $dbSelect, $managerClassSrc);
         $managerClassSrc = str_replace('_DB_TBL_NAME_', $tbl, $managerClassSrc);
         $managerClassSrc = str_replace('_FIELD_TYPES_', $mgrFldTypes, $managerClassSrc);
+        $managerClassSrc = str_replace('_FIELD_TOPOGEO_TYPES_', $mgrTopogeoFldTypes, $managerClassSrc);
         $managerClassSrc = str_replace('_DEFAULT_VALUES_', $mgrDefVals, $managerClassSrc);
         file_put_contents($outDir.'/Manager.php', $managerClassSrc);
 

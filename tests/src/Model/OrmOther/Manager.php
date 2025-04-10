@@ -59,6 +59,12 @@ class Manager extends \Milanmadar\CoolioORM\Manager
     ]; }
 
     /**
+     * @inheritDoc
+     */
+    public function getTopoGeometryFieldInfo(): array { return [
+    ]; }
+
+    /**
     * @inheritDoc
     */
     protected function afterConvertFromDb(array &$php_data): void {

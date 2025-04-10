@@ -160,7 +160,7 @@ abstract class Manager
      * Info for topogeometry type fields
      * @return array<string, array{'topology_name':string, 'topology_layer':int, 'tolerance':float}>
      */
-    public function getTopoGeometryFieldInfo(): array { return []; }
+    abstract public function getTopoGeometryFieldInfo(): array;
 
     /**
      * @param string $column

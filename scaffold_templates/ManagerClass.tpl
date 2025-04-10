@@ -51,6 +51,12 @@ class Manager extends CoolioORM\Manager
     ]; }
 
     /**
+     * @inheritDoc
+     */
+    public function getTopoGeometryFieldInfo(): array { return [_FIELD_TOPOGEO_TYPES_
+    ]; }
+
+    /**
     * @inheritDoc
     */
     protected function getDefaultValues(): array { return [_DEFAULT_VALUES_
@@ -86,8 +92,7 @@ class Manager extends CoolioORM\Manager
      * @inheritDoc
      * @return Entity
      */
-    protected function createEntityDo(CoolioORM\ORM $orm, array $php_data = []): Entity
-    {
+    protected function createEntityDo(CoolioORM\ORM $orm, array $php_data = []): Entity {
         return new Entity($orm, $php_data);
     }
 
