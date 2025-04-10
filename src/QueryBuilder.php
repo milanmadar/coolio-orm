@@ -24,10 +24,8 @@ class QueryBuilder extends DoctrineQueryBuilder
     /** @var array< array<string> > */
     private array $orderBys;
 
-    /** @var int in the whereColumn() methods we use this to generate the named placeholder */
-    private int $setParameterName_inuque;
-    /** @var int in the setParameter() method we use this to keep track of teh current parameter */
-    private int $setParameterIndex;
+    /** @var int in the whereColumn() methods we use this to generate unique named placeholders */
+    private int $setParameterName_i;
 
     private ORM $orm;
     private Connection $db;
@@ -42,8 +40,7 @@ class QueryBuilder extends DoctrineQueryBuilder
 
         $this->type = self::TYPE_SELECT;
         $this->orderBys = [];
-        $this->setParameterName_inuque = 0;
-        $this->setParameterIndex = 0;
+        $this->setParameterName_i = 0;
         $this->db = $db;
         $this->orm = $orm;
         $this->statementRepo = $this->orm->getStatementRepositoryByConnection($db);
@@ -177,27 +174,6 @@ class QueryBuilder extends DoctrineQueryBuilder
     }
 
     /**
-     * @inheritDoc
-     * @param string $key
-     * @param string|int|float|null $value
-     * @return $this
-     */
-    public function set(string $key, string|int|float|null $value): self
-    {
-        // geometry (AbstractShape) is already converted to string becuase of $value param is string type
-        if($this->isPostgres && isset($this->entityMgr) && is_string($value)) {
-            $value = GeoQueryProcessor::INSERT_UPDATE_DELETE_geometryToPostGISformat(
-                $this->entityMgr->getTopoGeometryFieldInfo_column($key),
-                $value
-            );
-        }
-
-        if(is_null($value)) $value = 'null';
-        parent::set($key, (string)$value);
-        return $this;
-    }
-
-    /**
      * It handles:
      * - '=' and '!=' operator to 'IS NULL' or 'IS NOT NULL' when $value is NULL
      * - '=' and '!=! to 'IN' or 'NOT IN' when $value is an array
@@ -221,7 +197,7 @@ class QueryBuilder extends DoctrineQueryBuilder
             }
         }
 
-        $paramName = 'AutoGen' . ++$this->setParameterName_inuque;
+        $paramName = 'AutoGen' . ++$this->setParameterName_i;
 
         $operator = strtoupper(trim($operator));
 
@@ -304,7 +280,7 @@ class QueryBuilder extends DoctrineQueryBuilder
     }
 
     /**
-     * @inheritDoc
+     * INSERT query. Use ->setValue() to set the values.
      * @return $this
      */
     public function insert(string|null $table = null): self
@@ -324,7 +300,7 @@ class QueryBuilder extends DoctrineQueryBuilder
     }
 
     /**
-     * @inheritDoc
+     * UDATE query. Use ->set() to set the values.
      * @return $this
      */
     public function update(string|null $table = null): self
@@ -414,85 +390,116 @@ class QueryBuilder extends DoctrineQueryBuilder
     }
 
     /**
-     * Used for INSERT query only (for UPDATE use ->set(), for SELECT user ->andWhereColumn())
-     * @param string $column
-     * @param string|int|float|bool|AbstractShape|null $value
+     * used for UPDATE queries (for INSERT use ->setValue(), for SELECT use ->andWhereColumn())
+     * @param string $key
+     * @param mixed $value
      * @return $this
      */
-    public function setValue(string $column, string|int|float|bool|AbstractShape|null $value): self
+    public function set(string $key, mixed $value): self
     {
-        // user is parameterizing probably
-        if(!empty($value) && is_string($value) && ($value == '?' || $value[0] == ':')) {
-            parent::setValue($column, $value);
+        if($this->type != self::TYPE_UPDATE) {
+            throw new \InvalidArgumentException('QueryBuilder->set() must be used for UPDATE queries only. For INSERT use ->set(), for SELECT use ->andWhereColumn() (without ->setParameter())');
+        }
+
+        if(!isset($value)) {
+            $value = 'null';
+        } else {
+            if (!is_string($value)) {
+                throw new \InvalidArgumentException('QueryBuilder->set() 2nd param must be an SQL expression (goes into the query is it is), or NULL, or a named parameter and then call ->setParameter().');
+            }
+            if ($value == '?') {
+                throw new \InvalidArgumentException('QueryBuilder->set() 2nd param must be a named parameter, not a "?".');
+            }
+            if(!empty($value) && $value[0] != ':') {
+                $value = ':'.$value;
+            }
+        }
+        parent::set($key, $value);
+        return $this;
+    }
+
+    /**
+     * Used for INSERT query only (for UPDATE use ->set(), for SELECT use ->andWhereColumn())
+     * @param string $column
+     * @param mixed $value UNSAFE! This goes into the query as-it-is. Probably us it lke this: $qb->setValue('column', ':NamedParam')->setParameter('NamedParam', $value);
+     * @return $this
+     */
+    public function setValue(string $column, mixed $value): self
+    {
+        if($this->type != self::TYPE_INSERT) {
+            throw new \InvalidArgumentException('QueryBuilder->setValue() must be used for INSERT queries only. For UPDATE use ->set(), for SELECT use ->andWhereColumn() (without ->setParameter())');
+        }
+
+        if(!isset($value)) {
+            $value = 'null';
+        } else {
+            if (!is_string($value)) {
+                throw new \InvalidArgumentException('QueryBuilder->setValue() 2nd param must be an SQL expression (goes into the query is it is), or NULL, or a named parameter and then call ->setParameter().');
+            }
+            if ($value == '?') {
+                throw new \InvalidArgumentException('QueryBuilder->setValue() 2nd param must be a named parameter, not a "?".');
+            }
+        }
+        parent::setValue($column, $value);
+        return $this;
+    }
+
+    /**
+     * Used for INSERT/UPDATE queries only (for SELECT use ->andWhereColumn())
+     * @param string $column
+     * @param AbstractShape|null $value
+     * @return $this
+     */
+    public function setGeom(string $column, AbstractShape|null $value): self
+    {
+        if(!isset($value)) {
+            if($this->type == self::TYPE_INSERT) {
+                parent::setValue($column, 'null');
+            } elseif($this->type == self::TYPE_UPDATE) {
+                parent::set($column, 'null');
+            }
             return $this;
         }
 
-        if($value instanceof AbstractShape) {
-            if(isset($this->entityMgr)) {
-                $fieldTypes = $this->entityMgr->getFieldTypes();
-                if(isset($fieldTypes[$column])) {
-                    if($fieldTypes[$column] == 'geometry' || $fieldTypes[$column] == 'geometry_curved')
-                    {
-                        $paramValues = [];
-                        $paramTypes = [];
-                        $valueStrs = GeoFunctions::ST_GeomFromEWKT_param(
-                            $value,
-                            $paramValues,
-                            $paramTypes
-                        );
+        $paramValues = [];
+        $paramTypes = [];
 
-                        parent::setValue($column, $valueStrs);
-
-                        foreach($paramValues as $i=>$v) {
-                            self::setParameter(
-                                $i,
-                                $v,
-                                $paramTypes[$i]
-                            );
-                            ++$this->setParameterIndex;
-                        }
-
-                        return $this;
-                    }
-                    elseif($fieldTypes[$column] == 'topogeometry')
-                    {
-                        $topoGeomFieldInfo_column = $this->entityMgr->getTopoGeometryFieldInfo_column($column);
-                        if(!isset($topoGeomFieldInfo_column)) {
-                            throw new \InvalidArgumentException("Manager::fromPHPdata_toDBdata() Field '{$column}' type in manager->getFieldTypes() is 'topogeometry' but there is no field for it in manager->getTopoGeometryFieldInfo()");
-                        }
-
-                        $paramValues = [];
-                        $paramTypes = [];
-                        $valueStrs = Geo\GeoFunctions::toTopoGeom_param(
-                            $value,
-                            $topoGeomFieldInfo_column['topology_name'],
-                            $topoGeomFieldInfo_column['topology_layer'],
-                            $topoGeomFieldInfo_column['tolerance'],
-                            $paramValues,
-                            $paramTypes
-                        );
-
-                        parent::setValue($column, $valueStrs);
-
-                        foreach($paramValues as $i=>$v) {
-                            parent::setParameter(
-                                $i,
-                                $v,
-                                $paramTypes[$i]
-                            );
-                        }
-
-                        return $this;
-                    }
-                }
-            } else {
-                $value = $value->__toString();
-            }
+        // topogeometry
+        $topoGeomFieldInfo_column = $this->entityMgr?->getTopoGeometryFieldInfo_column($column);
+        if(isset($topoGeomFieldInfo_column)) {
+            $valueStrs = Geo\GeoFunctions::toTopoGeom_param(
+                $value,
+                $topoGeomFieldInfo_column['topology_name'],
+                $topoGeomFieldInfo_column['topology_layer'],
+                $topoGeomFieldInfo_column['tolerance'],
+                $paramValues,
+                $paramTypes
+            );
+        }
+        else { // regular geometry
+            $valueStrs = GeoFunctions::ST_GeomFromEWKT_param(
+                $value,
+                $paramValues,
+                $paramTypes
+            );
         }
 
-        ++$this->setParameterName_inuque;
-        parent::setValue($column, ':autoInsertSetValue'.$this->setParameterName_inuque);
-        parent::setParameter('autoInsertSetValue'.$this->setParameterName_inuque, $value);
+        // set the things
+        if($this->type == self::TYPE_INSERT) {
+            parent::setValue($column, $valueStrs);
+        } elseif($this->type == self::TYPE_UPDATE) {
+            parent::set($column, $valueStrs);
+        } else {
+            throw new \InvalidArgumentException('QueryBuilder->setGeom() can be used only for INSERT and UPDATE queries. For SELECT queries use ->andWhereColumn()');
+        }
+
+        foreach($paramValues as $i=>$v) {
+            parent::setParameter(
+                $i,
+                $v,
+                $paramTypes[$i]
+            );
+        }
 
         return $this;
     }
@@ -596,6 +603,7 @@ class QueryBuilder extends DoctrineQueryBuilder
         return $this->limit(($page-1)*$maxResults, $maxResults);
     }
 
+
     /**
      * @inheritDoc
      * @return $this
@@ -603,29 +611,19 @@ class QueryBuilder extends DoctrineQueryBuilder
     public function setParameter(
         int|string $key,
         mixed $value,
-        string|ParameterType|Type|ArrayParameterType $type = ParameterType::STRING
+        mixed $type = ParameterType::STRING
     ): self
     {
-        if($this->isPostgres && $value instanceof AbstractShape) {
-            $value = $value->__toString();
+        if(!is_string($key) || empty($key)) {
+            throw new \InvalidArgumentException('QueryBuilder->setParameter() 1st param must be a string (must use named parameters)');
+        }
 
-            if(is_string($key) && isset($this->entityMgr))
-            {
-                $possible_column_name = ltrim($key, ':');
-                // camel case to snake case
-                $pattern = [
-                    '/([a-z0-9])([A-Z])/', // Place underscore between a lowercase letter or number and an uppercase letter (e.g. "aB" → "a_B")
-                    '/([A-Z]+)([A-Z][a-z])/', // Place underscore between two uppercase letters followed by a lowercase letter (e.g. "HTMLParser" → "HTML_Parser")
-                ];
-                /** @var string $possible_column_name */
-                $possible_column_name = preg_replace($pattern, ['$1_$2', '$1_$2', ], $possible_column_name);
-                $possible_column_name = strtolower($possible_column_name);
+        if($key[0] == ':') {
+            $key = substr($key, 1);
+        }
 
-                $value = GeoQueryProcessor::INSERT_UPDATE_DELETE_geometryToPostGISformat(
-                    $this->entityMgr->getTopoGeometryFieldInfo_column($possible_column_name),
-                    $value
-                );
-            }
+        if($value instanceof AbstractShape) {
+            throw new \InvalidArgumentException('QueryBuilder->setParameter() 2nd param cannot be a geometry (AbstractShape). Use $'.'querybuilder->setGeom() for INSERT/UPDATE queries, or $'.'querybuilder->andWhereColumn() for SELECT queries (and with those you don;t need ->setParameter()');
         }
 
         // bool
@@ -661,6 +659,16 @@ class QueryBuilder extends DoctrineQueryBuilder
      */
     public function setParameters(array $params, array $types = []): self
     {
+        // $params keys must be strings, and values cannot be AbstractShape
+        foreach($params as $k=>$v) {
+            if(!is_string($k)) {
+                throw new \InvalidArgumentException('QueryBuilder->setParameters() 1st param keys must be strings (must use named parameters)');
+            }
+            if($v instanceof AbstractShape) {
+                throw new \InvalidArgumentException('QueryBuilder->setParameters() 1st param value cannot be a geometry (AbstractShape). Use $'.'querybuilder->setGeom() for INSERT/UPDATE queries, or $'.'querybuilder->andWhereColumn() for SELECT queries (and with those you don;t need ->setParameter()');
+            }
+        }
+
         if(empty($types)) {
             /**
              * @var int<0, max>|string $k

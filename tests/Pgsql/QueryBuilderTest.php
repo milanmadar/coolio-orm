@@ -61,69 +61,24 @@ class QueryBuilderTest extends TestCase
 
     public function testQuestionMarkOneEntity()
     {
+        $this->expectException(\InvalidArgumentException::class);
+
         $mgr = self::$dbHelper->getManager(OrmTest\Manager::class);
 
-        $ent = $mgr->createQueryBuilder()
-            ->where('id=?')->setParameter(0, 1)
-            ->fetchOneEntity();
-        $this->assertInstanceOf('\tests\Model\OrmTest\Entity', $ent);
-        $this->assertEquals(1, $ent->getId());
-
-        $ent = $mgr->createQueryBuilder()
-            ->where('id=?')->setParameter(0, 11111)
-            ->fetchOneEntity();
-        $this->assertNull($ent);
+        $mgr->createQueryBuilder()
+            ->where('id=?')->setParameter(0, 1);
     }
 
-    public function testQuestionMarks2OneEntity()
+    public function testQuestionMarksSetAllParams()
     {
+        $this->expectException(\InvalidArgumentException::class);
+
         $mgr = self::$dbHelper->getManager(OrmTest\Manager::class);
 
-        $ent = $mgr->createQueryBuilder()
-            ->where('id=?')->setParameter(0, 1)
-            ->andWhere('fld_medium_int=?')->setParameter(1, 4)
-            ->fetchOneEntity();
-        $this->assertInstanceOf('\tests\Model\OrmTest\Entity', $ent);
-        $this->assertEquals(1, $ent->getId());
-
-        $ent = $mgr->createQueryBuilder()
-            ->where('id=?')->setParameter(0, 1)
-            ->andWhere('fld_medium_int=?')->setParameter(1, 11111)
-            ->fetchOneEntity();
-        $this->assertNull($ent);
-    }
-
-    public function testQuestionMarks2OneEntitySetAllParams()
-    {
-        $mgr = self::$dbHelper->getManager(OrmTest\Manager::class);
-
-        $ent = $mgr->createQueryBuilder()
+        $mgr->createQueryBuilder()
             ->where('id=?')
             ->andWhere('fld_medium_int=?')
-            ->setParameters([1, 4])
-            ->fetchOneEntity();
-        $this->assertInstanceOf('\tests\Model\OrmTest\Entity', $ent);
-        $this->assertEquals(1, $ent->getId());
-
-        $ent = $mgr->createQueryBuilder()
-            ->where('id=?')
-            ->andWhere('fld_medium_int=?')
-            ->setParameters([1, 11111])
-            ->fetchOneEntity();
-        $this->assertNull($ent);
-    }
-
-    public function testQuestionMarkManyEntity()
-    {
-        $mgr = self::$dbHelper->getManager(OrmTest\Manager::class);
-
-        $res = $mgr->createQueryBuilder()
-            ->where('id>?')->setParameter(0, 1)
-            ->fetchManyEntity();
-        $this->assertIsArray($res);
-        $this->assertNotEmpty($res);
-        $this->assertGreaterThan(1, count($res));
-        $this->assertInstanceOf('\tests\Model\OrmTest\Entity', $res[0]);
+            ->setParameters([1, 4]);
     }
 
     public function testNamedParamOneEntity()
@@ -193,29 +148,12 @@ class QueryBuilderTest extends TestCase
         $this->assertInstanceOf('\tests\Model\OrmTest\Entity', $res[0]);
     }
 
-    public function testNamedAndQuestionMarkParamOneEntity()
-    {
-        $mgr = self::$dbHelper->getManager(OrmTest\Manager::class);
-
-        try {
-            $mgr->createQueryBuilder()
-                ->where('id=:ID1')->setParameter('ID1', 1)
-                ->orWhere('fld_medium_int=?')->setParameter(0, 4)
-                ->fetchOneEntity();
-
-            $this->fail('Expected ORMException');
-        }
-        catch (ORMException) {
-            $this->assertEquals(1, 2-1);
-        }
-    }
-
     public function testDoctrineExecuteQuery()
     {
         $mgr = self::$dbHelper->getManager(OrmTest\Manager::class);
 
         $res = $mgr->createQueryBuilder()
-            ->where('id=?')->setParameter(0, 1)
+            ->where('id=:A')->setParameter('A', 1)
             ->executeQuery();
 
         $this->assertTrue($res instanceof \Doctrine\DBAL\Result);
@@ -234,12 +172,12 @@ class QueryBuilderTest extends TestCase
 
         $blr = $mgr->createQueryBuilder();
 
-        $blr->where('id=?')->setParameter(0, 1);
+        $blr->where('id=:A')->setParameter('A', 1);
         $row = $blr->fetchAssociative();
         $this->assertIsArray($row);
         $this->assertNotEmpty($row);
 
-        $blr->where('id=?')->setParameter(0, 99999);
+        $blr->where('id=:B')->setParameter('B', 99999);
         $row = $blr->fetchAssociative();
         $this->assertTrue($row === false);
     }
@@ -298,7 +236,7 @@ class QueryBuilderTest extends TestCase
 
         $mgr->createQueryBuilder()
             ->update()
-            ->set('fld_int', '?')->setParameter(0, 8642)
+            ->set('fld_int', ':A')->setParameter('A', 8642)
             ->where('id=1')
             ->executeStatement();
 
@@ -333,7 +271,7 @@ class QueryBuilderTest extends TestCase
         try {
             $mgr->createQueryBuilder()
                 ->update()
-                ->set('fld_int', 1000)
+                ->set('fld_int', ':Val')->setParameter('Val', 8642)
                 ->orderBy('id', 'desc')
                 ->limit(0, 3)
                 ->executeStatement();
@@ -344,14 +282,25 @@ class QueryBuilderTest extends TestCase
         }
     }
 
-    public function testInsert()
+    public function testInsert_setValue_Questionmark()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        $mgr = self::$dbHelper->getManager(OrmTest\Manager::class);
+
+        $mgr->createQueryBuilder()
+            ->insert()
+            ->setValue('fld_float', '?')->setParameter(0, 3.14);
+    }
+
+    public function testInsert_setValue_NamedParams()
     {
         $mgr = self::$dbHelper->getManager(OrmTest\Manager::class);
 
         $mgr->createQueryBuilder()
             ->insert()
-            ->setValue('fld_float', '?')->setParameter(0, 3.14)
-            ->setValue('fld_varchar', '?')->setParameter(1, "ok'k")
+            ->setValue('fld_float', ':aaa')->setParameter('aaa', 3.14)
+            ->setValue('fld_varchar', ':bbb')->setParameter('bbb', "ok'k")
             ->executeStatement();
 
         $newId = $mgr->createQueryBuilder()->lastInsertId();
@@ -360,32 +309,21 @@ class QueryBuilderTest extends TestCase
         $this->assertEquals(self::$oRowCnt+1, $rowCnt);
 
         $row = $mgr->createQueryBuilder()
-            ->where('id=?')->setParameter(0, $newId)
+            ->where('id=:aaa')->setParameter('aaa', $newId)
             ->fetchAssociative();
 
         $this->assertEquals("ok'k", $row['fld_varchar']);
     }
 
-    public function testInsert2()
+    public function testInsert_setValue_direct()
     {
+        $this->expectException(\InvalidArgumentException::class);
+
         $mgr = self::$dbHelper->getManager(OrmTest\Manager::class);
 
         $mgr->createQueryBuilder()
             ->insert()
-            ->setValue('fld_float', 3.14)
-            ->setValue('fld_varchar', 'Nice Name')
-            ->executeStatement();
-
-        $newId = $mgr->createQueryBuilder()->lastInsertId();
-
-        $rowCnt = self::$dbHelper->countRows('orm_test');
-        $this->assertEquals(self::$oRowCnt+1, $rowCnt);
-
-        $row = $mgr->createQueryBuilder()
-            ->where('id=?')->setParameter(0, $newId)
-            ->fetchAssociative();
-
-        $this->assertEquals('Nice Name', $row['fld_varchar']);
+            ->setValue('fld_float', 3.14);
     }
 
     public function testOrWhere()
@@ -476,9 +414,9 @@ class QueryBuilderTest extends TestCase
 
         $sql = $mgr->createQueryBuilder()
             ->delete()
-            ->where('id=1')->andWhere('id=2 AND id=?')->setParameter(0, 4)
+            ->where('id=1')->andWhere('id=2 AND id=:A')->setParameter('A', 4)
             ->getSQL();
-        $this->assertEquals('DELETE FROM orm_test WHERE (id=1) AND (id=2 AND id=?)', $sql);
+        $this->assertEquals('DELETE FROM orm_test WHERE (id=1) AND (id=2 AND id=:A)', $sql);
 
         $sql = $mgr->createQueryBuilder()
             ->delete()
