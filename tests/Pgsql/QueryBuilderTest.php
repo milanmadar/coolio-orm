@@ -366,6 +366,28 @@ class QueryBuilderTest extends TestCase
         $this->assertEquals("ok'k", $row['fld_varchar']);
     }
 
+    public function testInsert2()
+    {
+        $mgr = self::$dbHelper->getManager(OrmTest\Manager::class);
+
+        $mgr->createQueryBuilder()
+            ->insert()
+            ->setValue('fld_float', 3.14)
+            ->setValue('fld_varchar', 'Nice Name')
+            ->executeStatement();
+
+        $newId = $mgr->createQueryBuilder()->lastInsertId();
+
+        $rowCnt = self::$dbHelper->countRows('orm_test');
+        $this->assertEquals(self::$oRowCnt+1, $rowCnt);
+
+        $row = $mgr->createQueryBuilder()
+            ->where('id=?')->setParameter(0, $newId)
+            ->fetchAssociative();
+
+        $this->assertEquals('Nice Name', $row['fld_varchar']);
+    }
+
     public function testOrWhere()
     {
         $mgr = self::$dbHelper->getManager(OrmTest\Manager::class);

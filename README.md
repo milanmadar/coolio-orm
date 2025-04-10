@@ -342,6 +342,8 @@ Note: in most cases you probably want to use the [QueryBuilder](README.md#query-
 
 Note: in most cases you probably want to use the [QueryBuilder](README.md#query-builder) (they also use the Entity Repo).
 
+**IMPORTANT:** Topology-enabled tables (tables that has topogemetry fields) will not use the Entity Repository because the topology may change the geometries every time a geometry is added/edited/removed in the topology. 
+
 Internally, the ORM has a Repository of Entities. It's like a cache for Entities: When you fetched an Entity from the db, it will save that Entity to the repository. 
 The next time you want to fetch the same Entity, it will use this repository to give you back the same Entity: **giving the exact same object, not another object with the same data in it**.
 

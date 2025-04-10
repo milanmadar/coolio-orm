@@ -22,7 +22,7 @@ class GeoQueryProcessor
                 $columns = $mgr->getFields();
             }
 
-            $_cols = self::geometryToPostGISformat($mgr->getFieldTypes(), $columns);
+            $_cols = self::SELECTgeometryToPostGISformat($mgr->getFieldTypes(), $columns);
 
             $processedSelect = implode(", ", array_map(fn($c) => $c, $_cols));
 
@@ -35,13 +35,13 @@ class GeoQueryProcessor
     }
 
     /**
-     * Converts geometry fields to PostGIS format for SQL queries. Leaves other fields as they were
+     * Converts geometry fields to PostGIS format for a SELECT SQL queries. Leaves other fields as they were
      *
      * @param array<string, string> $managerFieldTypes $manager->getFieldTypes()
      * @param array<string> $fieldsInTheSQLstring
      * @return array<string> The formatted fields, geometries transformed to 'ST_As...` for PostGIS.
      */
-    public static function geometryToPostGISformat(array $managerFieldTypes, array $fieldsInTheSQLstring): array
+    public static function SELECTgeometryToPostGISformat(array $managerFieldTypes, array $fieldsInTheSQLstring): array
     {
         $cols = [];
         foreach($fieldsInTheSQLstring as $c) {
@@ -64,6 +64,31 @@ class GeoQueryProcessor
             }
         }
         return $cols;
+    }
+
+    /**
+     * @param null|array{'topology_name':string, 'topology_layer':int, 'tolerance':float} $managerTopoGeometryFieldInfo_column
+     * @param string|int|float|null $value
+     * @return string
+     */
+    public static function INSERT_UPDATE_DELETE_geometryToPostGISformat(
+        array|null $managerTopoGeometryFieldInfo_column,
+        string|int|float|null $value
+    ): string
+    {
+        if(!isset($managerTopoGeometryFieldInfo_column)) {
+            return (string)$value;
+        }
+
+        if(!is_string($value)) {
+            return (string)$value;
+        }
+
+        // All geometry fields are in the form of 'SRID=4326;POINT(1 2)'
+        // because the type of the $value param is string.
+        // That's already good for 'geometry' and 'geometry_curved' types.
+        // For 'topogeometry' type, we need to wrap it further with toTopoGeom()
+        return "toTopoGeom({$value}, '{$managerTopoGeometryFieldInfo_column['topology_name']}', {$managerTopoGeometryFieldInfo_column['topology_layer']}, {$managerTopoGeometryFieldInfo_column['tolerance']})";
     }
 
     /**

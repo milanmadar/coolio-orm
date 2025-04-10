@@ -165,9 +165,9 @@ class Entity extends \Milanmadar\CoolioORM\Entity
 
     /**
      * A char 8
-     * @return string
+     * @return string|null
      */
-    public function getFldChar(): string
+    public function getFldChar(): string|null
     {
         return $this->_get('fld_char');
     }
@@ -185,9 +185,9 @@ class Entity extends \Milanmadar\CoolioORM\Entity
 
     /**
      * A varchar 25
-     * @return string
+     * @return string|null
      */
-    public function getFldVarchar(): string
+    public function getFldVarchar(): string|null
     {
         return $this->_get('fld_varchar');
     }

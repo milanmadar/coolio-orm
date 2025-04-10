@@ -4,6 +4,7 @@ namespace Milanmadar\CoolioORM;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Types\Type;
+use Doctrine\DBAL\ParameterType;
 
 abstract class Manager
 {
@@ -70,7 +71,7 @@ abstract class Manager
         // Maybe we got some data, but non of that is for this entity. That makes no sense
 //        $is_empty_data = empty($db_data);
 
-        $php_data = $this->convertFromDb($db_data);
+        $php_data = $this->fromDBdata_toPHPdata($db_data);
 
 //        if(!$is_empty_data && empty($php_data)) {
 //            throw new \LogicException("Non of the given data belongs to the ".get_class($this));
@@ -84,11 +85,16 @@ abstract class Manager
     /**
      * Returns a new empty Entity. (If you are doing it from a database table row then use $manager->createEntityFromDbData())
      * @param array<string, mixed>|null $php_data Already correctly PHP typed. (If you are doing it from a database table row then use $manager->createEntityFromDbData())
-     * @param bool $skipEntityRepo Optional. If TRUE it will not store this Entity in the Entity Repository
+     * @param bool $skipEntityRepo Optional. If TRUE it will not store this Entity in the Entity Repository. TOPOGEOMETRY will always skip the Entity Repository
      * @return Entity
      */
     public function createEntity(array|null $php_data = null, bool $skipEntityRepo = false): Entity
     {
+        // topology changes the geometry, so always fetch it from the db, so skip the entity repository
+        if( !empty( $this->getTopoGeometryFieldInfo() ) ) {
+            $skipEntityRepo = true;
+        }
+
         if(!isset($php_data))
         {
             $php_data = $this->getDefaultValues();
@@ -113,11 +119,13 @@ abstract class Manager
             }
         }
 
-        // Wasn't in the Repo (or we aren't using it), so create it and add it to the Repo
         $newEnt = static::createEntityDo($this->orm, $php_data);
+
+        // Wasn't in the Repo (or we aren't using it), so create it and add it to the Repo
         if($this->useEntityRepository && !$skipEntityRepo) {
             $this->entityRepository->add($newEnt, $this->dbTable.$this->getDbConnUrl());
         }
+
         return $newEnt;
     }
 
@@ -130,95 +138,13 @@ abstract class Manager
     abstract protected function createEntityDo(ORM $orm, array $php_data = []): Entity;
 
     /**
-     * Change the types
-     * @param array<string, mixed> $data
-     * @return array<string, mixed>
-     */
-    protected function convertFromDb(array $data): array
-    {
-        //$converted_data = [];
-        foreach($data as $k=>$v)
-        {
-            /*if(!isset($this->fieldTypes[$k])) // this field doesn't belong to this entity
-            {
-                unset($data[$k]);
-            }
-            else*/if(isset($v))
-            {
-                if(!str_ends_with($k, '_srid')) {
-                    $data[$k] = match($this->fieldTypes[$k] ?? 'doesnt_belong_to_this_entity') {
-                        'doesnt_belong_to_this_entity' => $v,
-                        'string', 'text' => (string)$v,
-                        'integer', 'smallint', 'bigint' => (int)$v,
-                        'float', 'decimal' => (float)$v,
-                        'boolean' => (bool)$v,
-                        'array', 'simple_array' => unserialize($v),
-                        'json', 'json_array' => json_decode($v, true),
-//                        'geometry' => Geo\Shape2D3DFactory::createFromGeoJSONString($v, $data[$k.'_srid'] ?? null),
-//                        'geometry_curved', 'topogeometry' => Geo\Shape2D3DFactory::createFromGeoEWKTString($v),
-                        'geometry' , 'geometry_curved', 'topogeometry' => Geo\Shape2D3DFactory::createFromGeoEWKTString($v),
-                        default => Type::getType($this->fieldTypes[$k])->convertToPHPValue($v, $this->db->getDatabasePlatform()),
-                    };
-                }
-            }
-            else // this else was not here and all test passed
-            {
-                $data[$k] = null;
-            }
-        }
-        return $data;
-    }
-
-    /**
-     * Change the types
-     * @param array<string, mixed> $data
-     * @return array<string, mixed>
-     */
-    protected function convertToDb(array $data): array
-    {
-        $converted_data = $data;
-        foreach($data as $k=>$v)
-        {
-            if(isset($this->fieldTypes[$k]))
-            {
-                if(!isset($v))
-                {
-                    $converted_data[$k] = null;
-                }
-                else
-                {
-                    // json may fail, handle that
-                    if($this->fieldTypes[$k] == 'json' || $this->fieldTypes[$k] == 'json_array') {
-                        $jsonStr = json_encode($v);
-                        if(empty($jsonStr)) {$jsonStr = json_encode(['json'=>'errored']);}
-                        $converted_data[$k] = $jsonStr;
-                    } else {
-                        $converted_data[$k] = match($this->fieldTypes[$k]) {
-                            'string', 'text' => (string)$v,
-                            'integer', 'smallint', 'bigint' => (int)$v,
-                            'float', 'decimal' => (float)$v,
-                            'boolean' => (int)$v,
-                            'array', 'simple_array' => serialize($v),
-                            'json', 'json_array' => json_encode($v),
-                            'geometry', 'geometry_curved' => $v->toEWKT(),
-                            'topogeometry' => 'toTopoGeom('.$v->toEWKT().')',
-                            default => Type::getType($this->fieldTypes[$k])->convertToDatabaseValue($v, $this->db->getDatabasePlatform()),
-                        };
-                    }
-                }
-            }
-        }
-        return $converted_data;
-    }
-
-    /**
-     * Called after the Db data has been converted into PHP types (so after $manager->convertFromDb()), and before its passed to the Entity constructor
+     * Called after the Db data has been converted into PHP types (so after $manager->fromDBdata_toPHPdata()), and before its passed to the Entity constructor
      * @param array<string, mixed> $php_data By Reference!
      */
     abstract protected function afterConvertFromDb(array &$php_data): void;
 
     /**
-     * Called just before the PHP data is about to be saved to the Db (so before $manager->convertToDb())
+     * Called just before the PHP data is about to be saved to the Db (so before $manager->fromPHPdata_toDBdata())
      * @param array<string, mixed> $data By Reference!
      */
     abstract protected function beforeToDb(array &$data): void;
@@ -227,6 +153,21 @@ abstract class Manager
      * @return array<string, string>
      */
     abstract public function getFieldTypes(): array;
+
+    /**
+     * Info for topogeometry type fields
+     * @return array<string, array{'topology_name':string, 'topology_layer':int, 'tolerance':float}>
+     */
+    public function getTopoGeometryFieldInfo(): array { return []; }
+
+    /**
+     * @param string $column
+     * @return null|array{'topology_name':string, 'topology_layer':int, 'tolerance':float}
+     */
+    public function getTopoGeometryFieldInfo_column(string $column): array|null
+    {
+        return $this->getTopoGeometryFieldInfo()[$column] ?? null;
+    }
 
     /**
      * All the field names
@@ -361,6 +302,11 @@ abstract class Manager
     {
         if(!isset($id)) return null;
 
+        // topology changes the geometry, so always fetch it from the db, so skip the entity repository
+        if( !empty( $this->getTopoGeometryFieldInfo() ) ) {
+            $forceToGetFromDb = true;
+        }
+
         // If its in the Entity Repository, return what we already have
         if($this->useEntityRepository && !$forceToGetFromDb) {
             $existingEnt = $this->entityRepository->getByDbId($id, $this->dbTable.$this->getDbConnUrl());
@@ -491,7 +437,7 @@ abstract class Manager
 
         // save the unsaved related entities
         $entityRelations = $ent->_getRelatedEntities();
-        foreach($entityRelations as $field=>$relationObj) {
+        foreach($entityRelations as $_field=>$relationObj) {
             $relatedEntity = $relationObj->_getRefEntityNotFromDb($ent);
             if(isset($relatedEntity) && !$relatedEntity->hasId()) {
                 $this->orm->entityManager( $relationObj->getRefMgrClass(), $this->db)->save( $relatedEntity );
@@ -503,14 +449,13 @@ abstract class Manager
         {
             $dataToSave = $ent->_getData();
             $this->beforeToDb($dataToSave);
-            $dataToSave = $this->convertToDb($dataToSave);
 
             try {
-                $this->db->insert($this->dbTable, $dataToSave);
+                $this->insert($dataToSave);
             }
             catch (\Doctrine\DBAL\Exception\ConnectionException|\Doctrine\DBAL\Exception\ConnectionLost|\Doctrine\DBAL\Exception\RetryableException $e) {
                 sleep($_ENV['COOLIO_ORM_RETRY_SLEEP'] ?? 2);
-                $this->db->insert($this->dbTable, $dataToSave);
+                $this->insert($dataToSave);
             }
             catch(\Doctrine\DBAL\Exception $e) {
                 // log the data too, but truncate the too long things
@@ -534,15 +479,14 @@ abstract class Manager
         {
             $dataToSave = $ent->_getDataChanged();
             $this->beforeToDb($dataToSave);
-            $dataToSave = $this->convertToDb($dataToSave);
 
             try {
-                $this->db->update($this->dbTable, $dataToSave, ['id'=>$ent->_get('id')]);
+                $this->update($dataToSave, ['id'=>$ent->_get('id')]);
             }
             catch (\Doctrine\DBAL\Exception\ConnectionException|\Doctrine\DBAL\Exception\ConnectionLost|\Doctrine\DBAL\Exception\RetryableException $e) {
                 try {
                     sleep($_ENV['COOLIO_ORM_RETRY_SLEEP'] ?? 2);
-                    $this->db->update($this->dbTable, $dataToSave, ['id' => $ent->_get('id')]);
+                    $this->update($dataToSave, ['id' => $ent->_get('id')]);
                 }
                 catch (\Doctrine\DBAL\Exception $e) {
                     // log the data too, but truncate the too long things
@@ -668,6 +612,203 @@ abstract class Manager
             $qb = $qb->andWhereColumn($k, '=', $v);
         }
         return $qb->executeStatement();
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     * @return int|string
+     * @throws \Doctrine\DBAL\Exception
+     */
+    private function insert(array $data): int|string
+    {
+        if (count($data) === 0) {
+            return $this->db->executeStatement('INSERT INTO ' . $this->dbTable . ' () VALUES ()');
+        }
+
+        [$columns, $values, $placeholders, $types] = $this->fromPHPdata_toDBdata($data);
+
+        return $this->db->executeStatement(
+            'INSERT INTO ' . $this->dbTable . ' (' . implode(', ', $columns) . ')' .
+            ' VALUES (' . implode(', ', $placeholders) . ')',
+            $values,
+            $types,
+        );
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     * @param array<string, mixed> $criteria
+     * @return int|string
+     * @throws \Doctrine\DBAL\Exception
+     */
+    private function update(array $data, array $criteria = []): int|string
+    {
+        [$columns, $values, $placeholders, $types] = $this->fromPHPdata_toDBdata($data);
+
+        $set = [];
+        foreach ($columns as $i => $colName) {
+            $set[] = $colName . ' = ' . $placeholders[$i];
+        }
+
+        $sql = 'UPDATE ' . $this->dbTable . ' SET ' . implode(', ', $set);
+
+        if (!empty($criteria))
+        {
+            [$where_columns, $where_values, $where_placeholders, $where_types] = $this->fromPHPdata_toDBdata($criteria);
+
+            $whereConditions = [];
+            foreach($where_columns as $i => $colName) {
+                $whereConditions[] = $colName . ' = ' . $where_placeholders[$i];
+            }
+            $values = array_merge($values, $where_values);
+            $types = array_merge($types, $where_types);
+
+            $sql .= ' WHERE ' . implode(' AND ', $whereConditions);
+        }
+
+        return $this->db->executeStatement($sql, $values, $types);
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     * @return array{ array<string>, array<mixed>, array<string>, array<mixed> }
+     * @throws \Doctrine\DBAL\Exception
+     * @throws \Doctrine\DBAL\Types\ConversionException
+     */
+    private function fromPHPdata_toDBdata(array $data): array
+    {
+        $columns      = [];
+        $values       = [];
+        $placeholders = [];
+        $types        = [];
+
+        foreach($data as $k=>$v)
+        {
+            $columns[] = $k;
+
+            if(!isset($v))
+            {
+                $placeholders[] = '?';
+                $values[] = null;
+                $types[] = ParameterType::STRING;
+            }
+            elseif(isset($this->fieldTypes[$k]))
+            {
+                switch ($this->fieldTypes[$k]) {
+                    case 'string':
+                    case 'text':
+                        $placeholders[] = '?';
+                        $values[] = (string)$v;
+                        $types[] = ParameterType::STRING;
+                        break;
+                    case 'integer':
+                    case 'smallint':
+                    case 'bigint':
+                    case 'boolean':
+                        $placeholders[] = '?';
+                        $values[] = (int)$v;
+                        $types[] = ParameterType::INTEGER;
+                        break;
+                    case 'float':
+                    case 'decimal':
+                        $placeholders[] = '?';
+                        $values[] = (float)$v;
+                        $types[] = ParameterType::STRING;
+                        break;
+                    case 'array':
+                    case 'simple_array':
+                        $placeholders[] = '?';
+                        $values[] = serialize($v);
+                        $types[] = ParameterType::STRING;
+                        break;
+                    case 'json':
+                    case 'json_array':
+                        $placeholders[] = '?';
+                        $jsonStr = json_encode($v);
+                        if($jsonStr === false) {
+                            $values[] = json_encode(['json'=>'errored']);
+                        } else {
+                            $values[] = $jsonStr;
+                        }
+                        $types[] = ParameterType::STRING;
+                        break;
+                    case 'geometry':
+                    case 'geometry_curved':
+                        $placeholders[] = Geo\GeoFunctions::ST_GeomFromEWKT_param(
+                            $v,
+                            $values,
+                            $types
+                        );
+                        break;
+                    case 'topogeometry':
+                        $topoGeomFieldInfo_column = $this->getTopoGeometryFieldInfo_column($k);
+                        if(!isset($topoGeomFieldInfo_column)) {
+                            throw new \InvalidArgumentException("Field '$k' type in manager->getFieldTypes() is 'topogeometry' but there is no field for it in manager->getTopoGeometryFieldInfo()");
+                        }
+                        $placeholders[] = Geo\GeoFunctions::toTopoGeom_param(
+                            $v,
+                            $topoGeomFieldInfo_column['topology_name'],
+                            $topoGeomFieldInfo_column['topology_layer'],
+                            $topoGeomFieldInfo_column['tolerance'],
+                            $values,
+                            $types
+                        );
+                        break;
+                    default:
+                        $placeholders[] = '?';
+                        $values[] = Type::getType($this->fieldTypes[$k])->convertToDatabaseValue($v, $this->db->getDatabasePlatform());
+                        $types[] = ParameterType::STRING;
+                        break;
+                }
+            }
+            else
+            {
+                $placeholders[] = '?';
+                $values[$k] = $v;
+                $types[] = ParameterType::STRING;
+            }
+        }
+
+        return [$columns, $values, $placeholders, $types];
+    }
+
+    /**
+     * Change the types
+     * @param array<string, mixed> $data
+     * @return array<string, mixed>
+     */
+    protected function fromDBdata_toPHPdata(array $data): array
+    {
+        foreach($data as $k=>$v)
+        {
+            /*if(!isset($this->fieldTypes[$k])) // this field doesn't belong to this entity
+            {
+                unset($data[$k]);
+            }
+            else*/
+            if(isset($v)) {
+                if(!str_ends_with($k, '_srid')) {
+                    $data[$k] = match($this->fieldTypes[$k] ?? 'doesnt_belong_to_this_entity') {
+                        'doesnt_belong_to_this_entity' => $v,
+                        'string', 'text' => (string)$v,
+                        'integer', 'smallint', 'bigint' => (int)$v,
+                        'float', 'decimal' => (float)$v,
+                        'boolean' => (bool)$v,
+                        'array', 'simple_array' => unserialize($v),
+                        'json', 'json_array' => json_decode($v, true),
+                        //'geometry' => Geo\Shape2D3DFactory::createFromGeoJSONString($v, $data[$k.'_srid'] ?? null),
+                        //'geometry_curved', 'topogeometry' => Geo\Shape2D3DFactory::createFromGeoEWKTString($v),
+                        'geometry' , 'geometry_curved', 'topogeometry' => Geo\Shape2D3DFactory::createFromGeoEWKTString($v),
+                        default => Type::getType($this->fieldTypes[$k])->convertToPHPValue($v, $this->db->getDatabasePlatform()),
+                    };
+                }
+            }
+            else // this else was not here and all test passed
+            {
+                $data[$k] = null;
+            }
+        }
+        return $data;
     }
 
 }

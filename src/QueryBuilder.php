@@ -10,6 +10,8 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Result;
 use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Types\Type;
+use Milanmadar\CoolioORM\Geo\AbstractShape;
+use Milanmadar\CoolioORM\Geo\GeoFunctions;
 use Milanmadar\CoolioORM\Geo\GeoQueryProcessor;
 
 class QueryBuilder extends DoctrineQueryBuilder
@@ -24,12 +26,14 @@ class QueryBuilder extends DoctrineQueryBuilder
 
     /** @var int in the whereColumn() methods we use this to generate the named placeholder */
     private int $placeholderI;
+    private int $insertSetValuePlaceholderI;
 
     private ORM $orm;
     private Connection $db;
     private StatementRepository $statementRepo;
     private ?Manager $entityMgr;
     private bool $select_asterist_is_done;
+    private bool $isPostgres;
 
     public function __construct(ORM $orm, Connection $db, ?Manager $entityMgr = null)
     {
@@ -38,11 +42,18 @@ class QueryBuilder extends DoctrineQueryBuilder
         $this->type = self::TYPE_SELECT;
         $this->orderBys = [];
         $this->placeholderI = 0;
+        $this->insertSetValuePlaceholderI = 0;
         $this->db = $db;
         $this->orm = $orm;
         $this->statementRepo = $this->orm->getStatementRepositoryByConnection($db);
         $this->entityMgr = $entityMgr;
         $this->select_asterist_is_done = false;
+        $this->isPostgres = str_contains(get_class($this->db->getDatabasePlatform()), 'PostgreSQL');
+    }
+
+    public function getDoctrineConnection(): Connection
+    {
+        return $this->db;
     }
 
     /**
@@ -69,30 +80,31 @@ class QueryBuilder extends DoctrineQueryBuilder
      */
     public function select(string ...$expressions): self
     {
-        // Tiny optimization to avoid running the "transform geometries" section below.
-        // It's needed, because the baseManager::createQueryBuilder() calls $this->select('*')
-        // and then the user may also call $this->select('*').
-        // So just don't do the "transform geometries" section below twice
-        if($expressions[0] == '*') {
-            if($this->select_asterist_is_done) {
-                return $this;
-            }
-            $this->select_asterist_is_done = true;
-        } else {
-            $this->select_asterist_is_done = false;
-        }
+        $_exps = $expressions;
 
-        // transform geometries
-        if(isset($this->entityMgr))
+        if($this->isPostgres && isset($this->entityMgr))
         {
+            // Tiny optimization to avoid running the "transform geometries" section below.
+            // It's needed, because the baseManager::createQueryBuilder() calls $this->select('*')
+            // and then the user may also call $this->select('*').
+            // So just don't do the "transform geometries" section below twice
             if($expressions[0] == '*') {
-                $expressions = $this->entityMgr->getFields();
+                if($this->select_asterist_is_done) {
+                    return $this;
+                }
+                $this->select_asterist_is_done = true;
+            } else {
+                $this->select_asterist_is_done = false;
             }
 
-            $_exps = GeoQueryProcessor::geometryToPostGISformat($this->entityMgr->getFieldTypes(), $expressions);
-        }
-        else {
-            $_exps = $expressions;
+            // transform geometries
+            if(isset($this->entityMgr))
+            {
+                if($expressions[0] == '*') {
+                    $expressions = $this->entityMgr->getFields();
+                }
+                $_exps = GeoQueryProcessor::SELECTgeometryToPostGISformat($this->entityMgr->getFieldTypes(), $expressions);
+            }
         }
 
         $this->type = self::TYPE_SELECT;
@@ -171,6 +183,14 @@ class QueryBuilder extends DoctrineQueryBuilder
      */
     public function set(string $key, string|int|float|null $value): self
     {
+        // geometry (AbstractShape) is already converted to string becuase of $value param is string type
+        if($this->isPostgres && isset($this->entityMgr) && is_string($value)) {
+            $value = GeoQueryProcessor::INSERT_UPDATE_DELETE_geometryToPostGISformat(
+                $this->entityMgr->getTopoGeometryFieldInfo_column($key),
+                $value
+            );
+        }
+
         if(is_null($value)) $value = 'null';
         parent::set($key, (string)$value);
         return $this;
@@ -190,6 +210,16 @@ class QueryBuilder extends DoctrineQueryBuilder
      */
     private function correctWhereColumnParams(string $column, string $operator, mixed $value): array
     {
+        if($this->isPostgres && $value instanceof AbstractShape) {
+            $value = $value->__toString();
+            if(isset($this->entityMgr)) {
+                $value = GeoQueryProcessor::INSERT_UPDATE_DELETE_geometryToPostGISformat(
+                    $this->entityMgr->getTopoGeometryFieldInfo_column($column),
+                    $value
+                );
+            }
+        }
+
         $paramName = 'AutoGen' . ++$this->placeholderI;
 
         $operator = strtoupper(trim($operator));
@@ -227,7 +257,7 @@ class QueryBuilder extends DoctrineQueryBuilder
     }
 
     /**
-     * It handles NULL and corrrect '=' to 'IN' when $value is an array
+     * It handles NULL and correct '=' to 'IN' when $value is an array
      * @param string $column Field name
      * @param string $operator
      * @param mixed $value
@@ -265,6 +295,7 @@ class QueryBuilder extends DoctrineQueryBuilder
      */
     public function orWhereColumn(string $column, string $operator, mixed $value): QueryBuilder
     {
+
         $x = $this->correctWhereColumnParams($column, $operator, $value);
         $this->orWhere($x['sql']);
         if(isset($x['paramName'])) $this->setParameter($x['paramName'], $value);
@@ -387,7 +418,30 @@ class QueryBuilder extends DoctrineQueryBuilder
      */
     public function setValue(string $column, string $value): self
     {
-        parent::setValue($column, $value);
+        // user is parameterizing probably
+        if(!empty($value) && ($value == '?' || $value[0] == ':')) {
+            parent::setValue($column, $value);
+            return $this;
+        }
+
+        // geometry must go in as it is (not with setParameter() coz that would make it a string with quotes around it in the prepared statement)
+        if($this->isPostgres && isset($this->entityMgr)) {
+            $fieldTypes = $this->entityMgr->getFieldTypes();
+            if(isset($fieldTypes[$column])) {
+                if($fieldTypes[$column] == 'geometry' || $fieldTypes[$column] == 'geometry_curved' || $fieldTypes[$column] == 'topogeometry') {
+                    $value = GeoQueryProcessor::INSERT_UPDATE_DELETE_geometryToPostGISformat(
+                        $this->entityMgr->getTopoGeometryFieldInfo_column($column),
+                        $value
+                    );
+                    parent::setValue($column, $value);
+                    return $this;
+                }
+            }
+        }
+
+        ++$this->insertSetValuePlaceholderI;
+        parent::setValue($column, ':autoInsertSetValue'.$this->insertSetValuePlaceholderI);
+        parent::setParameter('autoInsertSetValue'.$this->insertSetValuePlaceholderI, $value);
         return $this;
     }
 
@@ -397,6 +451,14 @@ class QueryBuilder extends DoctrineQueryBuilder
      */
     public function values(array $values): self
     {
+        if($this->isPostgres && isset($this->entityMgr)) {
+            foreach($values as $k=>$v) {
+                $values[$k] = GeoQueryProcessor::INSERT_UPDATE_DELETE_geometryToPostGISformat(
+                    $this->entityMgr->getTopoGeometryFieldInfo_column($k),
+                    $v
+                );
+            }
+        }
         parent::values($values);
         return $this;
     }
@@ -492,6 +554,28 @@ class QueryBuilder extends DoctrineQueryBuilder
         string|ParameterType|Type|ArrayParameterType $type = ParameterType::STRING
     ): self
     {
+        if($this->isPostgres && $value instanceof AbstractShape) {
+            $value = $value->__toString();
+
+            if(is_string($key) && isset($this->entityMgr))
+            {
+                $possible_column_name = ltrim($key, ':');
+                // camel case to snake case
+                $pattern = [
+                    '/([a-z0-9])([A-Z])/', // Place underscore between a lowercase letter or number and an uppercase letter (e.g. "aB" → "a_B")
+                    '/([A-Z]+)([A-Z][a-z])/', // Place underscore between two uppercase letters followed by a lowercase letter (e.g. "HTMLParser" → "HTML_Parser")
+                ];
+                /** @var string $possible_column_name */
+                $possible_column_name = preg_replace($pattern, ['$1_$2', '$1_$2', ], $possible_column_name);
+                $possible_column_name = strtolower($possible_column_name);
+
+                $value = GeoQueryProcessor::INSERT_UPDATE_DELETE_geometryToPostGISformat(
+                    $this->entityMgr->getTopoGeometryFieldInfo_column($possible_column_name),
+                    $value
+                );
+            }
+        }
+
         // bool
         if(is_bool($value)) {
             $value = (int)$value;
@@ -516,7 +600,6 @@ class QueryBuilder extends DoctrineQueryBuilder
         }
 
         parent::setParameter($key, $value, $type);
-
         return $this;
     }
 
@@ -567,16 +650,6 @@ class QueryBuilder extends DoctrineQueryBuilder
     public function distinct(bool $distinct = true): self
     {
         parent::distinct($distinct);
-        return $this;
-    }
-
-    /**
-     * @inheritDoc
-     * @return $this
-     */
-    public function addSelect(string $expression, string ...$expressions): self
-    {
-        parent::addSelect($expression, ...$expressions);
         return $this;
     }
 

@@ -55,6 +55,29 @@ class Manager extends \Milanmadar\CoolioORM\Manager
         'topo_geom_collection' => 'topogeometry'
     ]; }
 
+    public function getTopoGeometryFieldInfo(): array { return [
+        'topo_geom_point' => [
+            'topology_name'  => 'topology_test_topo',
+            'topology_layer' => 1,
+            'tolerance'  => $_ENV['TOPOGEOMETRY_DEFAULT_TOLERANCE']
+        ],
+        'topo_geom_linestring' => [
+            'topology_name'  => 'topology_test_topo',
+            'topology_layer' => 2,
+            'tolerance'  => $_ENV['TOPOGEOMETRY_DEFAULT_TOLERANCE']
+        ],
+        'topo_geom_polygon' => [
+            'topology_name'  => 'topology_test_topo',
+            'topology_layer' => 3,
+            'tolerance'  => $_ENV['TOPOGEOMETRY_DEFAULT_TOLERANCE']
+        ],
+        'topo_geom_collection' => [
+            'topology_name'  => 'topology_test_topo',
+            'topology_layer' => 4,
+            'tolerance'  => $_ENV['TOPOGEOMETRY_DEFAULT_TOLERANCE']
+        ]
+    ]; }
+
     /**
     * @inheritDoc
     */

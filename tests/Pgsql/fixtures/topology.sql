@@ -15,7 +15,7 @@ DROP TABLE IF EXISTS topology_test;
 
 CREATE TABLE public.topology_test (
       id SERIAL PRIMARY KEY,
-      name TEXT
+      name VARCHAR(45) DEFAULT NULL
 );
 
 SELECT AddTopoGeometryColumn(
@@ -59,27 +59,27 @@ INSERT INTO public.topology_test (
 ) VALUES (
  'Main Street',
  toTopoGeom(
-         ST_GeomFromEWKT('SRID=4326;MULTIPOINT(1 2)'), -- your raw geometry
-         'topology_test_topo',                -- topology schema
-         1,                                   -- topology layer id (typically 1 if only 1 layer)
-         0.001                                -- tolerance for snapping and validation
+     ST_GeomFromEWKT('SRID=4326;MULTIPOINT(1 2)'), -- your raw geometry
+     'topology_test_topo',                -- topology schema
+     1,                                   -- topology layer id (typically 1 if only 1 layer)
+     0.001                                -- tolerance for snapping and validation
  ),
  toTopoGeom(
-         ST_GeomFromEWKT('SRID=4326;MULTILINESTRING((1 2, 3 4))'), -- your raw geometry
-         'topology_test_topo',                          -- topology schema
-         2,                                             -- topology layer id (typically 1 if only 1 layer)
-         0.001                                          -- tolerance for snapping and validation
+     ST_GeomFromEWKT('SRID=4326;MULTILINESTRING((1 2, 3 4))'), -- your raw geometry
+     'topology_test_topo',                          -- topology schema
+     2,                                             -- topology layer id (typically 1 if only 1 layer)
+     0.001                                          -- tolerance for snapping and validation
  ),
  toTopoGeom(
-         ST_GeomFromEWKT('SRID=4326;MULTIPOLYGON(((0 0,0 5,5 5,5 0,0 0),(1 1,1 2,2 2,2 1,1 1)))'), -- your raw geometry
-         'topology_test_topo',                           -- topology schema
-         3,                                              -- topology layer id (typically 1 if only 1 layer)
-         0.001                                           -- tolerance for snapping and validation
+     ST_GeomFromEWKT('SRID=4326;MULTIPOLYGON(((0 0,0 5,5 5,5 0,0 0),(1 1,1 2,2 2,2 1,1 1)))'), -- your raw geometry
+     'topology_test_topo',                           -- topology schema
+     3,                                              -- topology layer id (typically 1 if only 1 layer)
+     0.001                                           -- tolerance for snapping and validation
  ),
  toTopoGeom(
-         ST_GeomFromEWKT('SRID=4326;GEOMETRYCOLLECTION(POINT(1 1),LINESTRING(2 2,3 3,4 4))'), -- your raw geometry
-         'topology_test_topo',                                -- topology schema
-         4,                                              -- topology layer id (typically 1 if only 1 layer)
-         0.001                                           -- tolerance for snapping and validation
- )
+     ST_GeomFromEWKT('SRID=4326;GEOMETRYCOLLECTION(POINT(1 1),LINESTRING(2 2,3 3,4 4))'), -- your raw geometry
+     'topology_test_topo',                                -- topology schema
+     4,                                              -- topology layer id (typically 1 if only 1 layer)
+     0.001                                           -- tolerance for snapping and validation
+)
 );

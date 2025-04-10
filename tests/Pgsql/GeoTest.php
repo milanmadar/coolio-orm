@@ -54,14 +54,14 @@ class GeoTest extends TestCase
         $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\CircularString', $ent->getCircularStringGeom());
     }
 
-    public function testSelectAllShapes_FindOne_QueryBuilder_Star()
+    public function testSelectExcept_AllShapes_FindOne_QueryBuilder_Star()
     {
         $mgr = self::$dbHelper->getManager(GeoShapeAll\Manager::class);
         $mgr->clearRepository(false);
 
         /** @var GeoShapeAll\Entity $ent */
         $ent = $mgr->createQueryBuilder()
-            ->select('*')
+            ->selectExcept(['geomcollection_geom','polygon_geom'])
             ->andWhere('1=1')
             ->limit(0, 1)
             ->fetchOneEntity()
@@ -69,11 +69,9 @@ class GeoTest extends TestCase
 
         $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\Point', $ent->getPointGeom());
         $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\LineString', $ent->getLinestringGeom());
-        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\Polygon', $ent->getPolygonGeom());
         $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\MultiPoint', $ent->getMultipointGeom());
         $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\MultiLineString', $ent->getMultilinestringGeom());
         $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\MultiPolygon', $ent->getMultipolygonGeom());
-        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\GeometryCollection', $ent->getGeomcollectionGeom());
         $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\CircularString', $ent->getCircularStringGeom());
         $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\CompoundCurve', $ent->getCompoundcurveGeom());
         $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\Shape2D\CurvePolygon', $ent->getCurvepolygonGeom());
@@ -418,5 +416,110 @@ class GeoTest extends TestCase
         $this->assertTrue($compoundCurve == $ent->getCompoundcurveGeom());
         $this->assertTrue($curvePolygon == $ent->getCurvepolygonGeom());
         $this->assertTrue($multiCurve == $ent->getMulticurveGeom());
+    }
+
+    public function testUpdate_asObjects()
+    {
+        $mgr = self::$dbHelper->getManager(GeoShapeAll\Manager::class);
+        $mgr->clearRepository(false);
+
+        $oCnt = self::$dbHelper->countRows('geometry_test');
+
+        //
+        // Create All Shapes
+        //
+        $point = new Point(6, 7, 4326);
+        $lineString = new LineString([
+            new Point(11, 1), new Point(2, 2), new Point(3, 3), new Point(44, 44)
+        ], 4326);
+        $multiPoint = new MultiPoint([
+            new Point(11, 1), new Point(2, 2), new Point(3, 3), new Point(4, 4)
+        ], 4326);
+        $polygon = new Polygon([
+            new LineString([new Point(22, 0), new Point(0, 5), new Point(5, 5), new Point(5, 0), new Point(22, 0)]),
+            new LineString([new Point(22, 1), new Point(1, 2), new Point(2, 2), new Point(2, 1), new Point(22, 1)])
+        ], 4326);
+        $multiLineString = new MultiLineString([
+            new LineString([new Point(33, 1), new Point(2, 2), new Point(3, 3)], 4326),
+            new LineString([new Point(33, 4), new Point(5, 5)], 4326),
+            new LineString([new Point(33, 6), new Point(7, 7), new Point(8, 8)], 4326)
+        ], 4326);
+        $multiPolygon = new MultiPolygon([
+            new Polygon([
+                new LineString([new Point(44, 0), new Point(0, 5), new Point(5, 5), new Point(5, 0), new Point(44, 0),]),
+                new LineString([new Point(44, 1), new Point(1, 2), new Point(2, 2), new Point(2, 1), new Point(44, 1),])
+            ], 4326),
+            new Polygon([
+                new LineString([new Point(55, 8), new Point(0, 5), new Point(5, 5), new Point(5, 0), new Point(55, 8),]),
+                new LineString([new Point(55, 9), new Point(1, 2), new Point(2, 2), new Point(2, 1), new Point(55, 9),])
+            ], 4326)
+        ], 4326);
+        $compoundCurve = new CompoundCurve([
+            new LineString([new Point(66, 0), new Point(66, 1)]),
+            new CircularString([new Point(66, 1), new Point(4, 2), new Point(66, 65)]),
+            new LineString([new Point(66, 65), new Point(6, 0)]),
+        ], 4326);
+        $circularString = new CircularString([
+            new Point(77, 0), new Point(4, 0), new Point(4, 4), new Point(0, 4), new Point(0, 0)
+        ], 4326);
+        $curvePolygon = new CurvePolygon([
+            new CircularString([new Point(88, 0, 4326), new Point(6, 0, 4326), new Point(6, 6, 4326), new Point(0, 6, 4326), new Point(88, 0, 4326)], 4326),
+            new LineString([new Point(88, 2, 4326), new Point(3, 2, 4326), new Point(3, 3, 4326), new Point(2, 3, 4326), new Point(88, 2, 4326)], 4326),
+            new CircularString([new Point(88, 1, 4326), new Point(2, 1, 4326), new Point(2, 2, 4326), new Point(1, 2, 4326), new Point(88, 1, 4326)], 4326)
+        ], 4326);
+        $multiCurve = new MultiCurve([
+            new CircularString([new Point(99, 0, 4326), new Point(1, 2, 4326), new Point(2, 0, 4326)], 4326),
+            new LineString([new Point(99, 3, 4326), new Point(4, 4, 4326), new Point(5, 5, 4326)], 4326)
+        ], 4326);
+        $geometryCollection = new GeometryCollection([
+            new Point(12, 1, 4326),
+            new LineString([new Point(12, 2, 4326), new Point(3, 3, 4326), new Point(4, 4, 4326)], 4326),
+            new Polygon([
+                new LineString([new Point(12, 0, 4326), new Point(0, 5, 4326), new Point(5, 5, 4326), new Point(5, 0, 4326), new Point(12, 0, 4326),], 4326),
+                new LineString([new Point(12, 1, 4326), new Point(1, 2, 4326), new Point(2, 2, 4326), new Point(2, 1, 4326), new Point(12, 1, 4326),], 4326)
+            ], 4326)
+        ], 4326);
+
+        // first get what we had
+        $ent1 = $mgr->findById(1);
+
+        //
+        // Insert All Shapes
+        //
+        $mgr->createQueryBuilder()
+            ->update()
+            ->set('point_geom', $point)
+            ->set('linestring_geom', $lineString)
+            ->set('polygon_geom', $polygon)
+            ->set('multipoint_geom', $multiPoint)
+            ->set('multilinestring_geom', $multiLineString)
+            ->set('multipolygon_geom', $multiPolygon)
+            ->set('geomcollection_geom', $geometryCollection)
+            ->set('circularstring_geom', $circularString)
+            ->set('compoundcurve_geom', $compoundCurve)
+            ->set('curvedpolygon_geom', $curvePolygon)
+            ->set('multicurve_geom', $multiCurve)
+            ->andWhereColumn('id', '=', 1)
+            ->executeStatement()
+        ;
+        $this->assertEquals($oCnt, self::$dbHelper->countRows('geometry_test'));
+
+        //
+        // Select All Shapes
+        //
+        $mgr->_getEntityRepository()->clear();
+        $ent2 = $mgr->findById(1);
+
+        $this->assertFalse($ent1->getPointGeom() == $ent2->getPointGeom());
+        $this->assertFalse($ent1->getLinestringGeom() == $ent2->getLinestringGeom());
+        $this->assertFalse($ent1->getPolygonGeom() == $ent2->getPolygonGeom());
+        $this->assertFalse($ent1->getMultipointGeom() == $ent2->getMultipointGeom());
+        $this->assertFalse($ent1->getMultilinestringGeom() == $ent2->getMultilinestringGeom());
+        $this->assertFalse($ent1->getMultipolygonGeom() == $ent2->getMultipolygonGeom());
+        $this->assertFalse($ent1->getGeomcollectionGeom() == $ent2->getGeomcollectionGeom());
+        $this->assertFalse($ent1->getCircularStringGeom() == $ent2->getCircularStringGeom());
+        $this->assertFalse($ent1->getCompoundcurveGeom() == $ent2->getCompoundcurveGeom());
+        $this->assertFalse($ent1->getCurvepolygonGeom() == $ent2->getCurvepolygonGeom());
+        $this->assertFalse($ent1->getMulticurveGeom() == $ent2->getMulticurveGeom());
     }
 }

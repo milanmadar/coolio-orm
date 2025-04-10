@@ -518,4 +518,43 @@ class ManagerDbTest extends TestCase
         $this->assertEquals($otherId, $ent2->getOrmOther()->getId());
     }
 
+    public function testUpdateToNull()
+    {
+        $mgr = self::$dbHelper->getManager(OrmTest\Manager::class);
+
+        $mgr->clearRepository(false);
+        $ent1 = $mgr->findById(10);
+        $this->assertNotNull($ent1->getFldChar());
+        $this->assertNotNull($ent1->getFldFloat());
+        $this->assertNotNull($ent1->getFldVarchar());
+
+        $ent1->setFldChar(null);
+        $ent1->setFldFloat(null);
+        $mgr->save($ent1);
+
+        $mgr->clearRepository(false);
+        $ent2 = $mgr->findById(10);
+        $this->assertFalse($ent1 === $ent2);
+        $this->assertNull($ent2->getFldChar());
+        $this->assertNull($ent2->getFldFloat());
+        $this->assertNotNull($ent2->getFldVarchar());
+    }
+
+    public function testInsertNull()
+    {
+        $mgr = self::$dbHelper->getManager(OrmTest\Manager::class);
+
+        $ent1 = $mgr->createEntity()
+            ->setFldChar(null)
+            ->setFldFloat(null);
+        $mgr->save($ent1);
+
+        $mgr->clearRepository(false);
+        $ent2 = $mgr->findById($ent1->getId());
+        $this->assertFalse($ent1 === $ent2);
+        $this->assertNull($ent2->getFldChar());
+        $this->assertNull($ent2->getFldFloat());
+        $this->assertNotNull($ent2->getFldVarchar());
+    }
+
 }
