@@ -6,6 +6,41 @@ use Milanmadar\CoolioORM\Manager;
 
 class GeoQueryProcessor
 {
+    /**
+     * @param Manager|null $mgr
+     * @param string $column
+     * @param AbstractShape $shape
+     * @return array{ string, array<string, mixed>, array<string, mixed> } SQLpart, paramValues, paramTypes
+     */
+    public static function geoFunction_sqlPart_andParams(Manager|null $mgr, string $column, AbstractShape $shape): array
+    {
+        $paramValues = [];
+        $paramTypes = [];
+
+        // topogeometry
+        $topoGeomFieldInfo_column = $mgr?->getTopoGeometryFieldInfo_column($column);
+        if(isset($topoGeomFieldInfo_column)) {
+            $sqlPart = GeoFunctions::toTopoGeom_param(
+                $shape,
+                $topoGeomFieldInfo_column['topology_name'],
+                $topoGeomFieldInfo_column['topology_layer'],
+                $topoGeomFieldInfo_column['tolerance'],
+                $paramValues,
+                $paramTypes
+            );
+        }
+        else // regular geometry
+        {
+            $sqlPart = GeoFunctions::ST_GeomFromEWKT_param(
+                $shape,
+                $paramValues,
+                $paramTypes
+            );
+        }
+
+        return [$sqlPart, $paramValues, $paramTypes];
+    }
+
     public static function processQuery(string $sql, Manager $mgr): string
     {
         // extract the SELECT part
@@ -64,31 +99,6 @@ class GeoQueryProcessor
             }
         }
         return $cols;
-    }
-
-    /**
-     * @param null|array{'topology_name':string, 'topology_layer':int, 'tolerance':float} $managerTopoGeometryFieldInfo_column
-     * @param string|int|float|null $value
-     * @return string
-     */
-    public static function INSERT_UPDATE_DELETE_geometryToPostGISformat(
-        array|null $managerTopoGeometryFieldInfo_column,
-        string|int|float|null $value
-    ): string
-    {
-        if(!isset($managerTopoGeometryFieldInfo_column)) {
-            return (string)$value;
-        }
-
-        if(!is_string($value)) {
-            return (string)$value;
-        }
-
-        // All geometry fields are in the form of 'SRID=4326;POINT(1 2)'
-        // because the type of the $value param is string.
-        // That's already good for 'geometry' and 'geometry_curved' types.
-        // For 'topogeometry' type, we need to wrap it further with toTopoGeom()
-        return "toTopoGeom({$value}, '{$managerTopoGeometryFieldInfo_column['topology_name']}', {$managerTopoGeometryFieldInfo_column['topology_layer']}, {$managerTopoGeometryFieldInfo_column['tolerance']})";
     }
 
     /**

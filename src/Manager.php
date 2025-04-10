@@ -684,11 +684,11 @@ abstract class Manager
         $placeholders = [];
         $types        = [];
 
-        foreach($data as $k=>$v)
+        foreach($data as $colName=>$val)
         {
-            $columns[] = $k;
+            $columns[] = $colName;
 
-            if(!isset($v))
+            if(!isset($val))
             {
                 $placeholders[] = 'NULL';
 //                $p = 'mgrPm' . ++self::$placeholderNameIndex;
@@ -696,14 +696,14 @@ abstract class Manager
 //                $values[$p] = null;
 //                $types[$p] = ParameterType::STRING;
             }
-            elseif(isset($this->fieldTypes[$k]))
+            elseif(isset($this->fieldTypes[$colName]))
             {
-                switch ($this->fieldTypes[$k]) {
+                switch ($this->fieldTypes[$colName]) {
                     case 'string':
                     case 'text':
                         $p = 'mgrPm' . ++self::$placeholderNameIndex;
                         $placeholders[] = ':'.$p;
-                        $values[$p] = (string)$v;
+                        $values[$p] = (string)$val;
                         $types[$p] = ParameterType::STRING;
                         break;
                     case 'integer':
@@ -712,28 +712,28 @@ abstract class Manager
                     case 'boolean':
                         $p = 'mgrPm' . ++self::$placeholderNameIndex;
                         $placeholders[] = ':'.$p;
-                        $values[$p] = (int)$v;
+                        $values[$p] = (int)$val;
                         $types[$p] = ParameterType::INTEGER;
                         break;
                     case 'float':
                     case 'decimal':
                         $p = 'mgrPm' . ++self::$placeholderNameIndex;
                         $placeholders[] = ':'.$p;
-                        $values[$p] = (float)$v;
+                        $values[$p] = (float)$val;
                         $types[$p] = ParameterType::STRING;
                         break;
                     case 'array':
                     case 'simple_array':
                         $p = 'mgrPm' . ++self::$placeholderNameIndex;
                         $placeholders[] = ':'.$p;
-                        $values[$p] = serialize($v);
+                        $values[$p] = serialize($val);
                         $types[$p] = ParameterType::STRING;
                         break;
                     case 'json':
                     case 'json_array':
                         $p = 'mgrPm' . ++self::$placeholderNameIndex;
                         $placeholders[] = ':'.$p;
-                        $jsonStr = json_encode($v);
+                        $jsonStr = json_encode($val);
                         if($jsonStr === false) {
                             $values[$p] = json_encode(['json'=>'errored']);
                         } else {
@@ -743,30 +743,20 @@ abstract class Manager
                         break;
                     case 'geometry':
                     case 'geometry_curved':
-                        $placeholders[] = Geo\GeoFunctions::ST_GeomFromEWKT_param(
-                            $v,
-                            $values,
-                            $types
-                        );
-                        break;
                     case 'topogeometry':
-                        $topoGeomFieldInfo_column = $this->getTopoGeometryFieldInfo_column($k);
-                        if(!isset($topoGeomFieldInfo_column)) {
-                            throw new \InvalidArgumentException("Manager::fromPHPdata_toDBdata() Field '$k' type in manager->getFieldTypes() is 'topogeometry' but there is no field for it in manager->getTopoGeometryFieldInfo()");
-                        }
-                        $placeholders[] = Geo\GeoFunctions::toTopoGeom_param(
-                            $v,
-                            $topoGeomFieldInfo_column['topology_name'],
-                            $topoGeomFieldInfo_column['topology_layer'],
-                            $topoGeomFieldInfo_column['tolerance'],
-                            $values,
-                            $types
+                        [$geo_sqlPart, $geo_paramValues, $geo_paramTypes] = Geo\GeoQueryProcessor::geoFunction_sqlPart_andParams(
+                            $this,
+                            $colName,
+                            $val
                         );
+                        $placeholders[] = $geo_sqlPart;
+                        $values = array_merge($values, $geo_paramValues);
+                        $types = array_merge($types, $geo_paramTypes);
                         break;
                     default:
                         $p = 'mgrPm' . ++self::$placeholderNameIndex;
                         $placeholders[] = ':'.$p;
-                        $values[$p] = Type::getType($this->fieldTypes[$k])->convertToDatabaseValue($v, $this->db->getDatabasePlatform());
+                        $values[$p] = Type::getType($this->fieldTypes[$colName])->convertToDatabaseValue($val, $this->db->getDatabasePlatform());
                         $types[$p] = ParameterType::STRING;
                         break;
                 }
@@ -775,7 +765,7 @@ abstract class Manager
             {
                 $p = 'mgrPm' . ++self::$placeholderNameIndex;
                 $placeholders[] = ':'.$p;
-                $values[$p] = $v;
+                $values[$p] = $val;
                 $types[$p] = ParameterType::STRING;
             }
         }

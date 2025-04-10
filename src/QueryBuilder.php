@@ -180,21 +180,21 @@ class QueryBuilder extends DoctrineQueryBuilder
      * @param string $column
      * @param string $operator
      * @param mixed $value
-     * @return array<string, mixed> [<br>
-     *    'sql' => Pass this to the $this->where() method,<br>
-     *    'paramName' => Placeholder name. (If its NULL then no need to call $this->setParameter())<br>
+     * @return array{ string, array<string, mixed> } [<br>
+     *    SQL: Pass this to the $this->where() method,<br>
+     *    Placeholder names and values.<br>
      * ]
      */
     private function correctWhereColumnParams(string $column, string $operator, mixed $value): array
     {
-        if($this->isPostgres && $value instanceof AbstractShape) {
-            $value = $value->__toString();
-            if(isset($this->entityMgr)) {
-                $value = GeoQueryProcessor::INSERT_UPDATE_DELETE_geometryToPostGISformat(
-                    $this->entityMgr->getTopoGeometryFieldInfo_column($column),
-                    $value
-                );
-            }
+        if($value instanceof AbstractShape) {
+            [$sqlPart, $paramValues, $paramTypes] = Geo\GeoQueryProcessor::geoFunction_sqlPart_andParams(
+                $this->entityMgr,
+                $column,
+                $value
+            );
+            $sql = $column.' '.$operator.' :'.$sqlPart;
+            return [$sql, $paramValues];
         }
 
         $paramName = 'AutoGen' . ++$this->setParameterName_i;
@@ -208,9 +208,9 @@ class QueryBuilder extends DoctrineQueryBuilder
             if(empty($value)) {
                 //return ['sql'=>$column.' '.$operator.' ()'];
                 if($operator == 'IN') {
-                    return ['sql' => '1=2'];
+                    return ['1=2', []];
                 } else {
-                    return ['sql' => '1=1'];
+                    return ['1=1', []];
                 }
             }
 
@@ -230,7 +230,9 @@ class QueryBuilder extends DoctrineQueryBuilder
             $sql = $column.' '.$operator.' :'.$paramName;
         }
 
-        return ['sql'=>$sql, 'paramName'=>$paramName];
+        return isset($paramName)
+            ? [$sql, [$paramName=>$value]]
+            : [$sql, []];
     }
 
     /**
@@ -242,9 +244,14 @@ class QueryBuilder extends DoctrineQueryBuilder
      */
     public function whereColumn(string $column, string $operator, mixed $value): QueryBuilder
     {
-        $x = $this->correctWhereColumnParams($column, $operator, $value);
-        $this->where($x['sql']);
-        if(isset($x['paramName'])) $this->setParameter($x['paramName'], $value);
+        [$sql, $paramNamesAndValues] = $this->correctWhereColumnParams($column, $operator, $value);
+
+        $this->where($sql);
+
+        foreach($paramNamesAndValues as $k=>$v) {
+            $this->setParameter($k, $v);
+        }
+
         return $this;
     }
 
@@ -257,9 +264,14 @@ class QueryBuilder extends DoctrineQueryBuilder
      */
     public function andWhereColumn(string $column, string $operator, mixed $value): QueryBuilder
     {
-        $x = $this->correctWhereColumnParams($column, $operator, $value);
-        $this->andWhere($x['sql']);
-        if(isset($x['paramName'])) $this->setParameter($x['paramName'], $value);
+        [$sql, $paramNamesAndValues] = $this->correctWhereColumnParams($column, $operator, $value);
+
+        $this->andWhere($sql);
+
+        foreach($paramNamesAndValues as $k=>$v) {
+            $this->setParameter($k, $v);
+        }
+
         return $this;
     }
 
@@ -272,10 +284,14 @@ class QueryBuilder extends DoctrineQueryBuilder
      */
     public function orWhereColumn(string $column, string $operator, mixed $value): QueryBuilder
     {
+        [$sql, $paramNamesAndValues] = $this->correctWhereColumnParams($column, $operator, $value);
 
-        $x = $this->correctWhereColumnParams($column, $operator, $value);
-        $this->orWhere($x['sql']);
-        if(isset($x['paramName'])) $this->setParameter($x['paramName'], $value);
+        $this->orWhere($sql);
+
+        foreach($paramNamesAndValues as $k=>$v) {
+            $this->setParameter($k, $v);
+        }
+
         return $this;
     }
 
@@ -461,64 +477,25 @@ class QueryBuilder extends DoctrineQueryBuilder
             return $this;
         }
 
-        $paramValues = [];
-        $paramTypes = [];
-
-        // topogeometry
-        $topoGeomFieldInfo_column = $this->entityMgr?->getTopoGeometryFieldInfo_column($column);
-        if(isset($topoGeomFieldInfo_column)) {
-            $valueStrs = Geo\GeoFunctions::toTopoGeom_param(
-                $value,
-                $topoGeomFieldInfo_column['topology_name'],
-                $topoGeomFieldInfo_column['topology_layer'],
-                $topoGeomFieldInfo_column['tolerance'],
-                $paramValues,
-                $paramTypes
-            );
-        }
-        else { // regular geometry
-            $valueStrs = GeoFunctions::ST_GeomFromEWKT_param(
-                $value,
-                $paramValues,
-                $paramTypes
-            );
-        }
+        [$sqlPart, $paramValues, $paramTypes] = Geo\GeoQueryProcessor::geoFunction_sqlPart_andParams(
+            $this->entityMgr,
+            $column,
+            $value
+        );
 
         // set the things
         if($this->type == self::TYPE_INSERT) {
-            parent::setValue($column, $valueStrs);
+            parent::setValue($column, $sqlPart);
         } elseif($this->type == self::TYPE_UPDATE) {
-            parent::set($column, $valueStrs);
+            parent::set($column, $sqlPart);
         } else {
             throw new \InvalidArgumentException('QueryBuilder->setGeom() can be used only for INSERT and UPDATE queries. For SELECT queries use ->andWhereColumn()');
         }
 
-        foreach($paramValues as $i=>$v) {
-            parent::setParameter(
-                $i,
-                $v,
-                $paramTypes[$i]
-            );
+        foreach($paramValues as $paramName=>$paramValue) {
+            parent::setParameter($paramName, $paramValue, $paramTypes[$paramName]);
         }
 
-        return $this;
-    }
-
-    /**
-     * @inheritDoc
-     * @return $this
-     */
-    public function values(array $values): self
-    {
-        if($this->isPostgres && isset($this->entityMgr)) {
-            foreach($values as $k=>$v) {
-                $values[$k] = GeoQueryProcessor::INSERT_UPDATE_DELETE_geometryToPostGISformat(
-                    $this->entityMgr->getTopoGeometryFieldInfo_column($k),
-                    $v
-                );
-            }
-        }
-        parent::values($values);
         return $this;
     }
 
