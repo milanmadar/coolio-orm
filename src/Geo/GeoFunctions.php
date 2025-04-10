@@ -6,7 +6,7 @@ use Doctrine\DBAL\ParameterType;
 
 class GeoFunctions
 {
-    private static $parameterIndex = 0;
+    private static int $parameterIndex = 0;
 
     /**
      * @param AbstractShape $shape
@@ -28,15 +28,15 @@ class GeoFunctions
     {
         $geomFromEWKT = self::ST_GeomFromEWKT_param($shape, $paramsWillBe, $paramTypesWilleBe);
 
-        $p1 = 'toTopoGeom_p' . ++self::$parameterIndex;
+        $p1 = 'toTopoGeomPm' . ++self::$parameterIndex;
         $paramsWillBe[$p1] = $topologyName;
         $paramTypesWilleBe[$p1] = ParameterType::STRING;
 
-        $p2 = 'toTopoGeom_p' . ++self::$parameterIndex;
+        $p2 = 'toTopoGeomPm' . ++self::$parameterIndex;
         $paramsWillBe[$p2] = $topologyLayerId;
         $paramTypesWilleBe[$p2] = ParameterType::INTEGER;
 
-        $p3 = 'toTopoGeom_p' . ++self::$parameterIndex;
+        $p3 = 'toTopoGeomPm' . ++self::$parameterIndex;
         $paramsWillBe[$p3] = $tolerance;
         $paramTypesWilleBe[$p3] = ParameterType::STRING;
 
@@ -55,7 +55,7 @@ class GeoFunctions
         array &$paramTypesWilleBe
     ): string
     {
-        $p1 = 'GeomFromEWKT_p' . ++self::$parameterIndex;
+        $p1 = 'GeomFromEWKTpm' . ++self::$parameterIndex;
         $paramValuesWillBe[$p1] = $shape->toEWKT();
         $paramTypesWilleBe[$p1] = ParameterType::STRING;
 

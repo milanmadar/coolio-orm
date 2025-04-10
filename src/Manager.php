@@ -23,6 +23,8 @@ abstract class Manager
     /** @var string name of the database table */
     protected string $dbTable;
 
+    private static int $placeholderNameIndex = 0;
+
     /**
      * Entity Manager
      * @param ORM $orm
@@ -677,8 +679,6 @@ abstract class Manager
      */
     private function fromPHPdata_toDBdata(array $data): array
     {
-        $placeholderNameIndex = 0;
-
         $columns      = [];
         $values       = [];
         $placeholders = [];
@@ -690,17 +690,18 @@ abstract class Manager
 
             if(!isset($v))
             {
-                $p = 'manager_p' . ++$placeholderNameIndex;
-                $placeholders[] = $p;
-                $values[$p] = null;
-                $types[$p] = ParameterType::STRING;
+                $placeholders[] = 'NULL';
+//                $p = 'mgrPm' . ++self::$placeholderNameIndex;
+//                $placeholders[] = $p;
+//                $values[$p] = null;
+//                $types[$p] = ParameterType::STRING;
             }
             elseif(isset($this->fieldTypes[$k]))
             {
                 switch ($this->fieldTypes[$k]) {
                     case 'string':
                     case 'text':
-                        $p = 'manager_p' . ++$placeholderNameIndex;
+                        $p = 'mgrPm' . ++self::$placeholderNameIndex;
                         $placeholders[] = ':'.$p;
                         $values[$p] = (string)$v;
                         $types[$p] = ParameterType::STRING;
@@ -709,28 +710,28 @@ abstract class Manager
                     case 'smallint':
                     case 'bigint':
                     case 'boolean':
-                        $p = 'manager_p' . ++$placeholderNameIndex;
+                        $p = 'mgrPm' . ++self::$placeholderNameIndex;
                         $placeholders[] = ':'.$p;
                         $values[$p] = (int)$v;
                         $types[$p] = ParameterType::INTEGER;
                         break;
                     case 'float':
                     case 'decimal':
-                        $p = 'manager_p' . ++$placeholderNameIndex;
+                        $p = 'mgrPm' . ++self::$placeholderNameIndex;
                         $placeholders[] = ':'.$p;
                         $values[$p] = (float)$v;
                         $types[$p] = ParameterType::STRING;
                         break;
                     case 'array':
                     case 'simple_array':
-                        $p = 'manager_p' . ++$placeholderNameIndex;
+                        $p = 'mgrPm' . ++self::$placeholderNameIndex;
                         $placeholders[] = ':'.$p;
                         $values[$p] = serialize($v);
                         $types[$p] = ParameterType::STRING;
                         break;
                     case 'json':
                     case 'json_array':
-                        $p = 'manager_p' . ++$placeholderNameIndex;
+                        $p = 'mgrPm' . ++self::$placeholderNameIndex;
                         $placeholders[] = ':'.$p;
                         $jsonStr = json_encode($v);
                         if($jsonStr === false) {
@@ -763,7 +764,7 @@ abstract class Manager
                         );
                         break;
                     default:
-                        $p = 'manager_p' . ++$placeholderNameIndex;
+                        $p = 'mgrPm' . ++self::$placeholderNameIndex;
                         $placeholders[] = ':'.$p;
                         $values[$p] = Type::getType($this->fieldTypes[$k])->convertToDatabaseValue($v, $this->db->getDatabasePlatform());
                         $types[$p] = ParameterType::STRING;
@@ -772,7 +773,7 @@ abstract class Manager
             }
             else
             {
-                $p = 'manager_p' . ++$placeholderNameIndex;
+                $p = 'mgrPm' . ++self::$placeholderNameIndex;
                 $placeholders[] = ':'.$p;
                 $values[$p] = $v;
                 $types[$p] = ParameterType::STRING;
