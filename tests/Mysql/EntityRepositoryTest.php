@@ -260,4 +260,56 @@ class EntityRepositoryTest extends TestCase
         // set back to what it was
         $repo->setMaxEntityCount( $origiMax );
     }
+
+    public function testChangeId(): void
+    {
+        $mgr = self::$dbHelper->getManager(OrmTest\Manager::class);
+        $mgr->clearRepository(true);
+
+        $ent = $mgr->findById(1);
+        $ent->setId(9999);
+        $mgr->save($ent);
+
+        $ent2 = $mgr->findById(1);
+        $this->assertNull($ent2);
+
+        $ent3 = $mgr->findById(9999);
+        $this->assertNotNull($ent3);
+        $this->assertTrue($ent3 === $ent);
+    }
+
+    public function testEntity_rollbackSomeFields(): void
+    {
+        $mgr = self::$dbHelper->getManager(OrmTest\Manager::class);
+
+        /** @var OrmTest\Entity $ent */
+        $ent = $mgr->createQueryBuilder()
+            ->where('id = 1')
+            ->fetchOneEntity();
+
+        $ent->setFldChar('new value');
+        $ent->setFldInt(123412);
+        $ent->_rollbackSomeFields(['fld_char']);
+        $this->assertNotEquals('new value', $ent->getFldChar());
+
+        $ent->_rollback();
+        $this->assertNotEquals(123412, $ent->getFldInt());
+    }
+
+    public function testEntityDebug(): void
+    {
+        $mgr = self::$dbHelper->getManager(OrmTest\Manager::class);
+
+        /** @var OrmTest\Entity $ent */
+        $ent = $mgr->createQueryBuilder()
+            ->where('id = 1')
+            ->fetchOneEntity();
+
+        $html = $ent->debugHtml();
+        $this->assertNotEmpty($html);
+
+        $html = $ent->debugCli();
+        $this->assertNotEmpty($html);
+    }
+
 }

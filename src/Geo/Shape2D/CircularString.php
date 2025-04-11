@@ -12,11 +12,11 @@ class CircularString extends AbstractShape2D implements HasStartEndPointInterfac
      * @param int|null $srid Optional SRID, defaults to the value in $_ENV['GEO_DEFAULT_SRID']
      * @return CircularString
      */
-    public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): CircularString
+    /*public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): CircularString
     {
         // GeoJSON does not support CircularString by spec
         throw new \RuntimeException('GeoJSON does not support CircularString. Use EWKT instead.');
-    }
+    }*/
 
     /**
      * @param string $ewktString
@@ -86,10 +86,10 @@ class CircularString extends AbstractShape2D implements HasStartEndPointInterfac
         return 'CIRCULARSTRING(' . implode(',', $pointStrings) . ')';
     }
 
-    public function toGeoJSON(): array
+    /*public function toGeoJSON(): array
     {
         throw new \RuntimeException('GeoJSON does not support CircularString.');
-    }
+    }*/
 
     /**
      * @return array<Point>

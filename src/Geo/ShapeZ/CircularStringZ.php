@@ -12,11 +12,11 @@ class CircularStringZ extends AbstractShapeZ implements HasStartEndPointZInterfa
      * @param int|null $srid Optional SRID
      * @return CircularStringZ
      */
-    public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): CircularStringZ
+    /*public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): CircularStringZ
     {
         // GeoJSON does not support CircularString, same as 2D
         throw new \RuntimeException('GeoJSON does not support CircularStringZ. Use EWKT instead.');
-    }
+    }*/
 
     /**
      * @param string $ewktString
@@ -93,10 +93,10 @@ class CircularStringZ extends AbstractShapeZ implements HasStartEndPointZInterfa
         return 'CIRCULARSTRINGZ(' . implode(',', $pointStrings) . ')';
     }
 
-    public function toGeoJSON(): array
+    /*public function toGeoJSON(): array
     {
         throw new \RuntimeException('GeoJSON does not support CircularStringZ.');
-    }
+    }*/
 
     /**
      * @return array<PointZ>

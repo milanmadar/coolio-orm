@@ -12,10 +12,10 @@ class CompoundCurveZ extends AbstractShapeZ implements HasStartEndPointZInterfac
      * @param int|null $srid
      * @return CompoundCurveZ
      */
-    public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): CompoundCurveZ
+    /*public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): CompoundCurveZ
     {
         throw new \RuntimeException('GeoJSON does not support CompoundCurveZ. Use EWKT instead.');
-    }
+    }*/
 
     /**
      * Creates a CompoundCurveZ from a GeoEWKT string.
@@ -105,14 +105,14 @@ class CompoundCurveZ extends AbstractShapeZ implements HasStartEndPointZInterfac
         return 'COMPOUNDCURVEZ(' . implode(',', $segmentWKT) . ')';
     }
 
-    public function toGeoJSON(): array
+    /*public function toGeoJSON(): array
     {
         $segmentGeoJSON = array_map(fn($segment) => $segment->toGeoJSON(), $this->segments);
         return [
             'type' => 'MultiCurve',
             'coordinates' => $segmentGeoJSON
         ];
-    }
+    }*/
 
     /**
      * @return array<LineStringZ|CircularStringZ>

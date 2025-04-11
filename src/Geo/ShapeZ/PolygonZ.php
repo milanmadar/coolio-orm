@@ -12,7 +12,7 @@ class PolygonZ extends AbstractShapeZ
      * @param int|null $srid Optional SRID, defaults to the value in $_ENV['GEO_DEFAULT_SRID']
      * @return PolygonZ
      */
-    public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): PolygonZ
+    /*public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): PolygonZ
     {
         if (!isset($srid)) $srid = $_ENV['GEO_DEFAULT_SRID'];
 
@@ -36,7 +36,7 @@ class PolygonZ extends AbstractShapeZ
         }
 
         return new PolygonZ($lineStrings, $srid);
-    }
+    }*/
 
     /**
      * @param string $ewktString
@@ -150,10 +150,7 @@ class PolygonZ extends AbstractShapeZ
         return 'POLYGON Z(' . implode(',', $ringStrings) . ')';
     }
 
-    /**
-     * @return array<mixed>
-     */
-    public function toGeoJSON(): array
+    /*public function toGeoJSON(): array
     {
         return [
             'type' => 'Polygon',
@@ -165,7 +162,7 @@ class PolygonZ extends AbstractShapeZ
                 $this->lineStrings
             )
         ];
-    }
+    }*/
 
     /**
      * Validates that the first and last points of the LineString are the same.

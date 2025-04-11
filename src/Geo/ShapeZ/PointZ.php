@@ -21,7 +21,7 @@ class PointZ extends AbstractShapeZ
      * @param int|null $srid Optional SRID, defaults to the value in $_ENV['GEO_DEFAULT_SRID']
      * @return PointZ
      */
-    public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): PointZ
+    /*public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): PointZ
     {
         if (!isset($srid)) $srid = $_ENV['GEO_DEFAULT_SRID'];
 
@@ -35,7 +35,7 @@ class PointZ extends AbstractShapeZ
         }
 
         return new PointZ($jsonData['coordinates'][0], $jsonData['coordinates'][1], $jsonData['coordinates'][2], $srid);
-    }
+    }*/
 
     /**
      * @param string $ewktString
@@ -79,16 +79,13 @@ class PointZ extends AbstractShapeZ
         return sprintf('POINTZ(%s %s %s)', $this->x, $this->y, $this->z);
     }
 
-    /**
-     * @return array<mixed>
-     */
-    public function toGeoJSON(): array
+    /*public function toGeoJSON(): array
     {
         return [
             'type' => 'Point',
             'coordinates' => [$this->x, $this->y, $this->z],
         ];
-    }
+    }*/
 
     public function getX(): float
     {

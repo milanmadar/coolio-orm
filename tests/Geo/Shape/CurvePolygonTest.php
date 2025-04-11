@@ -38,4 +38,17 @@ class CurvePolygonTest extends TestCase
         $this->assertSame($expected, $curvePolygon->ST_GeomFromEWKT());
     }
 
+    public function testCreateInvalid_NotClosingPoints()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        $line = new LineString([
+            new Point(0, 0),
+            new Point(0, 1),
+            new Point(1, 1),
+            new Point(0, 0.1),
+        ]);
+        new CurvePolygon([$line]);
+    }
+
 }

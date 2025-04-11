@@ -94,7 +94,7 @@ class Manager extends \Milanmadar\CoolioORM\Manager
      * @inheritDoc
      * @return Entity
      */
-    protected function createEntityDo(\Milanmadar\CoolioORM\Entity $orm, array $php_data = []): Entity
+    protected function createEntityDo(ORM $orm, array $php_data = []): Entity
     {
         return new Entity($orm, $php_data);
     }

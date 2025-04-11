@@ -12,11 +12,11 @@ class CurvePolygon extends AbstractShape2D
      * @param int|null $srid Optional SRID, defaults to the value in $_ENV['GEO_DEFAULT_SRID']
      * @return CurvePolygon
      */
-    public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): CurvePolygon
+    /*public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): CurvePolygon
     {
         // GeoJSON does not support CircularString by spec
         throw new \RuntimeException('GeoJSON does not support CurvePolygon. Use EWKT instead.');
-    }
+    }*/
 
     /**
      * @param string $ewktString
@@ -84,6 +84,7 @@ class CurvePolygon extends AbstractShape2D
      */
     public function __construct(array $boundaries, int|null $srid = null)
     {
+        $this->_validateRings($boundaries);
         parent::__construct($srid);
         $this->boundaries = $boundaries;
     }
@@ -97,17 +98,14 @@ class CurvePolygon extends AbstractShape2D
         return 'CURVEPOLYGON(' . implode(',', $boundaryWKT) . ')';
     }
 
-    /**
-     * @return array<mixed>
-     */
-    public function toGeoJSON(): array
+    /*public function toGeoJSON(): array
     {
         $boundaryGeoJSON = array_map(fn($boundary) => $boundary->toGeoJSON(), $this->boundaries);
         return [
             'type' => 'CurvePolygon',
             'coordinates' => $boundaryGeoJSON
         ];
-    }
+    }*/
 
     /**
      * @return array<LineString|CircularString>
@@ -123,7 +121,28 @@ class CurvePolygon extends AbstractShape2D
      */
     public function setBoundaries(array $boundaries): self
     {
+        $this->_validateRings($boundaries);
         $this->boundaries = $boundaries;
         return $this;
     }
+
+    /**
+     * Validates that the first and last points of the LineString are the same.
+     * @param array<LineString|CircularString> $lineStrings
+     * @throws \InvalidArgumentException
+     */
+    private function _validateRings(array $lineStrings): void
+    {
+        if(empty($lineStrings)) {
+            throw new \InvalidArgumentException('A Polygon must have at least one LineString.');
+        }
+
+        foreach ($lineStrings as $lineString) {
+            $points = $lineString->getPoints();
+            if (count($points) < 4 || $points[0] != end($points)) {
+                throw new \InvalidArgumentException('All rings must be a closed LineString (minimum 4 points, first and last point must be the same).');
+            }
+        }
+    }
+
 }

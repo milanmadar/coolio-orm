@@ -490,17 +490,15 @@ abstract class Entity implements Event\AnnouncerInterface
      * For visual debug
      * @return string
      */
-    public function displayHtml(): string
+    public function debugHtml(): string
     {
-        $html = '<table style="width:100%; text-align:left; vertical-align: top;">';
-
         $data = $this->_data;
         ksort($data);
 
+        $html = '<table style="width:100%; text-align:left; vertical-align: top;">';
+
         foreach($data as $fld=>$val)
         {
-            $fldHtml = htmlspecialchars(ucwords(str_replace('_', ' ', $fld)));
-
             if(!isset($val)) {
                 $valHtml = '(null)';
 
@@ -523,24 +521,76 @@ abstract class Entity implements Event\AnnouncerInterface
                 $valHtml = '<pre>'.print_r($val, true).'</pre>';
 
             } elseif(is_int($val) && str_contains($fld, 'time')) {
-                $valHtml = (string)$val.' ('.date('d.M.Y H:i:s', $val).')';
+                $valHtml = $val.' ('.date('d.M.Y H:i:s', $val).')';
 
             } else {
-                $valHtml = nl2br(htmlspecialchars( (string)$val ));
+                if(is_int($val)) { $type = '(int) '; }
+                elseif(is_float($val)) { $type = '(int) '; }
+                elseif(is_string($val)) { $type = '(string) '; }
+                else { $type = ' '; }
+                $valHtml = $type . nl2br(htmlspecialchars( (string)$val ));
             }
 
             $html .=
                 '<tr style="text-align:left; vertical-align: top; border-top: 1px solid #999; border-bottom:1px solid #999; border-left: none; border-right: none">'
-                .'<td style="width:150px; padding:3px;">'
-                .'<b>'.$fldHtml.':</b>'
-                .'</td>'
-                .'<td style="padding: 3px;">'
-                .$valHtml
-                .'</td>'
+                    .'<td style="width:150px; padding:3px;">'
+                    .   '<b>'.$fld.':</b>'
+                    .'</td>'
+                    .'<td style="padding: 3px;">'
+                        .$valHtml
+                    .'</td>'
                 .'</tr>';
         }
         $html .= '</table>';
         return $html;
+    }
+
+    /**
+     * For visual debug
+     * @return string
+     */
+    public function debugCli(): string
+    {
+        $data = $this->_data;
+        ksort($data);
+
+        $output = "\n";
+
+        foreach($data as $fld=>$val)
+        {
+            if(!isset($val)) {
+                $valHtml = '(null)';
+
+            } elseif($val === false) {
+                $valHtml = '(false)';
+
+            } elseif($val === true) {
+                $valHtml = '(true)';
+
+            } elseif($val === '') {
+                $valHtml = '(empty string)';
+
+            } elseif(is_array($val) && empty($val)) {
+                $valHtml = '(empty array)';
+
+            } elseif(is_array($val)) {
+                $valHtml = print_r($val, true);
+
+            } elseif(is_int($val) && (str_contains($fld, 'time') || $fld == 'created_at' || $fld == 'updated_at' || $fld == 'deleted_at' || $fld == 'published_at' || $fld == 'publish_at')) {
+                $valHtml = $val.' ('.date('d.M.Y H:i:s', $val).')';
+
+            } else {
+                if(is_int($val)) { $type = '(int) '; }
+                elseif(is_float($val)) { $type = '(int) '; }
+                elseif(is_string($val)) { $type = '(string) '; }
+                else { $type = ' '; }
+                $valHtml = $type . ((string)$val);
+            }
+
+            $output .= "\n".$fld.': '.$valHtml;
+        }
+        $output .= "\n";
+        return $output;
     }
 
     public function __destruct()

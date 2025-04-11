@@ -12,7 +12,7 @@ class MultiPointZ extends AbstractShapeZ
      * @param int|null $srid Optional SRID, defaults to the value in $_ENV['GEO_DEFAULT_SRID']
      * @return MultiPointZ
      */
-    public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): MultiPointZ
+    /*public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): MultiPointZ
     {
         if (!isset($srid)) $srid = $_ENV['GEO_DEFAULT_SRID'];
 
@@ -34,7 +34,7 @@ class MultiPointZ extends AbstractShapeZ
         }
 
         return new MultiPointZ($points, $srid);
-    }
+    }*/
 
     /**
      * @param string $ewktString
@@ -134,10 +134,7 @@ class MultiPointZ extends AbstractShapeZ
         return 'MULTIPOINT Z(' . implode(',', $pointStrings) . ')';
     }
 
-    /**
-     * @return array<mixed>
-     */
-    public function toGeoJSON(): array
+    /*public function toGeoJSON(): array
     {
         return [
             'type' => 'MultiPoint',
@@ -146,5 +143,5 @@ class MultiPointZ extends AbstractShapeZ
                 $this->points
             )
         ];
-    }
+    }*/
 }

@@ -9,9 +9,7 @@ use Doctrine\DBAL\Query\QueryBuilder as DoctrineQueryBuilder;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Result;
 use Doctrine\DBAL\Exception;
-use Doctrine\DBAL\Types\Type;
 use Milanmadar\CoolioORM\Geo\AbstractShape;
-use Milanmadar\CoolioORM\Geo\GeoFunctions;
 use Milanmadar\CoolioORM\Geo\GeoQueryProcessor;
 
 class QueryBuilder extends DoctrineQueryBuilder
@@ -20,7 +18,7 @@ class QueryBuilder extends DoctrineQueryBuilder
     private const TYPE_INSERT = 'INSERT';
     private const TYPE_UPDATE = 'UPDATE';
     private const TYPE_DELETE = 'DELETE';
-    private string $type;
+    private string|null $type;
     /** @var array< array<string> > */
     private array $orderBys;
 
@@ -31,24 +29,30 @@ class QueryBuilder extends DoctrineQueryBuilder
     private Connection $db;
     private StatementRepository $statementRepo;
     private ?Manager $entityMgr;
-    private bool $select_asterist_is_done;
     private bool $isPostgres;
+    private bool $isFromSet;
+    private bool $isSelectSet;
 
     public function __construct(ORM $orm, Connection $db, ?Manager $entityMgr = null)
     {
         parent::__construct($db);
 
-        $this->type = self::TYPE_SELECT;
+        $this->type = null;
         $this->orderBys = [];
         $this->setParameterName_i = 0;
         $this->db = $db;
         $this->orm = $orm;
         $this->statementRepo = $this->orm->getStatementRepositoryByConnection($db);
         $this->entityMgr = $entityMgr;
-        $this->select_asterist_is_done = false;
         $this->isPostgres = str_contains(get_class($this->db->getDatabasePlatform()), 'PostgreSQL');
+        $this->isFromSet = false;
+        $this->isSelectSet = false;
     }
 
+    /**
+     * @return Connection
+     * @codeCoverageIgnore
+     */
     public function getDoctrineConnection(): Connection
     {
         return $this->db;
@@ -57,6 +61,7 @@ class QueryBuilder extends DoctrineQueryBuilder
     /**
      * @param Manager $entityMgr
      * @return $this
+     * @codeCoverageIgnore
      */
     public function setEntityManager(Manager $entityMgr): self
     {
@@ -66,6 +71,7 @@ class QueryBuilder extends DoctrineQueryBuilder
 
     /**
      * @return Manager|null
+     * @codeCoverageIgnore
      */
     public function getEntityManager(): ?Manager
     {
@@ -78,31 +84,14 @@ class QueryBuilder extends DoctrineQueryBuilder
      */
     public function select(string ...$expressions): self
     {
+        $this->isSelectSet = true;
+
         $_exps = $expressions;
 
-        if($this->isPostgres && isset($this->entityMgr))
-        {
-            // Tiny optimization to avoid running the "transform geometries" section below.
-            // It's needed, because the baseManager::createQueryBuilder() calls $this->select('*')
-            // and then the user may also call $this->select('*').
-            // So just don't do the "transform geometries" section below twice
-            if($expressions[0] == '*') {
-                if($this->select_asterist_is_done) {
-                    return $this;
-                }
-                $this->select_asterist_is_done = true;
-            } else {
-                $this->select_asterist_is_done = false;
-            }
-
-            // transform geometries
-            if(isset($this->entityMgr))
-            {
-                if($expressions[0] == '*') {
-                    $expressions = $this->entityMgr->getFields();
-                }
-                $_exps = GeoQueryProcessor::SELECTgeometryToPostGISformat($this->entityMgr->getFieldTypes(), $expressions);
-            }
+        // transform geometries
+        if($this->isPostgres && isset($this->entityMgr) && $expressions[0] == '*') {
+            $expressions = $this->entityMgr->getFields();
+            $_exps = GeoQueryProcessor::SELECTgeometryToPostGISformat($this->entityMgr->getFieldTypes(), $expressions);
         }
 
         $this->type = self::TYPE_SELECT;
@@ -118,8 +107,9 @@ class QueryBuilder extends DoctrineQueryBuilder
     public function selectExcept(array $exceptFields): self
     {
         if(!isset($this->entityMgr)) {
-            throw new \ErrorException("CoolioORM\\QueryBuilder::selectExcept() doesn't have an $"."entityMgr. Fields were: ".implode(',', $exceptFields));
+            throw new \ErrorException("CoolioORM\\QueryBuilder::selectExcept() doesn't have an $"."entityMgr. Fields were: ".implode(',', $exceptFields)); // @codeCoverageIgnore
         }
+
         return $this->select(implode(',', $this->entityMgr->getFields($exceptFields)));
     }
 
@@ -129,6 +119,7 @@ class QueryBuilder extends DoctrineQueryBuilder
      */
     public function from(string $table, ?string $alias = null): self
     {
+        $this->isFromSet = true;
         parent::from($table, $alias);
         return $this;
     }
@@ -193,7 +184,7 @@ class QueryBuilder extends DoctrineQueryBuilder
                 $column,
                 $value
             );
-            $sql = $column.' '.$operator.' :'.$sqlPart;
+            $sql = $column.' '.$operator.' '.$sqlPart;
             return [$sql, $paramValues];
         }
 
@@ -307,7 +298,7 @@ class QueryBuilder extends DoctrineQueryBuilder
             if(isset($this->entityMgr)) {
                 $table = $this->entityMgr->getDbTable();
             } else {
-                throw new \InvalidArgumentException('QueryBuilder::insert() You must provide a table name or set an entity manager.');
+                throw new \InvalidArgumentException('QueryBuilder::insert() You must provide a table name or set an entity manager.'); // @codeCoverageIgnore
             }
         }
 
@@ -327,7 +318,7 @@ class QueryBuilder extends DoctrineQueryBuilder
             if(isset($this->entityMgr)) {
                 $table = $this->entityMgr->getDbTable();
             } else {
-                throw new \InvalidArgumentException('QueryBuilder::update() You must provide a table name or set an entity manager.');
+                throw new \InvalidArgumentException('QueryBuilder::update() You must provide a table name or set an entity manager.'); // @codeCoverageIgnore
             }
         }
 
@@ -347,7 +338,7 @@ class QueryBuilder extends DoctrineQueryBuilder
             if(isset($this->entityMgr)) {
                 $table = $this->entityMgr->getDbTable();
             } else {
-                throw new \InvalidArgumentException('QueryBuilder::delete() You must provide a table name or set an entity manager.');
+                throw new \InvalidArgumentException('QueryBuilder::delete() You must provide a table name or set an entity manager.'); // @codeCoverageIgnore
             }
         }
 
@@ -414,18 +405,19 @@ class QueryBuilder extends DoctrineQueryBuilder
     public function set(string $key, mixed $value): self
     {
         if($this->type != self::TYPE_UPDATE) {
-            throw new \InvalidArgumentException('QueryBuilder->set() must be used for UPDATE queries only. For INSERT use ->set(), for SELECT use ->andWhereColumn() (without ->setParameter())');
+            throw new \InvalidArgumentException('QueryBuilder->set() must be used for UPDATE queries only. For INSERT use ->set(), for SELECT use ->andWhereColumn() (without ->setParameter())'); // @codeCoverageIgnore
         }
 
         if(!isset($value)) {
             $value = 'null';
         } else {
             if (!is_string($value)) {
-                throw new \InvalidArgumentException('QueryBuilder->set() 2nd param must be an SQL expression (goes into the query is it is), or NULL, or a named parameter and then call ->setParameter().');
+                throw new \InvalidArgumentException('QueryBuilder->set() 2nd param must be an SQL expression (goes into the query is it is), or NULL, or a named parameter and then call ->setParameter().'); // @codeCoverageIgnore
             }
             if ($value == '?') {
-                throw new \InvalidArgumentException('QueryBuilder->set() 2nd param must be a named parameter, not a "?".');
+                throw new \InvalidArgumentException('QueryBuilder->set() 2nd param must be a named parameter, not a "?".'); // @codeCoverageIgnore
             }
+
             if(!empty($value) && $value[0] != ':') {
                 $value = ':'.$value;
             }
@@ -443,17 +435,17 @@ class QueryBuilder extends DoctrineQueryBuilder
     public function setValue(string $column, mixed $value): self
     {
         if($this->type != self::TYPE_INSERT) {
-            throw new \InvalidArgumentException('QueryBuilder->setValue() must be used for INSERT queries only. For UPDATE use ->set(), for SELECT use ->andWhereColumn() (without ->setParameter())');
+            throw new \InvalidArgumentException('QueryBuilder->setValue() must be used for INSERT queries only. For UPDATE use ->set(), for SELECT use ->andWhereColumn() (without ->setParameter())'); // @codeCoverageIgnore
         }
 
         if(!isset($value)) {
             $value = 'null';
         } else {
             if (!is_string($value)) {
-                throw new \InvalidArgumentException('QueryBuilder->setValue() 2nd param must be an SQL expression (goes into the query is it is), or NULL, or a named parameter and then call ->setParameter().');
+                throw new \InvalidArgumentException('QueryBuilder->setValue() 2nd param must be an SQL expression (goes into the query is it is), or NULL, or a named parameter and then call ->setParameter().'); // @codeCoverageIgnore
             }
             if ($value == '?') {
-                throw new \InvalidArgumentException('QueryBuilder->setValue() 2nd param must be a named parameter, not a "?".');
+                throw new \InvalidArgumentException('QueryBuilder->setValue() 2nd param must be a named parameter, not a "?".'); // @codeCoverageIgnore
             }
         }
         parent::setValue($column, $value);
@@ -468,6 +460,7 @@ class QueryBuilder extends DoctrineQueryBuilder
      */
     public function setGeom(string $column, AbstractShape|null $value): self
     {
+        // @codeCoverageIgnoreStart
         if(!isset($value)) {
             if($this->type == self::TYPE_INSERT) {
                 parent::setValue($column, 'null');
@@ -476,6 +469,7 @@ class QueryBuilder extends DoctrineQueryBuilder
             }
             return $this;
         }
+        // @codeCoverageIgnoreEnd
 
         [$sqlPart, $paramValues, $paramTypes] = Geo\GeoQueryProcessor::geoFunction_sqlPart_andParams(
             $this->entityMgr,
@@ -489,7 +483,7 @@ class QueryBuilder extends DoctrineQueryBuilder
         } elseif($this->type == self::TYPE_UPDATE) {
             parent::set($column, $sqlPart);
         } else {
-            throw new \InvalidArgumentException('QueryBuilder->setGeom() can be used only for INSERT and UPDATE queries. For SELECT queries use ->andWhereColumn()');
+            throw new \InvalidArgumentException('QueryBuilder->setGeom() can be used only for INSERT and UPDATE queries. For SELECT queries use ->andWhereColumn()'); // @codeCoverageIgnore
         }
 
         foreach($paramValues as $paramName=>$paramValue) {
@@ -600,7 +594,7 @@ class QueryBuilder extends DoctrineQueryBuilder
         }
 
         if($value instanceof AbstractShape) {
-            throw new \InvalidArgumentException('QueryBuilder->setParameter() 2nd param cannot be a geometry (AbstractShape). Use $'.'querybuilder->setGeom() for INSERT/UPDATE queries, or $'.'querybuilder->andWhereColumn() for SELECT queries (and with those you don;t need ->setParameter()');
+            throw new \InvalidArgumentException('QueryBuilder->setParameter() 2nd param cannot be a geometry (AbstractShape). Use $'.'querybuilder->setGeom() for INSERT/UPDATE queries, or $'.'querybuilder->andWhereColumn() for SELECT queries (and with those you don;t need ->setParameter()'); // @codeCoverageIgnore
         }
 
         // bool
@@ -639,10 +633,10 @@ class QueryBuilder extends DoctrineQueryBuilder
         // $params keys must be strings, and values cannot be AbstractShape
         foreach($params as $k=>$v) {
             if(!is_string($k)) {
-                throw new \InvalidArgumentException('QueryBuilder->setParameters() 1st param keys must be strings (must use named parameters)');
+                throw new \InvalidArgumentException('QueryBuilder->setParameters() 1st param keys must be strings (must use named parameters)'); // @codeCoverageIgnore
             }
             if($v instanceof AbstractShape) {
-                throw new \InvalidArgumentException('QueryBuilder->setParameters() 1st param value cannot be a geometry (AbstractShape). Use $'.'querybuilder->setGeom() for INSERT/UPDATE queries, or $'.'querybuilder->andWhereColumn() for SELECT queries (and with those you don;t need ->setParameter()');
+                throw new \InvalidArgumentException('QueryBuilder->setParameters() 1st param value cannot be a geometry (AbstractShape). Use $'.'querybuilder->setGeom() for INSERT/UPDATE queries, or $'.'querybuilder->andWhereColumn() for SELECT queries (and with those you don;t need ->setParameter()'); // @codeCoverageIgnore
             }
         }
 
@@ -776,6 +770,7 @@ class QueryBuilder extends DoctrineQueryBuilder
                 Utils::handleArrayInSQLParams($sql, $params);
                 return $this->db->fetchAssociative($sql, $params, $paramTypes);
             }
+            // @codeCoverageIgnoreStart
             catch (Exception\ConnectionException|Exception\ConnectionLost|Exception\RetryableException $e) {
                 if ($i == $maxTries) {
                     throw Utils::handleDriverException($e, $sql, $params);
@@ -785,10 +780,11 @@ class QueryBuilder extends DoctrineQueryBuilder
             catch (Exception $e) {
                 throw Utils::handleDriverException($e, $sql, $params);
             }
+            // @codeCoverageIgnoreEnd
         }
 
         // this is just so IDE doesn't complain, but the loop above always returns or throws
-        return parent::fetchAssociative();
+        return parent::fetchAssociative(); // @codeCoverageIgnore
     }
 
     /**
@@ -815,6 +811,7 @@ class QueryBuilder extends DoctrineQueryBuilder
                 Utils::handleArrayInSQLParams($sql, $params);
                 return $this->db->fetchNumeric($sql, $params, $paramTypes);
             }
+            // @codeCoverageIgnoreStart
             catch (Exception\ConnectionException|Exception\ConnectionLost|Exception\RetryableException $e) {
                 if ($i == $maxTries) {
                     throw Utils::handleDriverException($e, $sql, $params);
@@ -824,10 +821,11 @@ class QueryBuilder extends DoctrineQueryBuilder
             catch (Exception $e) {
                 throw Utils::handleDriverException($e, $sql, $params);
             }
+            // @codeCoverageIgnoreEnd
         }
 
         // this is just so IDE doesn't complain, but the loop above always returns or throws
-        return parent::fetchNumeric();
+        return parent::fetchNumeric(); // @codeCoverageIgnore
     }
 
     /**
@@ -854,6 +852,7 @@ class QueryBuilder extends DoctrineQueryBuilder
                 Utils::handleArrayInSQLParams($sql, $params);
                 return $this->db->fetchAllNumeric($sql, $params, $paramTypes);
             }
+            // @codeCoverageIgnoreStart
             catch (Exception\ConnectionException|Exception\ConnectionLost|Exception\RetryableException $e) {
                 if ($i == $maxTries) {
                     throw Utils::handleDriverException($e, $sql, $params);
@@ -863,10 +862,11 @@ class QueryBuilder extends DoctrineQueryBuilder
             catch (Exception $e) {
                 throw Utils::handleDriverException($e, $sql, $params);
             }
+            // @codeCoverageIgnoreEnd
         }
 
         // this is just so IDE doesn't complain, but the loop above always returns or throws
-        return parent::fetchAllNumeric();
+        return parent::fetchAllNumeric(); // @codeCoverageIgnore
     }
 
     /**
@@ -893,6 +893,7 @@ class QueryBuilder extends DoctrineQueryBuilder
                 Utils::handleArrayInSQLParams($sql, $params);
                 return $this->db->fetchAllAssociative($sql, $params, $paramTypes);
             }
+            // @codeCoverageIgnoreStart
             catch (Exception\ConnectionException|Exception\ConnectionLost|Exception\RetryableException $e) {
                 if ($i == $maxTries) {
                     throw Utils::handleDriverException($e, $sql, $params);
@@ -902,10 +903,11 @@ class QueryBuilder extends DoctrineQueryBuilder
             catch (Exception $e) {
                 throw Utils::handleDriverException($e, $sql, $params);
             }
+            // @codeCoverageIgnoreEnd
         }
 
         // this is just so IDE doesn't complain, but the loop above always returns or throws
-        return parent::fetchAllAssociative();
+        return parent::fetchAllAssociative(); // @codeCoverageIgnore
     }
 
     /**
@@ -932,6 +934,7 @@ class QueryBuilder extends DoctrineQueryBuilder
                 Utils::handleArrayInSQLParams($sql, $params);
                 return $this->db->fetchAllKeyValue($sql, $params, $paramTypes);
             }
+            // @codeCoverageIgnoreStart
             catch (Exception\ConnectionException|Exception\ConnectionLost|Exception\RetryableException $e) {
                 if ($i == $maxTries) {
                     throw Utils::handleDriverException($e, $sql, $params);
@@ -941,10 +944,11 @@ class QueryBuilder extends DoctrineQueryBuilder
             catch (Exception $e) {
                 throw Utils::handleDriverException($e, $sql, $params);
             }
+            // @codeCoverageIgnoreEnd
         }
 
         // this is just so IDE doesn't complain, but the loop above always returns or throws
-        return parent::fetchAllKeyValue();
+        return parent::fetchAllKeyValue(); // @codeCoverageIgnore
     }
 
     /**
@@ -971,6 +975,7 @@ class QueryBuilder extends DoctrineQueryBuilder
                 Utils::handleArrayInSQLParams($sql, $params);
                 return $this->db->fetchAllAssociativeIndexed($sql, $params, $paramTypes);
             }
+            // @codeCoverageIgnoreStart
             catch (Exception\ConnectionException|Exception\ConnectionLost|Exception\RetryableException $e) {
                 if ($i == $maxTries) {
                     throw Utils::handleDriverException($e, $sql, $params);
@@ -980,10 +985,11 @@ class QueryBuilder extends DoctrineQueryBuilder
             catch (Exception $e) {
                 throw Utils::handleDriverException($e, $sql, $params);
             }
+            // @codeCoverageIgnoreEnd
         }
 
         // this is just so IDE doesn't complain, but the loop above always returns or throws
-        return parent::fetchAllAssociativeIndexed();
+        return parent::fetchAllAssociativeIndexed(); // @codeCoverageIgnore
     }
 
     /**
@@ -1010,6 +1016,7 @@ class QueryBuilder extends DoctrineQueryBuilder
                 Utils::handleArrayInSQLParams($sql, $params);
                 return $this->db->fetchOne($sql, $params, $paramTypes);
             }
+            // @codeCoverageIgnoreStart
             catch (Exception\ConnectionException|Exception\ConnectionLost|Exception\RetryableException $e) {
                 if ($i == $maxTries) {
                     throw Utils::handleDriverException($e, $sql, $params);
@@ -1019,10 +1026,11 @@ class QueryBuilder extends DoctrineQueryBuilder
             catch (Exception $e) {
                 throw Utils::handleDriverException($e, $sql, $params);
             }
+            // @codeCoverageIgnoreEnd
         }
 
         // this is just so IDE doesn't complain, but the loop above always returns or throws
-        return parent::fetchOne();
+        return parent::fetchOne(); // @codeCoverageIgnore
     }
 
     /**
@@ -1049,6 +1057,7 @@ class QueryBuilder extends DoctrineQueryBuilder
                 Utils::handleArrayInSQLParams($sql, $params);
                 return $this->db->fetchFirstColumn($sql, $params, $paramTypes);
             }
+            // @codeCoverageIgnoreStart
             catch (Exception\ConnectionException|Exception\ConnectionLost|Exception\RetryableException $e) {
                 if ($i == $maxTries) {
                     throw Utils::handleDriverException($e, $sql, $params);
@@ -1058,10 +1067,11 @@ class QueryBuilder extends DoctrineQueryBuilder
             catch (Exception $e) {
                 throw Utils::handleDriverException($e, $sql, $params);
             }
+            // @codeCoverageIgnoreEnd
         }
 
         // this is just so IDE doesn't complain, but the loop above always returns or throws
-        return parent::fetchFirstColumn();
+        return parent::fetchFirstColumn(); // @codeCoverageIgnore
     }
 
     /**
@@ -1073,8 +1083,9 @@ class QueryBuilder extends DoctrineQueryBuilder
     public function fetchOneEntity(bool $forceToGetFromDb = false): ?Entity
     {
         if(!isset($this->entityMgr)) {
-            throw new \LogicException("To get entities you must set a Manager in the QueryBuilder constructor() or setEntityManager()");
+            throw new \LogicException("To get entities you must set a Manager in the QueryBuilder constructor() or setEntityManager()"); // @codeCoverageIgnore
         }
+
         $sql = $this->getSQL();
         return $this->entityMgr->findOne($sql, $this->getParameters(), $forceToGetFromDb);
     }
@@ -1088,8 +1099,9 @@ class QueryBuilder extends DoctrineQueryBuilder
     public function fetchManyEntity(bool$forceToGetFromDb = false): array
     {
         if(!isset($this->entityMgr)) {
-            throw new \LogicException("To get entities you must set a Manager in the QueryBuilder constructor() or setEntityManager()");
+            throw new \LogicException("To get entities you must set a Manager in the QueryBuilder constructor() or setEntityManager()"); // @codeCoverageIgnore
         }
+
         return $this->entityMgr->findMany($this->getSQL(), $this->getParameters(), $forceToGetFromDb);
     }
 
@@ -1129,5 +1141,24 @@ class QueryBuilder extends DoctrineQueryBuilder
         }
 
         return $sql;
+    }
+
+    public function getSQL(): string
+    {
+        $this->autoSetFromAndSelect();
+        return parent::getSQL();
+    }
+
+    private function autoSetFromAndSelect(): void
+    {
+        if(!$this->isSelectSet) {
+            if(!isset($this->type) || $this->type == self::TYPE_SELECT) {
+                $this->select('*');
+            }
+        }
+
+        if(!$this->isFromSet && isset($this->entityMgr) && $this->type == self::TYPE_SELECT) {
+            $this->from($this->entityMgr->getDbTable());
+        }
     }
 }

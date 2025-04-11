@@ -12,7 +12,7 @@ class LineStringZ extends AbstractShapeZ implements HasStartEndPointZInterface
      * @param int|null $srid Optional SRID, defaults to the value in $_ENV['GEO_DEFAULT_SRID']
      * @return LineStringZ
      */
-    public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): LineStringZ
+    /*public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): LineStringZ
     {
         if (!isset($srid)) $srid = $_ENV['GEO_DEFAULT_SRID'];
 
@@ -33,7 +33,7 @@ class LineStringZ extends AbstractShapeZ implements HasStartEndPointZInterface
         }
 
         return new LineStringZ($coordinates, $srid);
-    }
+    }*/
 
     /**
      * @param string $ewktString
@@ -126,10 +126,7 @@ class LineStringZ extends AbstractShapeZ implements HasStartEndPointZInterface
         return sprintf('LINESTRING Z(%s)', implode(',', $coordinateStrings));
     }
 
-    /**
-     * @return array<mixed>
-     */
-    public function toGeoJSON(): array
+    /*public function toGeoJSON(): array
     {
         $coordinates = array_map(function (PointZ $point) {
             return [$point->getX(), $point->getY(), $point->getZ()];
@@ -139,7 +136,7 @@ class LineStringZ extends AbstractShapeZ implements HasStartEndPointZInterface
             'type' => 'LineString',
             'coordinates' => $coordinates,
         ];
-    }
+    }*/
 
     public function getStartPointZ(): PointZ
     {

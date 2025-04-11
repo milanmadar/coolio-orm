@@ -227,27 +227,20 @@ class ManagerDbTest extends TestCase
         $ent1 = $mgr->findById(1);
         $mgr->delete($ent1);
 
-        try {
-            $ent1->getFldInt();
-            $this->assertTrue(true);
-        } catch(\LogicException $e) {
-            $this->fail();
-        }
+        $ent1->getFldInt();
+        $this->assertTrue(true);
     }
 
     public function testDeleteThenSetAccess()
     {
+        $this->expectException(\LogicException::class);
+
         $mgr = self::$dbHelper->getManager(OrmTest\Manager::class);
 
         $ent1 = $mgr->findById(1);
         $mgr->delete($ent1);
 
-        try {
-            $ent1->setFldInt(123456);
-            $this->fail();
-        } catch(\LogicException $e) {
-            $this->assertTrue(true);
-        }
+        $ent1->setFldInt(123456);
     }
 
     public function testDelete()
@@ -555,6 +548,30 @@ class ManagerDbTest extends TestCase
         $this->assertNull($ent2->getFldChar());
         $this->assertNull($ent2->getFldFloat());
         $this->assertNotNull($ent2->getFldVarchar());
+    }
+
+    public function testInsertBadQuery()
+    {
+        $this->expectException(\Milanmadar\CoolioORM\ORMException::class);
+
+        $mgr = self::$dbHelper->getManager(OrmTest\Manager::class);
+
+        $mgr->createQueryBuilder()
+            ->insert()
+            ->setValue('no_such_field', ':A')->setParameter('A', 123)
+            ->executeStatement();
+    }
+
+    public function testUpdateBadQuery()
+    {
+        $this->expectException(\Milanmadar\CoolioORM\ORMException::class);
+
+        $mgr = self::$dbHelper->getManager(OrmTest\Manager::class);
+
+        $mgr->createQueryBuilder()
+            ->update()
+            ->set('no_such_field', ':A')->setParameter('A', 123)
+            ->executeStatement();
     }
 
 }

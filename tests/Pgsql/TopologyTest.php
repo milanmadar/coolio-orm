@@ -224,9 +224,9 @@ class TopologyTest extends TestCase
         $newEnt = $mgr->createEntity()
             ->setName('Nice Name Entity')
             ->setTopoGeomPoint($multiPoint)
-//            ->setTopoGeomLinestring($multiLineString)
-//            ->setTopoGeomPolygon($multiPolygon)
-//            ->setTopoGeomGeometrycollection($geometryCollection)
+            ->setTopoGeomLinestring($multiLineString)
+            ->setTopoGeomPolygon($multiPolygon)
+            ->setTopoGeomCollection($geometryCollection)
         ;
 
         //
@@ -314,4 +314,77 @@ class TopologyTest extends TestCase
         $this->assertFalse($ent1->getTopoGeomPolygon() == $ent2->getTopoGeomPolygon());
         $this->assertFalse($ent1->getTopoGeomCollection() == $ent2->getTopoGeomCollection());
     }
+
+    public function testUpdate_asEntity()
+    {
+        $mgr = self::$dbHelper->getManager(TopologyTestEnt\Manager::class);
+        $mgr->clearRepository(false);
+
+        $oCnt = self::$dbHelper->countRows('topology_test');
+
+        //
+        // Create All Shapes
+        //
+        $multiPoint = new MultiPoint([
+            new Point(111, 222), new Point(333, 444), new Point(555, 660), new Point(777, 888)
+        ], 4326);
+        $multiLineString = new MultiLineString([
+            new LineString([new Point(-1, -1), new Point(9, 8), new Point(7, 6)], 4326),
+            new LineString([new Point(5, 4), new Point(3, 2)], 4326),
+            new LineString([new Point(1, 0), new Point(10, 11), new Point(12, 13)], 4326)
+        ], 4326);
+        $multiPolygon = new MultiPolygon([
+            new Polygon([
+                new LineString([new Point(-1, -2), new Point(16, 17), new Point(18, 19), new Point(20, 20), new Point(-1, -2),]),
+                new LineString([new Point(19, 18), new Point(17, 16), new Point(15, 14), new Point(13, 12), new Point(19, 18),])
+            ], 4326),
+            new Polygon([
+                new LineString([new Point(-3, -5), new Point(4, 2), new Point(3, 3), new Point(7, 9), new Point(-3, -5),]),
+                new LineString([new Point(9, 9), new Point(1, 2), new Point(2, 2), new Point(2, 1), new Point(9, 9),])
+            ], 4326)
+        ], 4326);
+        $geometryCollection = new GeometryCollection([
+            new Point(-1, 10, 4326),
+            new LineString([new Point(2, 2, 4326), new Point(3, 3, 4326), new Point(4, 4, 4326)], 4326),
+            new Polygon([
+                new LineString([new Point(0, 0, 4326), new Point(0, 5, 4326), new Point(5, 5, 4326), new Point(5, 0, 4326), new Point(0, 0, 4326),], 4326),
+                new LineString([new Point(1, 1, 4326), new Point(1, 2, 4326), new Point(2, 2, 4326), new Point(2, 1, 4326), new Point(1, 1, 4326),], 4326)
+            ], 4326)
+        ], 4326);
+
+        // first get what we had
+        $ent1 = $mgr->findById(1);
+
+        // make sure we've changed something
+        $this->assertFalse($ent1->getTopoGeomPoint() == $multiPoint);
+        $this->assertFalse($ent1->getTopoGeomLinestring() == $multiLineString);
+        $this->assertFalse($ent1->getTopoGeomPolygon() == $multiPolygon);
+        $this->assertFalse($ent1->getTopoGeomCollection() == $geometryCollection);
+
+        //
+        // Insert All Shapes
+        //
+        $ent1
+            ->setName('Nice Name Entity abc')
+            ->setTopoGeomPoint($multiPoint)
+            ->setTopoGeomLinestring($multiLineString)
+            ->setTopoGeomPolygon($multiPolygon)
+            ->setTopoGeomCollection($geometryCollection)
+        ;
+        $mgr->save($ent1);
+        $this->assertEquals($oCnt, self::$dbHelper->countRows('topology_test'));
+
+        //
+        // Select All Shapes
+        //
+        $mgr->_getEntityRepository()->clear();
+        $ent2 = $mgr->findById(1);
+
+        // we can only test the points, because the topology changes the other geometries
+        $this->assertTrue($ent1->getTopoGeomPoint() == $ent2->getTopoGeomPoint());
+//        $this->assertTrue($ent1->getTopoGeomLinestring() == $ent2->getTopoGeomLinestring());
+//        $this->assertTrue($ent1->getTopoGeomPolygon() == $ent2->getTopoGeomPolygon());
+//        $this->assertTrue($ent1->getTopoGeomCollection() == $ent2->getTopoGeomCollection());
+    }
+
 }

@@ -12,7 +12,7 @@ class Shape2D3DFactory
      * @return Shape2D\AbstractShape2D|ShapeZ\AbstractShapeZ The created geometry (Point, PointZ, LineString, LineStringZ, etc.).
      * @throws \InvalidArgumentException If the GeoJSON is invalid or unsupported.
      */
-    public static function createFromGeoJSONString(string $geoJsonStr, int|null $srid = null): Shape2D\AbstractShape2D|ShapeZ\AbstractShapeZ
+    /*public static function createFromGeoJSONString(string $geoJsonStr, int|null $srid = null): Shape2D\AbstractShape2D|ShapeZ\AbstractShapeZ
     {
         if (!isset($srid)) $srid = $_ENV['GEO_DEFAULT_SRID'];
 
@@ -23,97 +23,101 @@ class Shape2D3DFactory
         }
 
         return self::createFromGeoJSONData($geoJsonData, $srid);
-    }
+    }*/
 
     /**
      * @param array<mixed> $geoJsonData
      * @param int|null $srid Optional SRID, defaults to the value in $_ENV['GEO_DEFAULT_SRID']
      * @return Shape2D\AbstractShape2D|ShapeZ\AbstractShapeZ
      */
-    public static function createFromGeoJSONData(array $geoJsonData, int|null $srid = null): Shape2D\AbstractShape2D|ShapeZ\AbstractShapeZ
-    {
-        if (!isset($srid)) $srid = $_ENV['GEO_DEFAULT_SRID'];
+//    public static function createFromGeoJSONData(array $geoJsonData, int|null $srid = null): Shape2D\AbstractShape2D|ShapeZ\AbstractShapeZ
+//    {
+//        if (!isset($srid)) $srid = $_ENV['GEO_DEFAULT_SRID'];
+//
+//        // Check the type of geometry
+//        if (!isset($geoJsonData['type'])) {
+//            throw new \InvalidArgumentException('GeoJSON must contain "type".');
+//        }
+//
+//        switch ($geoJsonData['type']) {
+//            case 'Point':
+//                $coordCount = count($geoJsonData['coordinates']);
+//                if ($coordCount == 2) {
+//                    return Shape2D\Point::createFromGeoJSONData($geoJsonData, $srid);
+//                } elseif ($coordCount == 3) {
+//                    return ShapeZ\PointZ::createFromGeoJSONData($geoJsonData, $srid);
+//                }
+//                break;
+//
+//            case 'LineString':
+//                $coordCount = count($geoJsonData['coordinates'][0]);
+//                if ($coordCount == 2) {
+//                    return Shape2D\LineString::createFromGeoJSONData($geoJsonData, $srid);
+//                } elseif ($coordCount == 3) {
+//                    return ShapeZ\LineStringZ::createFromGeoJSONData($geoJsonData, $srid);
+//                }
+//                break;
+//
+//            case 'Polygon':
+//                $coordCount = count($geoJsonData['coordinates'][0][0]);
+//                if ($coordCount == 2) {
+//                    return Shape2D\Polygon::createFromGeoJSONData($geoJsonData, $srid);
+//                } elseif ($coordCount == 3) {
+//                    return ShapeZ\PolygonZ::createFromGeoJSONData($geoJsonData, $srid);
+//                }
+//                break;
+//
+//            case 'MultiPoint':
+//                $coordCount = count($geoJsonData['coordinates'][0]);
+//                if ($coordCount == 2) {
+//                    return Shape2D\MultiPoint::createFromGeoJSONData($geoJsonData, $srid);
+//                } elseif ($coordCount == 3) {
+//                    return ShapeZ\MultiPointZ::createFromGeoJSONData($geoJsonData, $srid);
+//                }
+//                break;
+//
+//            case 'MultiLineString':
+//                $coordCount = count($geoJsonData['coordinates'][0][0]);
+//                if ($coordCount == 2) {
+//                    return Shape2D\MultiLineString::createFromGeoJSONData($geoJsonData, $srid);
+//                } elseif ($coordCount == 3) {
+//                    return ShapeZ\MultiLineStringZ::createFromGeoJSONData($geoJsonData, $srid);
+//                }
+//                break;
+//
+//            case 'MultiPolygon':
+//                $coordCount = count($geoJsonData['coordinates'][0][0][0]);
+//                if ($coordCount == 2) {
+//                    return Shape2D\MultiPolygon::createFromGeoJSONData($geoJsonData, $srid);
+//                } elseif ($coordCount == 3) {
+//                    return ShapeZ\MultiPolygonZ::createFromGeoJSONData($geoJsonData, $srid);
+//                }
+//                break;
+//
+//            case 'GeometryCollection':
+//                $geometries = [];
+//                foreach ($geoJsonData['geometries'] as $geometry) {
+//                    $geometries[] = self::createFromGeoJSONString((string)json_encode($geometry), $srid);
+//                }
+//
+//                if(!empty($geometries) && $geometries[0] instanceof ShapeZ\AbstractShapeZ) {
+//                    /** @var array<ShapeZ\AbstractShapeZ> $geometries */
+//                    return new ShapeZ\GeometryCollectionZ($geometries, $srid);
+//                }
+//                /** @var array<Shape2D\AbstractShape2D> $geometries */
+//                return new Shape2D\GeometryCollection($geometries, $srid);
+//
+//            default:
+//                throw new \InvalidArgumentException('Unsupported GeoJSON type: ' . $geoJsonData['type']);
+//        }
+//
+//        throw new \InvalidArgumentException('Invalid number of coordinates for the given geometry type.');
+//    }
 
-        // Check the type of geometry
-        if (!isset($geoJsonData['type'])) {
-            throw new \InvalidArgumentException('GeoJSON must contain "type".');
-        }
-
-        switch ($geoJsonData['type']) {
-            case 'Point':
-                $coordCount = count($geoJsonData['coordinates']);
-                if ($coordCount == 2) {
-                    return Shape2D\Point::createFromGeoJSONData($geoJsonData, $srid);
-                } elseif ($coordCount == 3) {
-                    return ShapeZ\PointZ::createFromGeoJSONData($geoJsonData, $srid);
-                }
-                break;
-
-            case 'LineString':
-                $coordCount = count($geoJsonData['coordinates'][0]);
-                if ($coordCount == 2) {
-                    return Shape2D\LineString::createFromGeoJSONData($geoJsonData, $srid);
-                } elseif ($coordCount == 3) {
-                    return ShapeZ\LineStringZ::createFromGeoJSONData($geoJsonData, $srid);
-                }
-                break;
-
-            case 'Polygon':
-                $coordCount = count($geoJsonData['coordinates'][0][0]);
-                if ($coordCount == 2) {
-                    return Shape2D\Polygon::createFromGeoJSONData($geoJsonData, $srid);
-                } elseif ($coordCount == 3) {
-                    return ShapeZ\PolygonZ::createFromGeoJSONData($geoJsonData, $srid);
-                }
-                break;
-
-            case 'MultiPoint':
-                $coordCount = count($geoJsonData['coordinates'][0]);
-                if ($coordCount == 2) {
-                    return Shape2D\MultiPoint::createFromGeoJSONData($geoJsonData, $srid);
-                } elseif ($coordCount == 3) {
-                    return ShapeZ\MultiPointZ::createFromGeoJSONData($geoJsonData, $srid);
-                }
-                break;
-
-            case 'MultiLineString':
-                $coordCount = count($geoJsonData['coordinates'][0][0]);
-                if ($coordCount == 2) {
-                    return Shape2D\MultiLineString::createFromGeoJSONData($geoJsonData, $srid);
-                } elseif ($coordCount == 3) {
-                    return ShapeZ\MultiLineStringZ::createFromGeoJSONData($geoJsonData, $srid);
-                }
-                break;
-
-            case 'MultiPolygon':
-                $coordCount = count($geoJsonData['coordinates'][0][0][0]);
-                if ($coordCount == 2) {
-                    return Shape2D\MultiPolygon::createFromGeoJSONData($geoJsonData, $srid);
-                } elseif ($coordCount == 3) {
-                    return ShapeZ\MultiPolygonZ::createFromGeoJSONData($geoJsonData, $srid);
-                }
-                break;
-
-            case 'GeometryCollection':
-                $geometries = [];
-                foreach ($geoJsonData['geometries'] as $geometry) {
-                    $geometries[] = self::createFromGeoJSONString((string)json_encode($geometry), $srid);
-                }
-
-                if(!empty($geometries) && $geometries[0] instanceof ShapeZ\AbstractShapeZ) {
-                    /** @var array<ShapeZ\AbstractShapeZ> $geometries */
-                    return new ShapeZ\GeometryCollectionZ($geometries, $srid);
-                }
-                /** @var array<Shape2D\AbstractShape2D> $geometries */
-                return new Shape2D\GeometryCollection($geometries, $srid);
-
-            default:
-                throw new \InvalidArgumentException('Unsupported GeoJSON type: ' . $geoJsonData['type']);
-        }
-
-        throw new \InvalidArgumentException('Invalid number of coordinates for the given geometry type.');
-    }
-
+    /**
+     * @param string $ewktString
+     * @return Shape2D\AbstractShape2D|ShapeZ\AbstractShapeZ
+     */
     public static function createFromGeoEWKTString(string $ewktString): Shape2D\AbstractShape2D|ShapeZ\AbstractShapeZ
     {
         // Quick check for SRID part

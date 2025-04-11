@@ -12,7 +12,7 @@ class Point extends AbstractShape2D
      * @param int|null $srid Optional SRID, defaults to the value in $_ENV['GEO_DEFAULT_SRID']
      * @return Point
      */
-    public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): Point
+    /*public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): Point
     {
         if (!isset($srid)) $srid = $_ENV['GEO_DEFAULT_SRID'];
 
@@ -26,7 +26,7 @@ class Point extends AbstractShape2D
         }
 
         return new Point($jsonData['coordinates'][0], $jsonData['coordinates'][1], $srid);
-    }
+    }*/
 
     /**
      * @param string $ewktString
@@ -114,14 +114,11 @@ class Point extends AbstractShape2D
         return sprintf('POINT(%s %s)', $this->x, $this->y);
     }
 
-    /**
-     * @return array<mixed>
-     */
-    public function toGeoJSON(): array
+    /*public function toGeoJSON(): array
     {
         return [
             'type' => 'Point',
             'coordinates' => [$this->x, $this->y],
         ];
-    }
+    }*/
 }

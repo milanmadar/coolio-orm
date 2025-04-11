@@ -13,7 +13,7 @@ abstract class AbstractShapeZ extends AbstractShape
      * @param int|null $srid Optional SRID, defaults to the value in $_ENV['GEO_DEFAULT_SRID']
      * @return AbstractShapeZ
      */
-    abstract public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): AbstractShapeZ;
+    //abstract public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): AbstractShapeZ;
 
     /**
      * @param string $ewktString

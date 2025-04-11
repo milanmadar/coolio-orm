@@ -267,6 +267,7 @@ class ScaffoldCommand extends Command
 
                 if(str_starts_with($nativeColType, 'topogeometry'))
                 {
+                    /** @var array<string, mixed> $topoGeo_field_info_row */
                     $topoGeo_field_info_row = $db->executeQuery("
                         SELECT *
                         FROM topology.layer

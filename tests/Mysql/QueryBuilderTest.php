@@ -441,4 +441,57 @@ class QueryBuilderTest extends TestCase
         $this->assertEquals("DELETE FROM orm_test WHERE (id=1) AND (id=2 AND id='stringVal' OR something IN (1,2,3) OR other IN ('a','b','c'))", $sql);
     }
 
+    public function testFetchesWithResult()
+    {
+        $mgr = self::$dbHelper->getManager(OrmTest\Manager::class);
+
+        $qb = $mgr->createQueryBuilder()
+            ->where('id > 1');
+
+        $res = $qb->fetchAssociative();
+        $this->assertIsArray($res);
+        $this->assertGreaterThan(1, count($res));
+        $this->assertIsString(array_keys($res)[0]);
+
+        $res = $qb->fetchAllAssociative();
+        $this->assertIsArray($res);
+        $this->assertIsArray($res[0]);
+        $this->assertGreaterThan(1, count($res));
+        $this->assertIsString(array_keys($res[0])[0]);
+
+        $res = $qb->fetchNumeric();
+        $this->assertIsArray($res);
+        $this->assertGreaterThan(1, count($res));
+        $this->assertIsInt(array_keys($res)[0]);
+
+        $res = $qb->fetchAllNumeric();
+        $res = $qb->fetchFirstColumn();
+        $res = $qb->fetchAllKeyValue();
+        $res = $qb->fetchAllAssociativeIndexed();
+        $res = $qb->fetchOne();
+        $res = $qb->fetchFirstColumn();
+        $res = $qb->fetchOneEntity();
+        $res = $qb->fetchManyEntity();
+    }
+
+    public function testComplexQueryWith_Join_Orderby_Distinct_Having()
+    {
+        $mgr = self::$dbHelper->getManager(OrmTest\Manager::class);
+
+        $res = $mgr->createQueryBuilder()
+            ->select('t2.title')
+            ->distinct()
+            ->from('orm_test', 't1')
+            ->join('t1', 'orm_other', 't2', 't1.orm_other_id=t2.id')
+            ->where('t1.fld_int > 0')
+            ->groupBy('t2.title')
+            ->having('COUNT(t2.id) > 0')
+            ->orderBy('t2.title', 'asc')
+            ->limit(0, 5)
+            ->fetchAllAssociative();
+
+        $this->assertEquals(1, count($res));
+        $this->assertNotEmpty($res[0]['title']);
+    }
+
 }

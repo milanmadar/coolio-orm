@@ -12,7 +12,7 @@ class MultiPolygon extends AbstractShape2D
      * @param int|null $srid Optional SRID, defaults to the value in $_ENV['GEO_DEFAULT_SRID']
      * @return MultiPolygon
      */
-    public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): MultiPolygon
+    /*public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): MultiPolygon
     {
         if (!isset($srid)) $srid = $_ENV['GEO_DEFAULT_SRID'];
 
@@ -41,7 +41,7 @@ class MultiPolygon extends AbstractShape2D
         }
 
         return new MultiPolygon($polygons, $srid);
-    }
+    }*/
 
     /**
      * @param string $ewktString
@@ -211,10 +211,7 @@ class MultiPolygon extends AbstractShape2D
         return 'MULTIPOLYGON(' . implode(',', $polygonStrings) . ')';
     }
 
-    /**
-     * @return array<mixed>
-     */
-    public function toGeoJSON(): array
+    /*public function toGeoJSON(): array
     {
         return [
             'type' => 'MultiPolygon',
@@ -229,5 +226,5 @@ class MultiPolygon extends AbstractShape2D
                 $this->polygons
             )
         ];
-    }
+    }*/
 }

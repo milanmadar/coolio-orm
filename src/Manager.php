@@ -419,8 +419,9 @@ abstract class Manager
     public function createQueryBuilder(): QueryBuilder
     {
         return (new QueryBuilder( $this->orm, $this->db, $this ))
-            ->select('*')
-            ->from($this->dbTable);
+            //->select('*') // now its set with $qb->autoSetSelect() because we do magic with the '*' select
+            //->from($this->dbTable) // now its set with $qb->autoSetFrom() because Doctrine ADDs a new FROM expression to the query every time you call ->from()
+            ;
     }
 
     /**
@@ -459,6 +460,7 @@ abstract class Manager
                 sleep($_ENV['COOLIO_ORM_RETRY_SLEEP'] ?? 2);
                 $this->insert($dataToSave);
             }
+            // @codeCoverageIgnoreStart
             catch(\Doctrine\DBAL\Exception $e) {
                 // log the data too, but truncate the too long things
                 foreach($dataToSave as $field=>$value) {
@@ -468,6 +470,7 @@ abstract class Manager
                 }
                 throw Utils::handleDriverException($e, "Manager::save() INSERT ".get_class($this), $dataToSave);
             }
+            // @codeCoverageIgnoreEnd
 
             if($forceInsert) {
                 $ent->_setForceInsertOnNextSave(false);
@@ -483,12 +486,18 @@ abstract class Manager
             $this->beforeToDb($dataToSave);
 
             try {
-                $this->update($dataToSave, ['id'=>$ent->_get('id')]);
+                // its the primary id that changed
+                $whereId = isset($dataToSave['id'])
+                    ? $ent->_getDataOrigi()['id']
+                    : $ent->_get('id');
+
+                $this->update($dataToSave, ['id' => $whereId]);
             }
+            // @codeCoverageIgnoreStart
             catch (\Doctrine\DBAL\Exception\ConnectionException|\Doctrine\DBAL\Exception\ConnectionLost|\Doctrine\DBAL\Exception\RetryableException $e) {
                 try {
                     sleep($_ENV['COOLIO_ORM_RETRY_SLEEP'] ?? 2);
-                    $this->update($dataToSave, ['id' => $ent->_get('id')]);
+                    $this->update($dataToSave, ['id' => $whereId]);
                 }
                 catch (\Doctrine\DBAL\Exception $e) {
                     // log the data too, but truncate the too long things
@@ -500,6 +509,7 @@ abstract class Manager
                     throw Utils::handleDriverException($e, "Manager::save() UPDATE " . get_class($this) . " (id:" . $ent->_get('id') . ")", $dataToSave);
                 }
             }
+            // @codeCoverageIgnoreEnd
 
             $ent->_commit();
         }

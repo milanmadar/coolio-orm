@@ -14,7 +14,7 @@ class Polygon extends AbstractShape2D
      * @param int|null $srid Optional SRID, defaults to the value in $_ENV['GEO_DEFAULT_SRID']
      * @return Polygon
      */
-    public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): Polygon
+    /*public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): Polygon
     {
         if (!isset($srid)) $srid = $_ENV['GEO_DEFAULT_SRID'];
 
@@ -35,7 +35,7 @@ class Polygon extends AbstractShape2D
         }
 
         return new Polygon($lineStrings, $srid);
-    }
+    }*/
 
     /**
      * @param string $ewktString
@@ -148,10 +148,7 @@ class Polygon extends AbstractShape2D
         return 'POLYGON(' . implode(',', $ringStrings) . ')';
     }
 
-    /**
-     * @return array<mixed>
-     */
-    public function toGeoJSON(): array
+    /*public function toGeoJSON(): array
     {
         return [
             'type' => 'Polygon',
@@ -163,7 +160,7 @@ class Polygon extends AbstractShape2D
                 $this->lineStrings
             )
         ];
-    }
+    }*/
 
     /**
      * Validates that the first and last points of the LineString are the same.

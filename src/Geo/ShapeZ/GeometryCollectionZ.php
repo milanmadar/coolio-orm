@@ -13,27 +13,27 @@ class GeometryCollectionZ extends AbstractShapeZ
      * @param array<mixed> $jsonData
      * @return GeometryCollectionZ
      */
-    public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): GeometryCollectionZ
-    {
-        if (!isset($srid)) $srid = $_ENV['GEO_DEFAULT_SRID'];
-
-        if (
-            !isset($jsonData['type'], $jsonData['geometries']) ||
-            $jsonData['type'] !== 'GeometryCollection' ||
-            !is_array($jsonData['geometries'])
-        ) {
-            throw new \InvalidArgumentException('Invalid GeoJSON for GeometryCollectionZ.');
-        }
-
-        $geometries = [];
-        foreach ($jsonData['geometries'] as $geometryData) {
-            /** @var AbstractShapeZ $_ */
-            $_ = Shape2D3DFactory::createFromGeoJSONData($geometryData, $srid);
-            $geometries[] = $_;
-        }
-
-        return new GeometryCollectionZ($geometries, $srid);
-    }
+//    public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): GeometryCollectionZ
+//    {
+//        if (!isset($srid)) $srid = $_ENV['GEO_DEFAULT_SRID'];
+//
+//        if (
+//            !isset($jsonData['type'], $jsonData['geometries']) ||
+//            $jsonData['type'] !== 'GeometryCollection' ||
+//            !is_array($jsonData['geometries'])
+//        ) {
+//            throw new \InvalidArgumentException('Invalid GeoJSON for GeometryCollectionZ.');
+//        }
+//
+//        $geometries = [];
+//        foreach ($jsonData['geometries'] as $geometryData) {
+//            /** @var AbstractShapeZ $_ */
+//            $_ = Shape2D3DFactory::createFromGeoJSONData($geometryData, $srid);
+//            $geometries[] = $_;
+//        }
+//
+//        return new GeometryCollectionZ($geometries, $srid);
+//    }
 
     /**
      * @param string $ewktString
@@ -130,16 +130,13 @@ class GeometryCollectionZ extends AbstractShapeZ
         return 'GEOMETRYCOLLECTIONZ(' . implode(',', $wktGeometries) . ')';
     }
 
-    /**
-     * @return array<mixed>
-     */
-    public function toGeoJSON(): array
+    /*public function toGeoJSON(): array
     {
         return [
             'type' => 'GeometryCollection',
             'geometries' => array_map(fn(AbstractShapeZ $g) => $g->toGeoJSON(), $this->geometries)
         ];
-    }
+    }*/
 
     /**
      * @return AbstractShapeZ[]
