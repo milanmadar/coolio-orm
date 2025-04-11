@@ -61,25 +61,25 @@ INSERT INTO public.topology_test (
  toTopoGeom(
      ST_GeomFromEWKT('SRID=4326;MULTIPOINT(1 2)'), -- your raw geometry
      'topology_test_topo',                -- topology schema
-     1,                                   -- topology layer id (typically 1 if only 1 layer)
+     1,                                   -- topology layer id
      0.001                                -- tolerance for snapping and validation
  ),
  toTopoGeom(
      ST_GeomFromEWKT('SRID=4326;MULTILINESTRING((1 2, 3 4))'), -- your raw geometry
      'topology_test_topo',                          -- topology schema
-     2,                                             -- topology layer id (typically 1 if only 1 layer)
+     2,                                             -- topology layer id 
      0.001                                          -- tolerance for snapping and validation
  ),
  toTopoGeom(
      ST_GeomFromEWKT('SRID=4326;MULTIPOLYGON(((0 0,0 5,5 5,5 0,0 0),(1 1,1 2,2 2,2 1,1 1)))'), -- your raw geometry
      'topology_test_topo',                           -- topology schema
-     3,                                              -- topology layer id (typically 1 if only 1 layer)
+     3,                                              -- topology layer id 
      0.001                                           -- tolerance for snapping and validation
  ),
  toTopoGeom(
      ST_GeomFromEWKT('SRID=4326;GEOMETRYCOLLECTION(POINT(1 1),LINESTRING(2 2,3 3,4 4))'), -- your raw geometry
      'topology_test_topo',                                -- topology schema
-     4,                                              -- topology layer id (typically 1 if only 1 layer)
+     4,                                              -- topology layer id 
      0.001                                           -- tolerance for snapping and validation
 )
 );
