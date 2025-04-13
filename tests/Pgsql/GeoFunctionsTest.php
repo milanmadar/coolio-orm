@@ -8,15 +8,7 @@ use Milanmadar\CoolioORM\Geo\ShapeZ\PointZ;
 use PHPUnit\Framework\TestCase;
 use Milanmadar\CoolioORM\ORM;
 use Milanmadar\CoolioORM\Geo\GeoFunctions;
-use Milanmadar\CoolioORM\Geo\Shape2D\CircularString;
-use Milanmadar\CoolioORM\Geo\Shape2D\CompoundCurve;
-use Milanmadar\CoolioORM\Geo\Shape2D\CurvePolygon;
-use Milanmadar\CoolioORM\Geo\Shape2D\GeometryCollection;
 use Milanmadar\CoolioORM\Geo\Shape2D\LineString;
-use Milanmadar\CoolioORM\Geo\Shape2D\MultiCurve;
-use Milanmadar\CoolioORM\Geo\Shape2D\MultiLineString;
-use Milanmadar\CoolioORM\Geo\Shape2D\MultiPoint;
-use Milanmadar\CoolioORM\Geo\Shape2D\MultiPolygon;
 use Milanmadar\CoolioORM\Geo\Shape2D\Point;
 use Milanmadar\CoolioORM\Geo\Shape2D\Polygon;
 use tests\DbHelper;
@@ -56,6 +48,12 @@ class GeoFunctionsTest extends TestCase
             ->fetchOne()
         ;
         $this->assertTrue($result);
+
+        $ent = $mgr->createQueryBuilder()
+            ->select('id')
+            ->andWhere($expr)
+            ->fetchOne();
+        $this->assertNotNull($ent);
     }
 
     public function testST_Contains()
@@ -73,6 +71,12 @@ class GeoFunctionsTest extends TestCase
             ->fetchOne()
         ;
         $this->assertTrue($result);
+
+        $ent = $mgr->createQueryBuilder()
+            ->select('id')
+            ->andWhere($expr)
+            ->fetchOne();
+        $this->assertNotNull($ent);
     }
 
     public function testST_ContainsProperly()
@@ -90,6 +94,12 @@ class GeoFunctionsTest extends TestCase
             ->fetchOne()
         ;
         $this->assertTrue($result);
+
+        $ent = $mgr->createQueryBuilder()
+            ->select('id')
+            ->andWhere($expr)
+            ->fetchOne();
+        $this->assertNotNull($ent);
     }
 
     public function testST_CoveredBy()
@@ -107,6 +117,12 @@ class GeoFunctionsTest extends TestCase
             ->fetchOne()
         ;
         $this->assertTrue($result);
+
+        $ent = $mgr->createQueryBuilder()
+            ->select('id')
+            ->andWhere($expr)
+            ->fetchOne();
+        $this->assertNotNull($ent);
     }
 
     public function testST_Covers()
@@ -141,6 +157,12 @@ class GeoFunctionsTest extends TestCase
             ->fetchOne()
         ;
         $this->assertTrue($result);
+
+        $ent = $mgr->createQueryBuilder()
+            ->select('id')
+            ->andWhere($expr)
+            ->fetchOne();
+        $this->assertNotNull($ent);
     }
 
     public function testST_Disjoint()
@@ -158,6 +180,12 @@ class GeoFunctionsTest extends TestCase
             ->fetchOne()
         ;
         $this->assertTrue($result);
+
+        $ent = $mgr->createQueryBuilder()
+            ->select('id')
+            ->andWhere($expr)
+            ->fetchOne();
+        $this->assertNotNull($ent);
     }
 
     public function testST_Equals()
@@ -175,6 +203,12 @@ class GeoFunctionsTest extends TestCase
             ->fetchOne()
         ;
         $this->assertTrue($result);
+
+        $ent = $mgr->createQueryBuilder()
+            ->select('id')
+            ->andWhere($expr)
+            ->fetchOne();
+        $this->assertNotNull($ent);
     }
 
     public function testST_Intersects()
@@ -192,6 +226,12 @@ class GeoFunctionsTest extends TestCase
             ->fetchOne()
         ;
         $this->assertTrue($result);
+
+        $ent = $mgr->createQueryBuilder()
+            ->select('id')
+            ->andWhere($expr)
+            ->fetchOne();
+        $this->assertNotNull($ent);
     }
 
     public function testST_LineCrossingDirection()
@@ -210,6 +250,12 @@ class GeoFunctionsTest extends TestCase
             ->fetchOne()
         ;
         $this->assertEquals($result, GeoFunctions::CROSS_LEFT);
+
+        $ent = $mgr->createQueryBuilder()
+            ->select('id')
+            ->andWhereColumn($expr, '=', GeoFunctions::CROSS_LEFT)
+            ->fetchOne();
+        $this->assertNotNull($ent);
     }
 
     public function testST_OrderingEquals()
@@ -228,6 +274,12 @@ class GeoFunctionsTest extends TestCase
             ->fetchOne()
         ;
         $this->assertTrue($result);
+
+        $ent = $mgr->createQueryBuilder()
+            ->select('id')
+            ->andWhere($expr)
+            ->fetchOne();
+        $this->assertNotNull($ent);
     }
 
     public function testST_Overlaps()
@@ -246,6 +298,12 @@ class GeoFunctionsTest extends TestCase
             ->fetchOne()
         ;
         $this->assertTrue($result);
+
+        $ent = $mgr->createQueryBuilder()
+            ->select('id')
+            ->andWhere($expr)
+            ->fetchOne();
+        $this->assertNotNull($ent);
     }
 
     public function testST_Relate()
@@ -264,6 +322,12 @@ class GeoFunctionsTest extends TestCase
             ->fetchOne()
         ;
         $this->assertEquals('1010F0102', $result);
+
+        $ent = $mgr->createQueryBuilder()
+            ->select('id')
+            ->andWhereColumn($expr, '=', '1010F0102')
+            ->fetchOne();
+        $this->assertNotNull($ent);
     }
 
     public function testST_RelateMatch()
@@ -295,6 +359,12 @@ class GeoFunctionsTest extends TestCase
             ->fetchOne()
         ;
         $this->assertTrue($result);
+
+        $ent = $mgr->createQueryBuilder()
+            ->select('id')
+            ->andWhere($expr)
+            ->fetchOne();
+        $this->assertNotNull($ent);
     }
 
     public function testST_Within()
@@ -313,6 +383,12 @@ class GeoFunctionsTest extends TestCase
             ->fetchOne()
         ;
         $this->assertTrue($result);
+
+        $ent = $mgr->createQueryBuilder()
+            ->select('id')
+            ->andWhere($expr)
+            ->fetchOne();
+        $this->assertNotNull($ent);
     }
 
     public function testST_3DDWithin()
@@ -332,6 +408,12 @@ class GeoFunctionsTest extends TestCase
             ->fetchOne()
         ;
         $this->assertFalse($result);
+
+        $ent = $mgr->createQueryBuilder()
+            ->select('id')
+            ->andWhere($expr)
+            ->fetchOne();
+        $this->assertNotNull($ent);
     }
 
     public function testST_3DDFullyWithin()
@@ -351,6 +433,12 @@ class GeoFunctionsTest extends TestCase
             ->fetchOne()
         ;
         $this->assertFalse($result);
+
+        $ent = $mgr->createQueryBuilder()
+            ->select('id')
+            ->andWhere($expr)
+            ->fetchOne();
+        $this->assertNotNull($ent);
     }
 
     public function testST_DFullyWithin()
@@ -370,6 +458,12 @@ class GeoFunctionsTest extends TestCase
             ->fetchOne()
         ;
         $this->assertTrue($result);
+
+        $ent = $mgr->createQueryBuilder()
+            ->select('id')
+            ->andWhere($expr)
+            ->fetchOne();
+        $this->assertNotNull($ent);
     }
 
     public function testST_DWithin()
@@ -389,6 +483,12 @@ class GeoFunctionsTest extends TestCase
             ->fetchOne()
         ;
         $this->assertTrue($result);
+
+        $ent = $mgr->createQueryBuilder()
+            ->select('id')
+            ->andWhere($expr)
+            ->fetchOne();
+        $this->assertNotNull($ent);
     }
 
     public function testST_Distance()
@@ -408,6 +508,12 @@ class GeoFunctionsTest extends TestCase
             ->fetchOne()
         ;
         $this->assertEquals(78594.85295358, $result);
+
+        $ent = $mgr->createQueryBuilder()
+            ->select('id')
+            ->andWhereColumn($expr, '=', 78594.85295358)
+            ->fetchOne();
+        $this->assertNotNull($ent);
     }
 
     public function testST_3DDistance()
@@ -426,6 +532,12 @@ class GeoFunctionsTest extends TestCase
             ->fetchOne()
         ;
         $this->assertEquals(2.1213203435596424, $result);
+
+        $ent = $mgr->createQueryBuilder()
+            ->select('id')
+            ->andWhereColumn($expr, '=', 2.1213203435596424)
+            ->fetchOne();
+        $this->assertNotNull($ent);
     }
 
     public function testST_Length()
@@ -442,6 +554,12 @@ class GeoFunctionsTest extends TestCase
             ->fetchOne()
         ;
         $this->assertEquals(111319.49079327357, $result);
+
+        $ent = $mgr->createQueryBuilder()
+            ->select('id')
+            ->andWhereColumn($expr, '=', 111319.49079327357)
+            ->fetchOne();
+        $this->assertNotNull($ent);
     }
 
     public function testST_ShortestLine()
@@ -480,6 +598,12 @@ class GeoFunctionsTest extends TestCase
             ->fetchOne()
         ;
         $this->assertEquals(1774086.6712937024, $result);
+
+        $ent = $mgr->createQueryBuilder()
+            ->select('id')
+            ->andWhereColumn($expr, '=', 1774086.6712937024)
+            ->fetchOne();
+        $this->assertNotNull($ent);
     }
 
 
@@ -501,6 +625,12 @@ class GeoFunctionsTest extends TestCase
             ->fetchOne()
         ;
         $this->assertTrue($result);
+
+        $ent = $mgr->createQueryBuilder()
+            ->select('id')
+            ->andWhere($expr)
+            ->fetchOne();
+        $this->assertNotNull($ent);
     }
 
 }
