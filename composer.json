@@ -39,7 +39,8 @@
         "php": "^8.2",
         "doctrine/dbal": "4.2.3",
         "ext-mbstring": "*",
-        "symfony/console": "^7.2"
+        "symfony/console": "^7.2",
+        "symfony/dotenv": "^7.2"
     },
     "require-dev": {
         "ext-xdebug": "*",
@@ -48,5 +49,15 @@
     },
     "bin": [
         "bin/console"
-    ]
+    ],
+    "extra": {
+        "symfony": {
+            "commands": [
+                "Milanmadar\\CoolioORM\\Command\\ScaffoldCommand"
+            ],
+            "bundle": {
+                "Milanmadar\\CoolioORM\\CoolioORMBundle": ["all"]
+            }
+        }
+    }
 }

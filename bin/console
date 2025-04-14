@@ -21,6 +21,14 @@ if (!class_exists(\Symfony\Component\Console\Application::class)) {
 
 use Milanmadar\CoolioORM;
 use Symfony\Component\Console\Application;
+use Symfony\Component\Dotenv\Dotenv;
+
+// .env
+$dotenv = new Dotenv();
+$envPath = getcwd() . '/.env';
+if (file_exists($envPath)) {
+    $dotenv->load($envPath);
+}
 
 // Create the Console app
 $application = new Application();

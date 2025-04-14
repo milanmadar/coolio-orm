@@ -1,0 +1,9 @@
+services:
+  Milanmadar\CoolioORM\ORM:
+    factory: ['Milanmadar\CoolioORM\ORM', 'instance']
+
+  Milanmadar\CoolioORM\Command\ScaffoldCommand:
+    arguments:
+      - '@Milanmadar\CoolioORM\ORM'
+    tags:
+      - { name: 'console.command' }
