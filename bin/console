@@ -1,6 +1,23 @@
 #!/usr/bin/env php
 <?php
-require __DIR__ . '/../vendor/autoload.php';
+// Locate the correct autoload.php
+$autoloadFiles = [
+    __DIR__ . '/../vendor/autoload.php',            // In case running inside package development
+    __DIR__ . '/../../../autoload.php',             // Installed as a vendor dependency
+];
+
+foreach ($autoloadFiles as $file) {
+    if (file_exists($file)) {
+        require $file;
+        break;
+    }
+}
+
+// If none found, crash
+if (!class_exists(\Symfony\Component\Console\Application::class)) {
+    fwrite(STDERR, "Could not find Composer autoloader.\n");
+    exit(1);
+}
 
 use Milanmadar\CoolioORM;
 use Symfony\Component\Console\Application;
