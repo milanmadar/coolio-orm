@@ -1,8 +1,6 @@
 #!/usr/bin/env php
 <?php
-require __DIR__ . '/vendor/autoload.php';
-require __DIR__ . '/dotEnvLoader.php';
-dotEnvLoader(__DIR__ . '/.env');
+require __DIR__ . '/../vendor/autoload.php';
 
 use Milanmadar\CoolioORM;
 use Symfony\Component\Console\Application;
@@ -13,5 +11,5 @@ $application = new Application();
 // Register commands
 $application->add(new CoolioORM\Command\ScaffoldCommand( CoolioORM\ORM::instance() ));
 
-// Run it the console app
+// Run the console app
 $application->run();

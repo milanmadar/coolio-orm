@@ -5,11 +5,13 @@ namespace Milanmadar\CoolioORM\Command;
 use Milanmadar\CoolioORM\ORM;
 use Milanmadar\CoolioORM\Geo\Shape2D;
 use Milanmadar\CoolioORM\Geo\ShapeZ;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
+#[AsCommand(name: 'coolio-orm:scaffold', description: 'Scaffolds Entity and Manager classes from your database')]
 class ScaffoldCommand extends Command
 {
     private ORM $orm;
@@ -28,7 +30,7 @@ class ScaffoldCommand extends Command
 
     protected function configure()
     {
-        $this->setName('scaffold');
+        $this->setName('coolio-orm:scaffold');
         $this->setDescription('Scaffolds Entity and Manager classes from your database');
     }
 

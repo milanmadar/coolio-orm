@@ -70,7 +70,7 @@ CREATE TABLE geometry_test (
 Scaffold means generating the PHP classes (Entity and Manager) from the Database table. In you terminal, run:
 
 ```bash
-vendor/milanmadar/coolio-orm/console scaffold
+vendor/bin/console coolio-orm:scaffold
 ```
 
 It will ask you which table you want to scaffold, and ask questions if needed.
