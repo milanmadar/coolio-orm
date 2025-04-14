@@ -426,11 +426,15 @@ class ScaffoldCommand extends Command
                     $paramType = 'int';
                     $docParamType = 'int';
                     break;
+                case 'real':
+                case 'numeric':
+                case 'double':
+                    $colType = 'float';
+                    $paramType = 'float';
+                    $docParamType = 'float';
+                    break;
                 case 'float':
                 case 'decimal':
-                case 'numeric':
-                case 'real':
-                case 'double':
                     $paramType = 'float';
                     $docParamType = 'float';
                     break;
