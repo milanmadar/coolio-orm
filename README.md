@@ -9,7 +9,7 @@ It is based on <a href="https://www.doctrine-project.org/projects/doctrine-dbal/
 ## Installation
 
 ```bash
-composer require coolio-orm/coolio-orm
+composer require milanmadar/coolio-orm
 ```
 
 You need the following environmental variables (like `.env`, also known as `DotEnv`):
