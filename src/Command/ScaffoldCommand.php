@@ -100,7 +100,6 @@ class ScaffoldCommand extends Command
 
         //
         // try to guess the model name with the full namespace
-        $modelsDir = '';
         $guessModelName = str_replace(' ', '', ucwords(str_replace(['-','_'], ' ', strtolower($tbl))));
         if(strpos($guessModelName, 'Public.') === 0) {
             $guessModelName = explode('.', $guessModelName)[1];
@@ -109,11 +108,11 @@ class ScaffoldCommand extends Command
             $guessModelName = str_replace(' ', '_', ucwords(str_replace('.', ' ', $guessModelName)));
         }
         $cwd = getcwd();
+        $modelsDir = $cwd.'/src/Model';
+        $bestModelNameGuessFound = false;
         if(is_dir($cwd.'/src')) {
             if(is_dir($cwd.'/src/Model'))
             {
-                $modelsDir = $cwd.'/src/Model';
-
                 /** @var array<string> $glob */
                 $glob = glob($cwd.'/src/Model/*');
                 $subDirs = array_filter($glob, 'is_dir');
@@ -134,6 +133,9 @@ class ScaffoldCommand extends Command
                                 array_pop($parts);
                                 $namespace = implode('\\', $parts);
                                 $guessModelName = $namespace . '\\' . $guessModelName;
+
+                                $bestModelNameGuessFound = true;
+
                                 break;
                             }
                         }
@@ -141,10 +143,13 @@ class ScaffoldCommand extends Command
                 }
             }
         }
+        if(!$bestModelNameGuessFound) {
+            $guessModelName = 'App\\Model\\' . $guessModelName;
+        }
 
         //
         // model name
-        $modelName = $io->ask("Name of the new Model name (with namespace, like 'App\Model\Product') ", $guessModelName);
+        $modelName = $io->ask("Name of the new Model (with namespace, like 'App\Model\Product') ", $guessModelName);
         $modelName = str_replace("/", "\\", $modelName);
         $modelName = trim($modelName, "\\");
         $modelName = str_replace('.', '_', $modelName);
