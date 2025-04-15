@@ -944,11 +944,11 @@ You can see the SQL string of the resulting query:
 
 Note: The below operations will modify data in the database, so the EntityRepository (aka. the Entity cache) will be cleared (for all db tables).
 
-- INSERT can't take named parameters. The '0' and '1' in the `setParameter()` means '1st' value, '2nd' value...
+- INSERT:
 
         $sqlBldr->insert('table_name')
-                ->setValue('age', '?')->setParameter(0, 18)
-                ->setValue('name', '?')->setParameter(1, "Jhonny")
+                ->setValue('age', ':Age')->setParameter('Age', 18)
+                ->setValue('name', :Name')->setParameter('Name', "Jhonny")
                 ->executeStatement();
   
 - UPDATE:
