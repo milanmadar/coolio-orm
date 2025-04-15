@@ -1,12 +1,22 @@
 # PHP Database Acces (ORM, DBAL)
 
-This ORM is well tested on MySQL and PostgreSQL (also with PostGIS extension for Geometry and Geography). It should work on any other SQL database that Doctrine DBAL supports, but we didn't test it on the others.
+ORM (Object Relation Mapper) is a set of classes that represent your data in PHP code and help you with reading/writing data from/to the db (see the Scaffold section to generate your Model from a database table).
 
-It is based on <a href="https://www.doctrine-project.org/projects/doctrine-dbal/en/4.2/reference/introduction.html#introduction" target="_blank">Doctrine DBAL</a>.
+This ORM is well tested on MySQL and PostgreSQL (also with PostGIS extension for Geometry and Geography). It should work on any other SQL database that Doctrine DBAL supports, but we didn't test it on the others.
 
 CoolioORM is a database-first approach, which means you first create your database tables, and then you generate (scaffold) the PHP classes from the database tables.
 
-It integrate well into <a href="https://symfony.com/doc/current/index.html" target="_blank">Symfony framework</a> as a Bundle
+It integrate well into <a href="https://symfony.com/doc/current/index.html" target="_blank">Symfony framework</a> as a Bundle (you can autowire `\Milanmadar\CoolioORM\ORM`).
+
+**NOTE: This ORM was designed for medium to large projects, where you have thousands or millions of rows in the database tables. Hence, It doesn't handle many-to-one or many-to-many relations like `$catagory->getProducts()` (because `getProducts()` would return 100.000 rows). But its very easy to do that with the query builder, and you have full control (and easy control) over `LIMIT` and `ORDER BY` there.**
+
+It is based on <a href="https://www.doctrine-project.org/projects/doctrine-dbal/en/4.2/reference/introduction.html#introduction" target="_blank">Doctrine DBAL</a>.
+
+The basics are:
+
+- Create Foreign Keys in your database tables and CoolioORM will automatically create the relations in the PHP classes
+- Switch between databases (like copy something from production to your local dev database, or do a migration with data processing)
+- It supports everything that Doctrine DBAL supports, additionally it supports Arrays easier and NULLs easier (with `$queryBuilder->andWhereColumn()`)
 
 ---
 
@@ -42,12 +52,14 @@ GEO_DEFAULT_SRID=4326
 
 ---
 
-## Usage
+## Usage with PostGIS Geometries
+
+We will create a demo table that hold certain types of 2D geometries, like Point, LineString, Polygon, etc (see `src/Geo/Shape2D` folder). But the ORM support 3D geometries too, like PointZ, LineStringZ, PolygonZ, etc (see `src/Geo/ShapeZ` folder).
 
 ### Step 1: Create database table
 
 ```sql
-// PostGIS Example
+-- PostGIS Example
 CREATE TABLE geometry_test (
    id SERIAL PRIMARY KEY,
    title VARCHAR(255) NOT NULL,
@@ -84,7 +96,7 @@ It will ask you which table you want to scaffold, and ask questions if needed.
 
 In this example we scaffolded `GeometryTest`. We will get 2 classes:
 
-- `GeometryTest\Entity` holds 1 row `geometry_test` table, each column (field) has setters getters
+- `GeometryTest\Entity` holds 1 row from the `geometry_test` table, each column (field) has setters getters
 - `GeometryTest\Manager` to read and write data from/to the `geometry_test` table
 
 ```php
@@ -92,12 +104,13 @@ use Milanmadar\CoolioORM\ORM;
 use Milanmadar\CoolioORM\Geo\Shape2D;
 use App\Model\GeometryTest;
 
-$orm = ORM::instance();
+$orm = ORM::instance(); // In Symfony, you can autowire `\Milanmadar\CoolioORM\ORM`
 
 $geotestManager = $orm->entityManager( GeometryTest\Manager::class );
 
 // Create a new entity (representing a table row), and fill it with data
-$geotest = $geotestManager->createEntity()
+$geotest = $geotestManager
+    ->createEntity()
     ->setTitle("My first Geometry enabled Entity")
     ->setDifficulty( 1 )
     ->setPointGeom( new Shape2D\Point(1, 2) )
@@ -140,12 +153,145 @@ $geotests = $geotestManager
 // You will find them all in the below documentation
 ```
 
-Those are the basics. You can do more, like:
+There are more supported PostGIS geometry types, look into the `src/Geo/Shape2D` and `src/Geo/ShapeZ` (3D) folder.
 
-- Create Foreign Keys in your database tables and CoolioORM will automatically create the relations in the Entity classes
-- There are many supported PostGIS geometry types, look into the `src/Geo/Shape2D` and `src/Geo/ShapeZ` (3D) folder
-- Switch between databases (like copy something from production to your local dev database, or do a migration with data processing)
-- It supports everything that Doctrine DBAL supports, additionally it supports Arrays easier and NULLs easier (with `$queryBuilder->andWhereColumn()`)
+## Usage for classic tables
+
+We will have Shops, and each Shop can have many Products.
+
+### Step 1: Create database table
+
+```sql
+-- MySQL Example
+CREATE TABLE `shop` (
+    `id` int NOT NULL AUTO_INCREMENT,
+    `name` varchar(128),
+    PRIMARY KEY (`id`)
+);
+
+CREATE TABLE `product` (
+    `id` int NOT NULL AUTO_INCREMENT,
+    `shop_id` int NOT NULL,
+    `title` varchar(128),
+    PRIMARY KEY (`id`),
+    KEY `fk_shop_id` (`shop_id`),
+    CONSTRAINT `fk_shop_id` FOREIGN KEY (`shop_id`) REFERENCES `shop` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+);
+```
+
+### Step 2: Scaffold
+
+Scaffold means generating the PHP classes (Entity and Manager) from the Database table. In you terminal, run the following command twice, to first generate the Shop, then second time generate the Product:
+
+```bash
+vendor/bin/console coolio-orm:scaffold
+```
+
+It will ask you which table you want to scaffold (at first run the `shop`, at second run the `product`), and ask questions if needed.
+
+### Step 3: Use it in your PHP code
+
+In this example we scaffolded `Shop` and `Product` classes. For each of them we will get 2 classes:
+
+- `Shop\Entity` holds 1 row from the `shop` table, each column (field) has setters getters
+- `Shop\Manager` to read and write data from/to the `shop` table
+- `Product\Entity` holds 1 row from the `product` table, each column (field) has setters getters
+- `Product\Manager` to read and write data from/to the `product` table
+
+```php
+use Milanmadar\CoolioORM\ORM;
+use App\Model\Shop;
+use App\Model\Products;
+
+$orm = ORM::instance(); // In Symfony, you can autowire `\Milanmadar\CoolioORM\ORM`
+
+$shopManager = $orm->entityManager( Shop\Manager::class );
+$productManager = $orm->entityManager( Product\Manager::class );
+
+//
+// Create a Shop with some Products
+//
+
+// Create a new Shop (representing a table row), and fill it with data
+$shop = $shopManager
+    ->createEntity()
+    ->setName('Coolio Shop');
+// Save it to the database
+$shopManager->save($shop);
+    
+// Create some products
+$products = [];
+// One product
+$products[] = $productManager
+    ->createEntity()
+    ->setTitle('Coolio T-shirt')
+    ->setShop( $shop ); // Set the shop for the product
+// Another product
+$products[] = $productManager
+    ->createEntity()
+    ->setTitle('Coolio Mug')
+    ->setShop( $shop ); // Set the shop for the product
+
+// Save each product
+foreach($products as $product) {
+   $productManager->save($product);
+}
+
+// Now all our entity has an IDs
+$shop->getId(); // 1
+$products[0]->getId(); // 1
+$products[1]->getId(); // 2
+
+//
+// Read all the products from the shop
+// Imagine there are 10.000 products in the shop
+//
+
+$shop = $shopManager->findById( 1 );
+
+// Read all Products with the "paging" method, with chunks of 200s
+// (Paging means we will increase the LIMIT offset by 200 each time)
+$lastOffset = 0;
+do {
+    $products = $productManager
+        ->createQueryBuilder()
+        ->andWhereColumn('shop_id', '=', $shop->getId())
+        ->orderBy('id', 'asc')
+        ->limit($lastOffset, 200) // chunks of 200
+        ->fetchManyEntity(); // this gives us an array of Product\Entity objects
+    foreach($products as $product) {
+        echo $product->getTitle()."\n";
+    }
+    $lastOffset += 200;
+} 
+while( !empty($products) );
+
+// Read all Products with the "cursor" method, with chunks of 200s
+// (Cursoring means we will read the Products ordered by their ID, always remembering the last ID we read)
+// The cursoring is better for large datasets (the database needs to work less)
+$lastProductId = 0;
+do {
+    $products = $productManager
+        ->createQueryBuilder()
+        ->andWhereColumn('shop_id', '=', $shop->getId())
+        ->andWhereColumn('id', '>', $lastProductId)  // from the last ID we already read
+        ->orderBy('id', 'asc')
+        ->limit(0, 200) // chunks of 200
+        ->fetchManyEntity(); // this gives us an array of Product\Entity objects
+    foreach($products as $product) {
+        $lastProductId = $product->getId(); // remember the last ID we read
+        echo $product->getTitle()."\n";
+    }
+} 
+while( !empty($products) );
+
+
+//
+// Delete the shop
+//
+$shopManager->delete($shop);
+// The deletion of the Products happens in the database because of the FOREIGN KEY...ON DELETE CASCADE
+```
 
 **Enjoy!**
 
@@ -153,12 +299,12 @@ Those are the basics. You can do more, like:
 
 ## Entity, Manager (ORM)
 
-ORM (Object Relation Mapper) is a set of classes that represent your data in PHP code and help you with reading/writing data from/to the db (see the [Scaffold section](README.md#scaffold) to generate your Model from a database table).
+A Model means 2 classes:
 
-A Model means 2 classes:  
-An `CoolioORM\Entity` class holds data from a single row from a db table. This has the accessors (setters/getters).  
-An `CoolioORM\Manager` class handles the db operations (internally it uses [Doctrine DBAL](README.md#database-connections)). This has save(), delete(), findById(), and some other method built in.  
-`CoolioORM\ORM` class can create the Managers with the `$orm->entityManage( MyManager::class)` method (it also handles database connections and several other things). So the CoolioORM\ORM class is the one you want to autowire into you Contollers and other classes that needs database access.
+- An `CoolioORM\Entity` class holds data from a single row from a db table. This has the accessors (setters/getters).  
+- An `CoolioORM\Manager` class handles the db operations (internally it uses [Doctrine DBAL](README.md#database-connections)). This has save(), delete(), findById(), and some other methods built in.
+
+The `CoolioORM\ORM` class can create the Managers with the `$orm->entityManager( MyManager::class )` method (it also handles database connections and several other things). So if you have dependency injection (like Symfony autowire) then the `Milanmadar\CoolioORM\ORM` class is the one you want to inject (autowire) into your Controllers and other classes that needs database access (like Commands in Symfony).
 
 ### The Entity
 
@@ -174,8 +320,56 @@ You can use PHP's `clone` keyword to copy an Entity, except it's ID (because tha
 The Entities have fluent setters, meaning you can write them like this:  
 `$entity->setTitle("title")->setPrice(100, 'USD')->setSomething("something");`
 
-The Entity has the `CoolioORM\ORM` internally (so you can use other Managers in it to create special relations, etc). So inside any Entity method, you can do this:  
-`$otherManager = $this->orm->entityManager( OtherModelManager::class, $this->db );` (the last `$this->db` param is optional, if its omitted, then the `OtherManager` will use its default database connection)
+The Entity has the `Milanmadar\CoolioORM\ORM` internally, so you can use other Managers in it to create special relations:
+
+```php
+#
+# EXAMPLE 1: Get the thumbnail picture of a Product
+#
+namespace App\Model\Product;
+
+use App\Model\Picture;
+use Milanmadar\CoolioORM;
+
+class Entity extends CoolioORM\Entity
+{
+    public function getThumbnail(): Picture\Entity
+    {
+        return $this->orm->entityManager( Picture\Manager::class )
+            ->createQueryBuilder()
+            ->andWhereColumn('product_id', '=', $this->getId())
+            ->andWhereColumn('type', '=', 'thumbnail')
+            ->orderBy('position', 'asc')
+            ->limit(0, 1)
+            ->fetchOneEntity();
+    }
+}
+
+#
+# EXAMPLE 1: Get the certain special Products of a Shop
+#
+namespace App\Model\Shop;
+
+use App\Model\Product;
+use Milanmadar\CoolioORM;
+
+class Entity extends CoolioORM\Entity
+{
+    public function getCheapestProduct(): Product\Entity 
+    {
+        return $this->orm->entityManager( Product\Manager::class )
+            // in real life you would probably use the QueryBuilder
+            ->findOneWhere("shop_id=? ORDER BY price ASC LIMIT 1", [$this->getId()]);
+    }
+    
+    public function getAllProducts(: array
+    {
+        return $this->orm->entityManager( Product\Manager::class )
+            // in real life you would probably use the QueryBuilder
+            ->findManyWhere("shop_id=? ORDER BY position ASC", [$this->getId()]);
+    }
+}
+```
 
 #### Entity Relations
 
@@ -191,7 +385,7 @@ items.description
 items.catalog_id # Foreign Key to catalogs.id (ON DELETE SET NULL, ON UPDATE CASCADE)
 ```
 
-When you setup the foreign keys correctly in the db table scheme, the [Scaffold](README.md#scaffold) will give you Entities as such:
+When you setup the foreign keys correctly in the db table scheme, the [Scaffold](README.md#scaffold) will give you Entities as such (simplified code without namespace just for explanation):
 ```php
 class Catalog
 {
@@ -261,9 +455,6 @@ $anotherCatalog = $item->getCatalog();
 $anotherCatalog->getId(); // catalogs.id=5
 ```
 
-<br>
-<span style="color:red;font-size:1.1rem">**ATTENTION!**</span> Related Entities must be in the same database.
-
 If you have an Entity, and inside it you want to get a different Entity, do the following:
 
 ```php
@@ -321,8 +512,36 @@ $orm = CoolioORM\ORM::instance();
 $userManager = $orm->entityManager( \App\Model\User\Manager::class );
 ```
 
-The Manager has the `CoolioORM\ORM` (so you can use other Managers in it to create special relations, etc). So inside any Manager method, you can use:  
-`$otherManager = $this->orm->entityManager( OtherModelManager::class, $this->db );`
+The Manager has the `CoolioORM\ORM` (so you can use other Managers in it to create special relations, etc). So inside any Manager method, you can use:
+
+```php
+use App\Model\OtherModel;
+class Manager extends CoolioORM\Manager
+{
+    public function manipulateOtherModel()
+    {
+        $otherManager = $this->orm->entityManager(OtherModel\Manager::class);
+        $otherEntity = $otherManager->findById(123);
+        // ... do something with $otherEntity ...
+    }
+    
+    public function someOtherModel_fromArchives()
+    {
+        $dbArchive = \Milanmadar\CoolioORM\Utils::getDbByUrl( $_ENV['DB_ARCHIVE'] ) // DB_ARCHIVE is an environmental variable (like in .env)
+        $otherManager = $this->orm->entityManager(OtherModel\Manager::class, $dbArchive);
+        $otherEntity = $otherManager->findById(123);
+        // ... do something with $otherEntity ...
+    }
+    
+    public function someOtherModel_fromTheSameDatabaseAsThis()
+    {
+        $thisDb = $this->db; // the database of this manager
+        $otherManager = $this->orm->entityManager(OtherModel\Manager::class, $thisDb);
+        $otherEntity = $otherManager->findById(123);
+        // ... do something with $otherEntity ...
+    }
+}
+```
 
 #### Retreive Entities from the db (SELECT) with ORM
 
