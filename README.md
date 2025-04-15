@@ -12,11 +12,14 @@ It integrate well into <a href="https://symfony.com/doc/current/index.html" targ
 
 It is based on <a href="https://www.doctrine-project.org/projects/doctrine-dbal/en/4.2/reference/introduction.html#introduction" target="_blank">Doctrine DBAL</a>.
 
-The basics are:
+The basic goodies are:
 
 - Create Foreign Keys in your database tables and CoolioORM will automatically create the relations in the PHP classes
-- Switch between databases (like copy something from production to your local dev database, or do a migration with data processing)
+- You can switch between databases if you want (like copy something from production to your local dev database, or do a migration from one db to another, with data processing)
 - It supports everything that Doctrine DBAL supports, additionally it supports Arrays easier and NULLs easier (with `$queryBuilder->andWhereColumn()`)
+- Supports PostGIS Geometries (2D and 3D)
+- Caches your query results to save database trips when possible (you can control that part too) 
+- Easy to get started with, and as your project grows complexity (multiple databases, large datasets, crazy relations) you can use the more advanced features that are still easy to use
 
 ---
 
