@@ -105,13 +105,16 @@ In this example we scaffolded `GeometryTest`. We will get 2 classes:
 ```php
 use Milanmadar\CoolioORM\ORM;
 use Milanmadar\CoolioORM\Geo\Shape2D;
+use Milanmadar\CoolioORM\Geo\GeoFunctions;
 use App\Model\GeometryTest;
 
 $orm = ORM::instance(); // In Symfony, you can autowire `\Milanmadar\CoolioORM\ORM`
 
 $geotestManager = $orm->entityManager( GeometryTest\Manager::class );
 
+//
 // Create a new entity (representing a table row), and fill it with data
+//
 $geotest = $geotestManager
     ->createEntity()
     ->setTitle("My first Geometry enabled Entity")
@@ -125,6 +128,10 @@ $geotestManager->save($geotest);
 // Now our Entity has an ID
 $geotest->getId(); // 1
 
+//
+// Read entities (rows) from the database
+//
+
 // Get an entity from the database
 $geotest = $geotestManager->findById( 1 );
 $geotest->getTitle(); // "My first Geometry enabled Entity"
@@ -133,13 +140,12 @@ $geotest->getPointGeom()->getX(); // 1
 // Get many entities from the database
 $geotests = $geotestManager->findManyWhere("difficult = :Safe_Difficulty_Param", ['Safe_Difficulty_Param'=>1]);
 foreach($geotests as $geotest) {
-    echo $geotest->getTitle();
+    echo $geotest->getTitle()."\n";
 }
 
-// Delete the entity
-$geotestManager->delete($geotest);
-
+//
 // QueryBuilder: SELECT
+//
 $geotests = $geotestManager
     ->createQueryBuilder()
     ->select('title', 'difficulty', 'linestring_geom') // if you want select(*) then you can omit this line
@@ -150,10 +156,39 @@ $geotests = $geotestManager
     ->groupBy('difficulty')
     ->fetchManyEntity() // fetches many entities
 ;
-// There are many fetches, like:
-//   ->fetchAllAssociative() // fetches all rows as associative array
-//   ->fetchOneEntity() // fetches 1 entity
-// You will find them all in the below documentation
+/* 
+There are many fetches, like:
+     ->fetchAllAssociative() // fetches all rows as associative array
+     ->fetchOneEntity() // fetches 1 entity
+You will find them all in the below documentation
+*/
+
+//
+// Use PostGIS ST_* functions
+//
+$ST_Distance_expression = GeoFunctions::ST_DWithin(
+    'point_geom',
+    new LineString([new Point(1, 1, 1), new Point(2, 1, 1), new Point(2, 2, 1), new Point(1, 1, 1)]),
+    5
+);
+
+$isThatRowWithinDistance = $mgr->createQueryBuilder()
+    ->select($ST_Distance_expression)
+    ->andWhereColumn('id', '=', 1)
+    ->fetchOne();
+// $isThatRowWithinDistance is TRUE or FALSE here        
+
+$entitiesWithinDistance = $mgr->createQueryBuilder()
+    ->andWhere($ST_Distance_expression)
+    ->fetchManyEntity();
+foreach($entitiesWithinDistance as $geotestEntity) {
+    echo $geotestEntity->getTitle()."\n";
+}
+
+//
+// Delete the entity
+//
+$geotestManager->delete($geotest);
 ```
 
 There are more supported PostGIS geometry types, look into the `src/Geo/Shape2D` and `src/Geo/ShapeZ` (3D) folder.
