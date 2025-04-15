@@ -5,6 +5,7 @@ namespace tests;
 use Doctrine\DBAL\Cache\QueryCacheProfile;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Result;
+use Doctrine\DBAL\Types\Type;
 
 class DbHelper
 {
@@ -94,7 +95,7 @@ class DbHelper
      * @param list<mixed>|array<string, mixed>                                     $params Query parameters
      * @param array<int, int|string|Type|null>|array<string, int|string|Type|null> $types  Parameter types
      *
-     * @throws \App\Tests\Exception
+     * @throws \Exception
      */
     public function executeQuery(string $sql, array $params = [], $types = [], ?QueryCacheProfile $qcp = null): Result {
         return $this->conn->executeQuery($sql, $params, $types, $qcp);
@@ -114,7 +115,7 @@ class DbHelper
      *
      * @return array<string, mixed>|false False is returned if no rows are found.
      *
-     * @throws \App\Tests\Exception
+     * @throws \Exception
      */
     public function fetchAssociative(string $query, array $params = [], array $types = []) {
         return $this->fetchAssociative($query, $params, $types);
@@ -130,7 +131,7 @@ class DbHelper
      *
      * @return list< mixed>|false False is returned if no rows are found.
      *
-     * @throws \App\Tests\Exception
+     * @throws \Exception
      */
     public function fetchNumeric(string $query, array $params = [], array $types = []) {
         return $this->fetchNumeric($query, $params, $types);
@@ -146,7 +147,7 @@ class DbHelper
      *
      * @return mixed|false False is returned if no rows are found.
      *
-     * @throws \App\Tests\Exception
+     * @throws \Exception
      */
     public function fetchOne(string $query, array $params = [], array $types = []) {
         return $this->conn->fetchOne($query, $params, $types);
@@ -161,7 +162,7 @@ class DbHelper
      *
      * @return list<list<mixed>>
      *
-     * @throws \App\Tests\Exception
+     * @throws \Exception
      */
     public function fetchAllNumeric(string $query, array $params = [], array $types = []): array {
         return $this->conn->fetchAllNumeric($query, $params, $types);
@@ -176,7 +177,7 @@ class DbHelper
      *
      * @return list<array<string,mixed>>
      *
-     * @throws \App\Tests\Exception
+     * @throws \Exception
      */
     public function fetchAllAssociative(string $query, array $params = [], array $types = []): array {
         return $this->conn->fetchAllAssociative($query, $params, $types);
@@ -192,7 +193,7 @@ class DbHelper
      *
      * @return array<mixed,mixed>
      *
-     * @throws \App\Tests\Exception
+     * @throws \Exception
      */
     public function fetchAllKeyValue(string $query, array $params = [], array $types = []): array {
         return $this->conn->fetchAllKeyValue($query, $params, $types);
@@ -209,7 +210,7 @@ class DbHelper
      *
      * @return array<mixed,array<string,mixed>>
      *
-     * @throws \App\Tests\Exception
+     * @throws \Exception
      */
     public function fetchAllAssociativeIndexed(string $query, array $params = [], array $types = []): array {
         return $this->conn->fetchAllAssociativeIndexed($query, $params, $types);
@@ -224,7 +225,7 @@ class DbHelper
      *
      * @return list<mixed>
      *
-     * @throws \App\Tests\Exception
+     * @throws \Exception
      */
     public function fetchFirstColumn(string $query, array $params = [], array $types = []): array {
         return $this->conn->fetchAllAssociativeIndexed($query, $params, $types);
@@ -243,6 +244,7 @@ class DbHelper
     {
         $orm = \Milanmadar\CoolioORM\ORM::instance();
         $mgr = $orm->entityManager($mgrClassName);
+        $mgr->clearRepository(false);
         return $mgr->setDb($this->getConnection());
     }
 

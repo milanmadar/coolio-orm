@@ -1,8 +1,12 @@
 # PHP Database Acces (ORM, DBAL)
 
-This ORM is well tested on MySQL and PostgreSQL (also with PostGIS extension for Geometry and Geography). It should work on any other SQL database that Doctrine DBAL supports, but we don't test it on the others.
+This ORM is well tested on MySQL and PostgreSQL (also with PostGIS extension for Geometry and Geography). It should work on any other SQL database that Doctrine DBAL supports, but we didn't test it on the others.
 
-It is based on <a href="https://www.doctrine-project.org/projects/doctrine-dbal/en/4.2/reference/introduction.html#introduction" target="_blank">Doctrine DBAL</a>, so it's query builder is very similar (except CoolioORM has the `$queryBuilde->andWhereColumn()`). And CoolioORM support PostGIS Geometries in an easy-to-use object oriented way.
+It is based on <a href="https://www.doctrine-project.org/projects/doctrine-dbal/en/4.2/reference/introduction.html#introduction" target="_blank">Doctrine DBAL</a>.
+
+CoolioORM is a database-first approach, which means you first create your database tables, and then you generate (scaffold) the PHP classes from the database tables.
+
+It integrate well into <a href="https://symfony.com/doc/current/index.html" target="_blank">Symfony framework</a> as a Bundle
 
 ---
 
@@ -32,9 +36,10 @@ COOLIO_ORM_RETRY_ATTEMPTS=1
 # How long should we wait between retrying a failed query
 COOLIO_ORM_RETRY_SLEEP=2
 
-# PostGIS: The default SRID (reading from the database will use what is in the db, not this default)  
+# PostGIS: The default SRID (scaffolding from the database will use what is in the db, not this default)  
 GEO_DEFAULT_SRID=4326
 ```
+
 ---
 
 ## Usage
@@ -77,7 +82,10 @@ It will ask you which table you want to scaffold, and ask questions if needed.
 
 ### Step 3: Use it in your PHP code
 
-In this example we scaffolded `GeometryTest`, so we have `GeometryTest\Entity` and `GeometryTest\Manager` classes.
+In this example we scaffolded `GeometryTest`. We will get 2 classes:
+
+- `GeometryTest\Entity` holds 1 row `geometry_test` table, each column (field) has setters getters
+- `GeometryTest\Manager` to read and write data from/to the `geometry_test` table
 
 ```php
 use Milanmadar\CoolioORM\ORM;
@@ -88,12 +96,12 @@ $orm = ORM::instance();
 
 $geotestManager = $orm->entityManager( GeometryTest\Manager::class );
 
-// Create a new product, and fill it with things
+// Create a new entity (representing a table row), and fill it with data
 $geotest = $geotestManager->createEntity()
     ->setTitle("My first Geometry enabled Entity")
     ->setDifficulty( 1 )
     ->setPointGeom( new Shape2D\Point(1, 2) )
-    ->setLinestringGeom( new LineString([ new Point(1, 1), new Point(2, 2), new Point(3, 3), new Point(4, 4) ], 4326));
+    ->setLinestringGeom( new LineString([ new Point(1, 1), new Point(2, 2), new Point(3, 3), new Point(4, 4) ], 4326) );
 
 // Save it to the database
 $geotestManager->save($geotest);
@@ -135,9 +143,9 @@ $geotests = $geotestManager
 Those are the basics. You can do more, like:
 
 - Create Foreign Keys in your database tables and CoolioORM will automatically create the relations in the Entity classes
-- There are many supported PostGIS geometry types, look into the `src/Geo/Shape` folder
+- There are many supported PostGIS geometry types, look into the `src/Geo/Shape2D` and `src/Geo/ShapeZ` (3D) folder
 - Switch between databases (like copy something from production to your local dev database, or do a migration with data processing)
-- It supports everything that Doctrine DBAL supports, it just supports arrays and NULLs easier (and the parameterization with `andWhereColumn()` is easier too)
+- It supports everything that Doctrine DBAL supports, additionally it supports Arrays easier and NULLs easier (with `$queryBuilder->andWhereColumn()`)
 
 **Enjoy!**
 
@@ -147,6 +155,7 @@ Those are the basics. You can do more, like:
 
 ORM (Object Relation Mapper) is a set of classes that represent your data in PHP code and help you with reading/writing data from/to the db (see the [Scaffold section](README.md#scaffold) to generate your Model from a database table).
 
+A Model means 2 classes:  
 An `CoolioORM\Entity` class holds data from a single row from a db table. This has the accessors (setters/getters).  
 An `CoolioORM\Manager` class handles the db operations (internally it uses [Doctrine DBAL](README.md#database-connections)). This has save(), delete(), findById(), and some other method built in.  
 `CoolioORM\ORM` class can create the Managers with the `$orm->entityManage( MyManager::class)` method (it also handles database connections and several other things). So the CoolioORM\ORM class is the one you want to autowire into you Contollers and other classes that needs database access.
@@ -297,7 +306,7 @@ $userManager = $orm->entityManager(
 );
 ```
 
-You can change the database connection for a manager (see the [Database connectoin section](README.md#database-connections) to see how to create a database connections). This will automatically clear the [Entity Repository](README.md#retreiving-the-same-rows-multiple-times-the-entity-repository) (Entitiy Cache) for all the managers:
+You can change the database connection for a manager (see the [Database connectoin section](README.md#database-connections) to see how to create a database connections). This will automatically clear the [Entity Repository](README.md#optimized-retrieving-the-same-rows-multiple-times-the-entity-repository) (Entitiy Cache) for all the managers:
 
 ```php
 $manager->setDb( 
@@ -338,7 +347,7 @@ Note: in most cases you probably want to use the [QueryBuilder](README.md#query-
 - `$entitiesArr = $manager->findMany($sql, $bindParams, $forceToGetFromD)`: Returns an **array of Entity** or an empty array. If works like the  `findOne()` (above)
 - `$entity = $manager->findByField($fieldname, $value, $forceToGetFromD)`: Returns a **single Entity** or NULL. It checks if that field equals value. It can only to equality, not any other operator. It works like the  `findOne()` (above)
 
-#### Optimized: Retreiving the same rows multiple times (The Entity Repository)
+#### Optimized: Retrieving the same rows multiple times (The Entity Repository)
 
 Note: in most cases you probably want to use the [QueryBuilder](README.md#query-builder) (they also use the Entity Repo).
 
