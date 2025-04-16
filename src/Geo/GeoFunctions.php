@@ -21,8 +21,27 @@ class GeoFunctions
     public const MULTICROSS_END_SAME_FIRST_LEFT = -3;
     public const MULTICROSS_END_SAME_FIRST_RIGHT = 3;
 
-
     private static int $parameterIndex = 0;
+
+    /**
+     * Appends '::geography' to the given expression.
+     * @param string $expr
+     * @return string
+     */
+    public static function geography(string $expr): string
+    {
+        return $expr.'::geography';
+    }
+
+    /**
+     * Appends '::geometry' to the given expression.
+     * @param string $expr
+     * @return string
+     */
+    public static function geometry(string $expr): string
+    {
+        return $expr.'::geometry';
+    }
 
     /**
      * @param AbstractShape $geom

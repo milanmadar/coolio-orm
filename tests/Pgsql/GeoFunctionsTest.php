@@ -633,4 +633,58 @@ class GeoFunctionsTest extends TestCase
         $this->assertNotNull($ent);
     }
 
+    public function testGeography()
+    {
+        self::$dbHelper->resetTo('Pgsql/fixtures/geometry.sql');
+        $mgr = self::$dbHelper->getManager(GeoShapeAll\Manager::class);
+
+        $expr = GeoFunctions::ST_DWithin(
+            GeoFunctions::geography('point_geom'),
+            GeoFunctions::geography(
+                new LineString([new Point(1, 1), new Point(2, 1), new Point(2, 2), new Point(1, 1)])
+            ),
+            500000
+        );
+
+        $result = $mgr->createQueryBuilder()
+            ->select($expr)
+            ->andWhereColumn('id', '=', 1)
+            ->fetchOne()
+        ;
+        $this->assertTrue($result);
+
+        $ent = $mgr->createQueryBuilder()
+            ->select('id')
+            ->andWhere($expr)
+            ->fetchOne();
+        $this->assertNotNull($ent);
+    }
+
+    public function testGeometry()
+    {
+        self::$dbHelper->resetTo('Pgsql/fixtures/geometry.sql');
+        $mgr = self::$dbHelper->getManager(GeoShapeAll\Manager::class);
+
+        $expr = GeoFunctions::ST_DWithin(
+            GeoFunctions::geometry('point_geom'),
+            GeoFunctions::geometry(
+                new LineString([new Point(1, 1), new Point(2, 1), new Point(2, 2), new Point(1, 1)])
+            ),
+            5
+        );
+
+        $result = $mgr->createQueryBuilder()
+            ->select($expr)
+            ->andWhereColumn('id', '=', 1)
+            ->fetchOne()
+        ;
+        $this->assertTrue($result);
+
+        $ent = $mgr->createQueryBuilder()
+            ->select('id')
+            ->andWhere($expr)
+            ->fetchOne();
+        $this->assertNotNull($ent);
+    }
+
 }
