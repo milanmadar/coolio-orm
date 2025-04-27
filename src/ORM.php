@@ -34,15 +34,8 @@ class ORM
      */
     public static function instance(): ORM
     {
-        if(!isset(self::$instance))
-        {
+        if(!isset(self::$instance)) {
             self::$instance = new ORM();
-
-            if(!self::$staticTypeAdded) {
-                Type::addType('geometry', GeometryType::class);
-                Type::addType('topogeometry', TopoGeometryType::class);
-                self::$staticTypeAdded = true;
-            }
         }
         return self::$instance;
     }
@@ -61,6 +54,12 @@ class ORM
      */
     public function __construct()
     {
+        if(!self::$staticTypeAdded) {
+            Type::addType('geometry', GeometryType::class);
+            Type::addType('topogeometry', TopoGeometryType::class);
+            self::$staticTypeAdded = true;
+        }
+
         $this->doctrineConnectionsByUrl = [];
         $this->statementRepositories = [];
         $this->entityManagers = [];

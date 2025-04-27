@@ -20,6 +20,7 @@ The basic goodies are:
 - Supports PostGIS Geometries (2D and 3D)
 - Caches your query results to save database trips when possible (you can control that part too) 
 - Easy to get started with, and as your project grows complexity (multiple databases, large datasets, crazy relations) you can use the more advanced features that are still easy to use
+- Thread safe: having multiple threads, and doing `$orm = new \Milanmadar\CoolioORM\ORM()` in each thread is safe, because each instance will have its own database connection, cache, prepared statements, etc
 
 ---
 
