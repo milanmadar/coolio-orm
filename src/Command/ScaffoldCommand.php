@@ -372,6 +372,12 @@ class ScaffoldCommand extends Command
                         return Command::FAILURE;
                     }
                 }
+                elseif($nativeColType == 'timestamp with time zone') {
+                    $colType = 'timestamp_tz';
+                }
+                elseif($nativeColType == 'timestamp without time zone') {
+                    $colType = 'timestamp';
+                }
 
                 // this happens to non-geo native types like 'character varying(45)' 'numeric(8,2)' 'character(8)'
                 $colType = explode(' ', $colType)[0];
@@ -393,6 +399,8 @@ class ScaffoldCommand extends Command
             {
                 if($colType == 'string' || $colType == 'text' || $colType == 'character' || $colType == 'char' || $colType == 'varchar') {
                     $defValSrc = "'".str_replace("'", "\\'", $colDefVal)."'";
+                } elseif(trim($colDefVal) == 'EXTRACT(epoch FROM CURRENT_TIMESTAMP)') {
+                    $defValSrc = 'time()';
                 } else {
                     $defValSrc = $colDefVal;
                 }
@@ -407,7 +415,9 @@ class ScaffoldCommand extends Command
             // Entity accessors
             switch($colType)
             {
-                case 'boolean': case 'smallint': case 'tinyint':
+                case 'boolean':
+                case 'tinyint':
+                case 'smallint':
                     $isBool = $io->confirm("\n ".$colName.' is "'.$colType.'" in the database. Is that bool or int in php? [Y=bool , N=int] ', false);
                     if($isBool) {
                         $io->writeln(" ".$colName.": boolean");
@@ -420,6 +430,17 @@ class ScaffoldCommand extends Command
                         $paramType = 'int';
                         $docParamType = 'int';
                     }
+                    break;
+                case 'date':
+                case 'time':
+                case 'timestamp':
+                case 'timestamp_tz':
+                case 'datetime':
+                case 'datetime2':
+                case 'smalldatetime':
+                case 'datetimeoffset':
+                    $paramType = '\DateTime';
+                    $docParamType = '\DateTime';
                     break;
                 case 'integer':
                 case 'bigint':
