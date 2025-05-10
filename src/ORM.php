@@ -163,9 +163,10 @@ class ORM
     public function save(Entity $entity): void
     {
         $class = get_class($entity);
-        $parts = explode('\\', $class);
+        /*$parts = explode('\\', $class);
         array_pop($parts);
-        $class = implode('\\', $parts).'\\Manager';
+        $class = implode('\\', $parts).'\\Manager';*/
+        $class = substr($class, 0, -6).'Manager';
         $this->entityManager($class)->save($entity); /* @phpstan-ignore-line */
     }
 
