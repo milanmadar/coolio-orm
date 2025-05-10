@@ -21,10 +21,10 @@ class ManagerDbTest extends TestCase
     public static function setUpBeforeClass(): void
     {
         $conn1 = ORM::instance()->getDbByUrl($_ENV['DB_POSTGRES_DB1']);
-        self::$dbHelper = new DbHelper( $conn1 );
+        self::$dbHelper = new DbHelper($conn1);
 
         $conn2 = ORM::instance()->getDbByUrl($_ENV['DB_POSTGRES_DB2']);
-        self::$dbHelperChange = new DbHelper( $conn2 );
+        self::$dbHelperChange = new DbHelper($conn2);
     }
 
     // This method runs before every $this->test*() method runs
@@ -33,7 +33,7 @@ class ManagerDbTest extends TestCase
         ORM::_clearSingleton();
         self::$dbHelper->resetTo('Pgsql/fixtures/fix.sql');
         self::$dbHelperChange->resetTo('Pgsql/fixtures/fix.sql');
-        if(!isset(self::$oRowCnt)) {
+        if (!isset(self::$oRowCnt)) {
             self::$oRowCnt = self::$dbHelper->countRows('orm_test');
         }
     }
@@ -56,7 +56,7 @@ class ManagerDbTest extends TestCase
         $ent1 = $mgr->findOneWhere('id=?', [1]);
         $this->assertInstanceOf('\tests\Model\OrmTest\Entity', $ent1);
 
-        $ent2 = $mgr->findOneWhere('id=:id', ['id'=>2]);
+        $ent2 = $mgr->findOneWhere('id=:id', ['id' => 2]);
         $this->assertInstanceOf('\tests\Model\OrmTest\Entity', $ent1);
 
         $ent3 = $mgr->findOneWhere('id=3');
@@ -65,7 +65,7 @@ class ManagerDbTest extends TestCase
         $ent4 = $mgr->findOneWhere('id=?', [99999]);
         $this->assertNull($ent4);
 
-        $ent5 = $mgr->findOneWhere('id=:id', ['id'=>99999]);
+        $ent5 = $mgr->findOneWhere('id=:id', ['id' => 99999]);
         $this->assertNull($ent5);
 
         $ent6 = $mgr->findOneWhere('id=99999');
@@ -79,7 +79,7 @@ class ManagerDbTest extends TestCase
         $ent1 = $mgr->findOne("SELECT * FROM orm_test WHERE id=?", [1]);
         $this->assertInstanceOf('\tests\Model\OrmTest\Entity', $ent1);
 
-        $ent2 = $mgr->findOne("SELECT * FROM orm_test WHERE id=:id", ['id'=>2]);
+        $ent2 = $mgr->findOne("SELECT * FROM orm_test WHERE id=:id", ['id' => 2]);
         $this->assertInstanceOf('\tests\Model\OrmTest\Entity', $ent2);
 
         $ent3 = $mgr->findOne("SELECT * FROM orm_test WHERE id=3");
@@ -88,7 +88,7 @@ class ManagerDbTest extends TestCase
         $ent4 = $mgr->findOne("SELECT * FROM orm_test WHERE id=?", [99999]);
         $this->assertNull($ent4);
 
-        $ent5 = $mgr->findOne("SELECT * FROM orm_test WHERE id=:id", ['id'=>99999]);
+        $ent5 = $mgr->findOne("SELECT * FROM orm_test WHERE id=:id", ['id' => 99999]);
         $this->assertNull($ent5);
 
         $ent6 = $mgr->findOne("SELECT * FROM orm_test WHERE id=99999");
@@ -104,7 +104,7 @@ class ManagerDbTest extends TestCase
         $this->assertGreaterThan(1, count($res1));
         $this->assertInstanceOf('\tests\Model\OrmTest\Entity', $res1[0]);
 
-        $res2 = $mgr->findManyWhere('id>:id', ['id'=>2]);
+        $res2 = $mgr->findManyWhere('id>:id', ['id' => 2]);
         $this->assertIsArray($res2);
         $this->assertGreaterThan(1, count($res2));
         $this->assertInstanceOf('\tests\Model\OrmTest\Entity', $res2[0]);
@@ -118,7 +118,7 @@ class ManagerDbTest extends TestCase
         $this->assertIsArray($res4);
         $this->assertEquals(0, count($res4));
 
-        $res5 = $mgr->findManyWhere('id>:id', ['id'=>99999]);
+        $res5 = $mgr->findManyWhere('id>:id', ['id' => 99999]);
         $this->assertIsArray($res5);
         $this->assertEquals(0, count($res5));
 
@@ -135,7 +135,7 @@ class ManagerDbTest extends TestCase
         $this->assertIsArray($res1);
         $this->assertGreaterThan(1, count($res1));
 
-        $res2 = $mgr->findMany("SELECT * FROM orm_test WHERE id>:id", ['id'=>2]);
+        $res2 = $mgr->findMany("SELECT * FROM orm_test WHERE id>:id", ['id' => 2]);
         $this->assertIsArray($res2);
         $this->assertGreaterThan(1, count($res2));
 
@@ -147,7 +147,7 @@ class ManagerDbTest extends TestCase
         $this->assertIsArray($res4);
         $this->assertEquals(0, count($res4));
 
-        $res5 = $mgr->findMany("SELECT * FROM orm_test WHERE id>:id", ['id'=>99999]);
+        $res5 = $mgr->findMany("SELECT * FROM orm_test WHERE id>:id", ['id' => 99999]);
         $this->assertIsArray($res5);
         $this->assertEquals(0, count($res5));
 
@@ -169,14 +169,14 @@ class ManagerDbTest extends TestCase
         $this->assertEquals(self::$oRowCnt, $rowCnt);
         $mgr->save($ent);
         $rowCnt = self::$dbHelper->countRows('orm_test');
-        $this->assertEquals(self::$oRowCnt+1, $rowCnt);
+        $this->assertEquals(self::$oRowCnt + 1, $rowCnt);
 
         // Id got set?
-        $this->assertEquals(self::$oRowCnt+1, $ent->getId());
+        $this->assertEquals(self::$oRowCnt + 1, $ent->getId());
 
         // Did it trigger DataChange and IdChange?
-        $goodHist[] = [EntityEventTypeEnum::DATA_CHANGED, 'id', self::$oRowCnt+1, null];
-        $goodHist[] = [EntityEventTypeEnum::ID_CHANGED, '_', self::$oRowCnt+1, null];
+        $goodHist[] = [EntityEventTypeEnum::DATA_CHANGED, 'id', self::$oRowCnt + 1, null];
+        $goodHist[] = [EntityEventTypeEnum::ID_CHANGED, '_', self::$oRowCnt + 1, null];
         $this->assertEquals(count($goodHist), count($sub->hist));
         $this->assertEquals($goodHist, $sub->hist);
     }
@@ -193,16 +193,16 @@ class ManagerDbTest extends TestCase
         // insert (already tested above)
         $mgr->save($ent);
         // events
-        $goodHist[] = [EntityEventTypeEnum::DATA_CHANGED, 'id', self::$oRowCnt+1, null];
-        $goodHist[] = [EntityEventTypeEnum::ID_CHANGED, '_', self::$oRowCnt+1, null];
+        $goodHist[] = [EntityEventTypeEnum::DATA_CHANGED, 'id', self::$oRowCnt + 1, null];
+        $goodHist[] = [EntityEventTypeEnum::ID_CHANGED, '_', self::$oRowCnt + 1, null];
 
         // save without change does nothing
         $mgr->save($ent);
         // php data
-        $this->assertEquals(self::$oRowCnt+1, $ent->getId());
+        $this->assertEquals(self::$oRowCnt + 1, $ent->getId());
         // db
         $rowCnt = self::$dbHelper->countRows('orm_test');
-        $this->assertEquals(self::$oRowCnt+1, $rowCnt);
+        $this->assertEquals(self::$oRowCnt + 1, $rowCnt);
         // events
         $this->assertEquals($goodHist, $sub->hist);
 
@@ -211,10 +211,10 @@ class ManagerDbTest extends TestCase
         // save
         $mgr->save($ent);
         // php data
-        $this->assertEquals(self::$oRowCnt+1, $ent->getId());
+        $this->assertEquals(self::$oRowCnt + 1, $ent->getId());
         // db
         $rowCnt = self::$dbHelper->countRows('orm_test');
-        $this->assertEquals(self::$oRowCnt+1, $rowCnt);
+        $this->assertEquals(self::$oRowCnt + 1, $rowCnt);
         // events
         $goodHist[] = [EntityEventTypeEnum::DATA_CHANGED, 'fld_int', 321, null];
         $this->assertEquals($goodHist, $sub->hist);
@@ -256,7 +256,7 @@ class ManagerDbTest extends TestCase
         $this->assertTrue($ent1->_isDeleted());
 
         $rowCnt = self::$dbHelper->countRows('orm_test');
-        $this->assertEquals(self::$oRowCnt-1, $rowCnt);
+        $this->assertEquals(self::$oRowCnt - 1, $rowCnt);
 
         $ent2 = $mgr->findById(1);
         $this->assertNotNull($ent1);
@@ -272,7 +272,7 @@ class ManagerDbTest extends TestCase
     {
         $mgr = self::$dbHelper->getManager(OrmTest\Manager::class);
 
-        $ent1 = $mgr->createEntity(['id'=>98765]);
+        $ent1 = $mgr->createEntity(['id' => 98765]);
         $rowCnt = self::$dbHelper->countRows('orm_test');
         $this->assertEquals(self::$oRowCnt, $rowCnt);
 
@@ -283,7 +283,7 @@ class ManagerDbTest extends TestCase
         $ent1->_setForceInsertOnNextSave(true);
         $mgr->save($ent1);
         $rowCnt = self::$dbHelper->countRows('orm_test');
-        $this->assertEquals(self::$oRowCnt+1, $rowCnt);
+        $this->assertEquals(self::$oRowCnt + 1, $rowCnt);
     }
 
     public function testForceInsertOnNextSave2()
@@ -300,10 +300,10 @@ class ManagerDbTest extends TestCase
 
         $mgr->delete($ent1);
         $rowCnt = self::$dbHelper->countRows('orm_test');
-        $this->assertEquals(self::$oRowCnt-1, $rowCnt);
+        $this->assertEquals(self::$oRowCnt - 1, $rowCnt);
 
         // re-create
-        $ent2 = $mgr->createEntity(['id'=>1]);
+        $ent2 = $mgr->createEntity(['id' => 1]);
         $ent2->_setForceInsertOnNextSave(true);
         $mgr->save($ent2);
         $rowCnt = self::$dbHelper->countRows('orm_test');
@@ -323,14 +323,14 @@ class ManagerDbTest extends TestCase
         $this->assertTrue($ent1->_isDeleted());
 
         $rowCnt = self::$dbHelper->countRows('orm_test');
-        $this->assertEquals(self::$oRowCnt-1, $rowCnt);
+        $this->assertEquals(self::$oRowCnt - 1, $rowCnt);
 
         // it was deleted, so $ent2 is null
         $ent2 = $mgr->findById(1);
         $this->assertNull($ent2);
 
         // re-create it (via a new variable)
-        $ent3 = $mgr->createEntity(['id'=>1]);
+        $ent3 = $mgr->createEntity(['id' => 1]);
         $this->assertNotNull($ent3);
         $mgr->save($ent3);
 
@@ -355,7 +355,7 @@ class ManagerDbTest extends TestCase
         $sql = "SELECT id, fld_int FROM orm_test WHERE id =1";
         $ent = $mgr->findOne($sql);
         $entData = $ent->_getData();
-        $expData = ['id'=>1, 'fld_int'=>1];
+        $expData = ['id' => 1, 'fld_int' => 1];
         $this->assertEquals($expData, $entData);
     }
 
@@ -384,11 +384,11 @@ class ManagerDbTest extends TestCase
     public function testSelectPartialThenFullThenPartial()
     {
         $mgr = self::$dbHelper->getManager(OrmTest\Manager::class);
-        
+
         // select id only
         $sql = "SELECT id FROM orm_test WHERE id = 1";
         $ent1 = $mgr->findOne($sql);
-        $this->assertEquals(['id'=>1], $ent1->_getData());
+        $this->assertEquals(['id' => 1], $ent1->_getData());
 
         // now select all fields
         $sql = "SELECT * FROM orm_test WHERE id = 1";
@@ -574,4 +574,19 @@ class ManagerDbTest extends TestCase
             ->executeStatement();
     }
 
+    public function testOrmSave()
+    {
+        $mgr = self::$dbHelper->getManager(OrmTest\Manager::class);
+
+        $ent1 = $mgr->findById(1);
+        $this->assertInstanceOf('\tests\Model\OrmTest\Entity', $ent1);
+
+        $ent1->setFldInt(3254);
+        ORM::instance()->save($ent1);
+        $mgr->clearRepository(true);
+
+        $ent1 = $mgr->findById(1);
+        $this->assertInstanceOf('\tests\Model\OrmTest\Entity', $ent1);
+        $this->assertEquals(3254, $ent1->getFldInt());
+    }
 }

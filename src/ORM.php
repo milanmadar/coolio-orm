@@ -160,4 +160,13 @@ class ORM
         return $this->entityRepository;
     }
 
+    public function save(Entity $entity): void
+    {
+        $class = get_class($entity);
+        $parts = explode('\\', $class);
+        array_pop($parts);
+        $class = implode('\\', $parts).'\\Manager';
+        $this->entityManager($class)->save($entity); /* @phpstan-ignore-line */
+    }
+
 }
