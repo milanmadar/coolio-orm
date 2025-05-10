@@ -612,9 +612,17 @@ class ScaffoldCommand extends Command
         // Output directory
         do {
             $guessOutDir = $modelsDir;
+            echo $guessOutDir."\n";
             $parts = explode('\\', $modelName);
-            $lastPart = array_pop($parts);
-            $guessOutDir .= '/'.$lastPart;
+            // if it has 'Model' in it anywhere, then we probably want all the parts after that
+            if($position = array_search('Model', $parts)) {
+                $_ = array_slice($parts, $position + 1);
+                $guessOutDir .= '/'.implode('/', $_);
+            } else {
+                $lastPart = array_pop($parts);
+                $guessOutDir .= '/'.$lastPart;
+            }
+            echo $guessOutDir."\n";
 
             $outDir = $io->ask("The directory where we should save the Entity.php and Manager.php ", $guessOutDir);
             $ok = $io->confirm("The files will be:\n   ".$outDir."/Entity.php\n   ".$outDir."/Manager.php\n Ok? [Y=ok, N=type again] ", true);
