@@ -6,3 +6,6 @@ parameters:
         analyse:
             - src/DependencyInjection/*
             - src/CoolioORMBundle.php
+            - src/Model/*
+    ignoreErrors:
+            - '#PHPDoc tag @var with type array<.*> is not subtype of native type list<.*>#'

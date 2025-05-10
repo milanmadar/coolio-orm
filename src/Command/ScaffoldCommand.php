@@ -378,6 +378,12 @@ class ScaffoldCommand extends Command
                 elseif($nativeColType == 'timestamp without time zone') {
                     $colType = 'timestamp';
                 }
+                elseif(preg_match('/timestamp\(\d{1,2}\) with time zone/', $nativeColType)) {
+                    $colType = 'timestamp_tz_micro';
+                }
+                elseif(preg_match('/timestamp\(\d{1,2}\) without time zone/', $nativeColType)) {
+                    $colType = 'timestamp_micro';
+                }
 
                 // this happens to non-geo native types like 'character varying(45)' 'numeric(8,2)' 'character(8)'
                 $colType = explode(' ', $colType)[0];
@@ -439,6 +445,8 @@ class ScaffoldCommand extends Command
                 case 'datetime2':
                 case 'smalldatetime':
                 case 'datetimeoffset':
+                case 'timestamp_micro':
+                case 'timestamp_tz_micro':
                     $paramType = '\DateTime';
                     $docParamType = '\DateTime';
                     break;

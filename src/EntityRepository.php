@@ -152,7 +152,7 @@ class EntityRepository
      * @param string|null $dbTable If given only the Entities for this table will be counted
      * @return int
      */
-    public function count(string $dbTable = null): int
+    public function count(string|null $dbTable = null): int
     {
         if(isset($dbTable)) {
             return empty($this->splIds[$dbTable]) ? 0 : count($this->splIds[$dbTable]);

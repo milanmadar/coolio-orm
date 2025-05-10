@@ -1,25 +1,26 @@
 <?php
 
-namespace tests\Model\OrmTest;
+namespace tests\Model\DbKeywords;
 
-use Milanmadar\CoolioORM\ORM;
+use Milanmadar\CoolioORM;
 
 /**
  * @method Entity createEntity(array $php_data = [], bool $skipEntityRepo = false)
  * @method Entity createEntityFromDbData(array $db_data = [], bool $skipEntityRepo = false)
+ * @method Entity|null findByField(string $field, mixed $value, bool $forceToGetFromDb = false)
  * @method Entity|null findById(?int $id, bool $forceToGetFromDb = false)
  * @method Entity|null findOneWhere(string $sqlAfterWHERE, array $binds = [], bool $forceToGetFromDb = false)
  * @method Entity|null findOne(string $sql, array $binds = [], bool $forceToGetFromDb = false)
  * @method Entity[] findManyWhere(string $sqlAfterWHERE, array $binds = [], bool $forceToGetFromDb = false)
  * @method Entity[] findMany(string $sql, array $binds = [], bool $forceToGetFromDb = false)
  */
-class Manager extends \Milanmadar\CoolioORM\Manager
+class Manager extends CoolioORM\Manager
 {
     /**
      * @inheritDoc
      * @param Entity $ent
      */
-    public function save(\Milanmadar\CoolioORM\Entity $ent): void
+    public function save(CoolioORM\Entity $ent): void
     {
         if( ! $ent instanceof Entity) {
             throw new \InvalidArgumentException(get_class($this)."::save() can't save ".get_class($ent));
@@ -31,7 +32,7 @@ class Manager extends \Milanmadar\CoolioORM\Manager
      * @inheritDoc
      * @param Entity $ent
      */
-    public function delete(\Milanmadar\CoolioORM\Entity $ent): void
+    public function delete(CoolioORM\Entity $ent): void
     {
         if( ! $ent instanceof Entity) {
             throw new \InvalidArgumentException(get_class($this)."::delete() can't delete ".get_class($ent));
@@ -40,7 +41,7 @@ class Manager extends \Milanmadar\CoolioORM\Manager
     }
 
     ///
-    /// BELOW ARE INHERITED METHODS FROM THE \ORM\Manager CLASS
+    /// BELOW ARE INHERITED METHODS FROM THE CoolioORM\Manager CLASS
     ///
 
     /**
@@ -48,40 +49,21 @@ class Manager extends \Milanmadar\CoolioORM\Manager
      */
     public function getFieldTypes(): array { return [
         'id' => 'integer',
-        'fld_int' => 'integer',
-        'fld_tiny_int' => 'boolean',
-        'fld_small_int' => 'smallint',
-        'fld_medium_int' => 'integer',
-        'fld_float' => 'float',
-        'fld_double' => 'float',
-        'fld_decimal' => 'decimal',
-        'fld_char' => 'string',
-        'fld_varchar' => 'string',
-        'fld_text' => 'text',
-        'fld_medium_text' => 'text',
-        'fld_json' => 'json',
-        'fld_date' => 'date',
-        'fld_time' => 'time',
-        'fld_timestamp' => 'timestamp',
-        'fld_timestamptz' => 'timestamp_tz',
-        'fld_timestamp_micro' => 'timestamp_micro',
-        'fld_timestamptz_micro' => 'timestamp_tz_micro',
-        'orm_other_id' => 'integer',
-        'orm_third_key' => 'string',
-    ]; }
-
-    /**
-    * @inheritDoc
-    */
-    protected function getDefaultValues(): array { return [
-        'fld_decimal' => 1.23,
-        'fld_varchar' => 'field\'s "quoted" def val',
+        'null' => 'string',
+        'class' => 'string',
+        'int' => 'integer',
     ]; }
 
     /**
      * @inheritDoc
      */
     public function getTopoGeometryFieldInfo(): array { return [
+    ]; }
+
+    /**
+    * @inheritDoc
+    */
+    protected function getDefaultValues(): array { return [
     ]; }
 
     /**
@@ -99,24 +81,22 @@ class Manager extends \Milanmadar\CoolioORM\Manager
     /**
      * @inheritDoc
      */
-    public static function getDbDefaultConnectionUrl(): string
-    {
-        return $_ENV['DB_MYSQL_DB1'];
+    public function getDefaultDbTable(): string {
+        return 'public.db_keywords';
     }
 
     /**
      * @inheritDoc
      */
-    public function getDefaultDbTable(): string {
-        return 'orm_test';
+    public static function getDbDefaultConnectionUrl(): string {
+        return $_ENV['DB_POSTGRES_DB1'];
     }
 
     /**
      * @inheritDoc
      * @return Entity
      */
-    protected function createEntityDo(ORM $orm, array $php_data = []): Entity
-    {
+    protected function createEntityDo(CoolioORM\ORM $orm, array $php_data = []): Entity {
         return new Entity($orm, $php_data);
     }
 

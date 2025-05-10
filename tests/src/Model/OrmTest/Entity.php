@@ -253,6 +253,128 @@ class Entity extends \Milanmadar\CoolioORM\Entity
     }
 
     /**
+     *
+     * @param \DateTime|null $val
+     * @return $this
+     */
+    public function setFldDate(?\DateTime $val): self
+    {
+        $this->_set('fld_date', $val);
+        return $this;
+    }
+
+    /**
+     *
+     * @return \DateTime
+     */
+    public function getFldDate(): \DateTime
+    {
+        return $this->_get('fld_date');
+    }
+
+    /**
+     *
+     * @param \DateTime|null $val
+     * @return $this
+     */
+    public function setFldTime(?\DateTime $val): self
+    {
+        $this->_set('fld_time', $val);
+        return $this;
+    }
+
+    /**
+     *
+     * @return \DateTime
+     */
+    public function getFldTime(): \DateTime
+    {
+        return $this->_get('fld_time');
+    }
+
+    /**
+     *
+     * @param \DateTime|null $val
+     * @return $this
+     */
+    public function setFldTimestamp(?\DateTime $val): self
+    {
+        $this->_set('fld_timestamp', $val);
+        return $this;
+    }
+
+    /**
+     *
+     * @return \DateTime
+     */
+    public function getFldTimestamp(): \DateTime
+    {
+        return $this->_get('fld_timestamp');
+    }
+
+    /**
+     *
+     * @param \DateTime|null $val
+     * @return $this
+     */
+    public function setFldTimestamptz(?\DateTime $val): self
+    {
+        $this->_set('fld_timestamptz', $val);
+        return $this;
+    }
+
+    /**
+     *
+     * @return \DateTime
+     */
+    public function getFldTimestamptz(): \DateTime
+    {
+        return $this->_get('fld_timestamptz');
+    }
+
+
+
+    /**
+     *
+     * @param \DateTime|null $val
+     * @return $this
+     */
+    public function setFldTimestampMicro(?\DateTime $val): self
+    {
+        $this->_set('fld_timestamp_micro', $val);
+        return $this;
+    }
+
+    /**
+     *
+     * @return \DateTime
+     */
+    public function getFldTimestampMicro(): \DateTime
+    {
+        return $this->_get('fld_timestamp_micro');
+    }
+
+    /**
+     *
+     * @param \DateTime|null $val
+     * @return $this
+     */
+    public function setFldTimestamptzMicro(?\DateTime $val): self
+    {
+        $this->_set('fld_timestamptz_micro', $val);
+        return $this;
+    }
+
+    /**
+     *
+     * @return \DateTime
+     */
+    public function getFldTimestamptzMicro(): \DateTime
+    {
+        return $this->_get('fld_timestamptz_micro');
+    }
+
+    /**
      * Sets the related \Model\OrmOther\Entity and synchronizes the 'orm_other_id' field
      * @param OrmOther\Entity|null $ormOther
      * @return $this

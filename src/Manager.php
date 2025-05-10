@@ -23,6 +23,9 @@ abstract class Manager
     /** @var string name of the database table */
     protected string $dbTable;
 
+    /** @var string pg, my, ms */
+    private string $dbType;
+
     private static int $placeholderNameIndex = 0;
 
     /**
@@ -271,13 +274,22 @@ abstract class Manager
      */
     public function setDb(Connection $db): self
     {
-        $ischangingDb = (isset($this->db) && $this->db !== $db);
+        $ischangingDb = (isset($this->db) && $this->db !== $db); // @phpstan-ignore-line
         $this->db = $db;
         $this->statementRepo = $this->orm->getStatementRepositoryByConnection($db);
         if($ischangingDb) {
             $this->clearRepository(true);
         }
         $this->dbConnUrl = Utils::getDbConnUrl($this->db);
+
+        if(str_contains($this->dbConnUrl, 'pgsql')) {
+            $this->dbType = 'pg';
+        } elseif(str_contains($this->dbConnUrl, 'sqlsrv')) {
+            $this->dbType = 'ms';
+        } else {
+            $this->dbType = 'my';
+        }
+
         return $this;
     }
 
@@ -639,8 +651,13 @@ abstract class Manager
 
         [$columns, $values, $placeholders, $types] = $this->fromPHPdata_toDBdata($data);
 
+        $escapedColumns = [];
+        foreach($columns as $col) {
+            $escapedColumns[] = Utils::escapeColumnName($col, $this->dbType);
+        }
+
         return $this->db->executeStatement(
-            'INSERT INTO ' . $this->dbTable . ' (' . implode(', ', $columns) . ')' .
+            'INSERT INTO ' . $this->dbTable . ' (' . implode(', ', $escapedColumns) . ')' .
             ' VALUES (' . implode(', ', $placeholders) . ')',
             $values,
             $types,
@@ -659,7 +676,7 @@ abstract class Manager
 
         $set = [];
         foreach ($columns as $i => $colName) {
-            $set[] = $colName . ' = ' . $placeholders[$i];
+            $set[] = Utils::escapeColumnName($colName, $this->dbType) . ' = ' . $placeholders[$i];
         }
 
         $sql = 'UPDATE ' . $this->dbTable . ' SET ' . implode(', ', $set);
@@ -682,19 +699,19 @@ abstract class Manager
     }
 
     /**
-     * @param array<string, mixed> $data
+     * @param array<string, mixed> $phpData
      * @return array{ array<string>, array<string, mixed>, array<string>, array<string, mixed> }
      * @throws \Doctrine\DBAL\Exception
      * @throws \Doctrine\DBAL\Types\ConversionException
      */
-    private function fromPHPdata_toDBdata(array $data): array
+    private function fromPHPdata_toDBdata(array $phpData): array
     {
         $columns      = [];
         $values       = [];
         $placeholders = [];
         $types        = [];
 
-        foreach($data as $colName=>$val)
+        foreach($phpData as $colName=> $val)
         {
             $columns[] = $colName;
 
@@ -709,6 +726,32 @@ abstract class Manager
             elseif(isset($this->fieldTypes[$colName]))
             {
                 switch ($this->fieldTypes[$colName]) {
+                    case 'date':
+                    case 'time':
+                    case 'datetime':
+                    case 'datetime2':
+                    case 'smalldatetime':
+                    case 'datetimeoffset':
+                    case 'timestamp':
+                    case 'timestamp_tz':
+                    case 'timestamp_micro':
+                    case 'timestamp_tz_micro':
+                        $p = 'mgrPm' . ++self::$placeholderNameIndex;
+                        $placeholders[] = ':'.$p;
+                        if($val instanceof \DateTime) {
+                            $values[$p] = match($this->fieldTypes[$colName]) {
+                                'date' => $val->format('Y-m-d'),
+                                'time' => $val->format('H:i:s'),
+                                'datetime', 'datetime2', 'smalldatetime', 'datetimeoffset', 'timestamp' => $val->format('Y-m-d H:i:s'),
+                                'timestamp_tz_micro' => $val->format('Y-m-d H:i:s.uP'),
+                                'timestamp_micro' => $val->format('Y-m-d H:i:s.u'),
+                                default => $val->format('Y-m-d H:i:sP'),
+                            };
+                        } else {
+                            $values[$p] = (string)$val;
+                        }
+                        $types[$p] = ParameterType::STRING;
+                        break;
                     case 'string':
                     case 'text':
                         $p = 'mgrPm' . ++self::$placeholderNameIndex;
@@ -785,12 +828,12 @@ abstract class Manager
 
     /**
      * Change the types
-     * @param array<string, mixed> $data
+     * @param array<string, mixed> $dbData
      * @return array<string, mixed>
      */
-    protected function fromDBdata_toPHPdata(array $data): array
+    protected function fromDBdata_toPHPdata(array $dbData): array
     {
-        foreach($data as $k=>$v)
+        foreach($dbData as $k=> $v)
         {
             /*if(!isset($this->fieldTypes[$k])) // this field doesn't belong to this entity
             {
@@ -799,7 +842,7 @@ abstract class Manager
             else*/
             if(isset($v)) {
                 if(!str_ends_with($k, '_srid')) {
-                    $data[$k] = match($this->fieldTypes[$k] ?? 'doesnt_belong_to_this_entity') {
+                    $dbData[$k] = match($this->fieldTypes[$k] ?? 'doesnt_belong_to_this_entity') {
                         'doesnt_belong_to_this_entity' => $v,
                         'string', 'text' => (string)$v,
                         'integer', 'smallint', 'bigint' => (int)$v,
@@ -807,6 +850,7 @@ abstract class Manager
                         'boolean' => (bool)$v,
                         'array', 'simple_array' => unserialize($v),
                         'json', 'json_array' => json_decode($v, true),
+                        'date', 'time', 'datetime', 'datetime2', 'smalldatetime', 'datetimeoffset', 'timestamp', 'timestamp_tz', 'timestamp_micro', 'timestamp_tz_micro' => new \DateTime($v),
                         //'geometry' => Geo\Shape2D3DFactory::createFromGeoJSONString($v, $data[$k.'_srid'] ?? null),
                         //'geometry_curved', 'topogeometry' => Geo\Shape2D3DFactory::createFromGeoEWKTString($v),
                         'geometry' , 'geometry_curved', 'topogeometry' => Geo\Shape2D3DFactory::createFromGeoEWKTString($v),
@@ -816,10 +860,10 @@ abstract class Manager
             }
             else // this else was not here and all test passed
             {
-                $data[$k] = null;
+                $dbData[$k] = null;
             }
         }
-        return $data;
+        return $dbData;
     }
 
 }
