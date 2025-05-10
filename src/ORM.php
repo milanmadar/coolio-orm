@@ -160,6 +160,11 @@ class ORM
         return $this->entityRepository;
     }
 
+    /**
+     * @param Entity $entity
+     * @return void
+     * @throws \Doctrine\DBAL\Exception
+     */
     public function save(Entity $entity): void
     {
         $class = get_class($entity);
@@ -168,6 +173,25 @@ class ORM
         $class = implode('\\', $parts).'\\Manager';*/
         $class = substr($class, 0, -6).'Manager';
         $this->entityManager($class)->save($entity); /* @phpstan-ignore-line */
+    }
+
+    /**
+     * @param array<Entity> $entities
+     * @return void
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function bulkInsert(array $entities): void
+    {
+        $separateEntities = [];
+        foreach($entities as $entity) {
+            $class = get_class($entity);
+            $separateEntities[$class][] = $entity;
+        }
+
+        foreach($separateEntities as $class => $entities) {
+            $class = substr($class, 0, -6).'Manager';
+            $this->entityManager($class)->bulkInsert($entities); /* @phpstan-ignore-line */
+        }
     }
 
 }

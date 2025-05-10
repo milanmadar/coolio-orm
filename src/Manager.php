@@ -468,11 +468,11 @@ abstract class Manager
             try {
                 $this->insert($dataToSave);
             }
+            // @codeCoverageIgnoreStart
             catch (\Doctrine\DBAL\Exception\ConnectionException|\Doctrine\DBAL\Exception\ConnectionLost|\Doctrine\DBAL\Exception\RetryableException $e) {
                 sleep($_ENV['COOLIO_ORM_RETRY_SLEEP'] ?? 2);
                 $this->insert($dataToSave);
             }
-            // @codeCoverageIgnoreStart
             catch(\Doctrine\DBAL\Exception $e) {
                 // log the data too, but truncate the too long things
                 foreach($dataToSave as $field=>$value) {
@@ -525,6 +525,64 @@ abstract class Manager
 
             $ent->_commit();
         }
+    }
+
+    /**
+     * @param array<Entity> $entities
+     * @return void
+     */
+    public function bulkInsert(array $entities): void
+    {
+        $cnt = count($entities);
+
+        if($cnt == 0) {
+            return;
+        }
+
+        if($cnt == 1) {
+            $firstEnt = array_pop($entities);
+            $this->save($firstEnt);
+            return;
+        }
+
+        $allPlaceholdersStr = '';
+        $allValues = [];
+        $allTypes = [];
+
+        foreach($entities as $ent) {
+            $dataToSave = $ent->_getData();
+            $this->beforeToDb($dataToSave);
+
+            [$columns, $values, $placeholders, $types] = $this->fromPHPdata_toDBdata( $dataToSave );
+
+            if(!empty($allPlaceholdersStr)) {
+                $allPlaceholdersStr .= ',';
+            }
+            $allPlaceholdersStr .= '(' . implode(', ', $placeholders) . ')';
+
+            $allValues = array_merge($allValues, $values);
+            $allTypes = array_merge($allTypes, $types);
+        }
+
+        $escapedColumns = [];
+        foreach($columns as $col) {
+            $escapedColumns[] = Utils::escapeColumnName($col, $this->dbType);
+        }
+
+        $sql = 'INSERT INTO ' . $this->dbTable . ' (' . implode(', ', $escapedColumns) . ')' . ' VALUES ' . $allPlaceholdersStr;
+
+        try {
+            $this->db->executeStatement($sql, $allValues, $allTypes);
+        }
+        // @codeCoverageIgnoreStart
+        catch (\Doctrine\DBAL\Exception\ConnectionException|\Doctrine\DBAL\Exception\ConnectionLost|\Doctrine\DBAL\Exception\RetryableException $e) {
+            sleep($_ENV['COOLIO_ORM_RETRY_SLEEP'] ?? 2);
+            $this->db->executeStatement($sql, $allValues, $allTypes);
+        }
+        catch(\Doctrine\DBAL\Exception $e) {
+            throw Utils::handleDriverException($e, "Manager::insertBulk() ".get_class($this), null);
+        }
+        // @codeCoverageIgnoreEnd
     }
 
     /**
@@ -706,6 +764,10 @@ abstract class Manager
      */
     private function fromPHPdata_toDBdata(array $phpData): array
     {
+        if(self::$placeholderNameIndex > 2147483000) {
+            self::$placeholderNameIndex = 0;
+        }
+
         $columns      = [];
         $values       = [];
         $placeholders = [];
