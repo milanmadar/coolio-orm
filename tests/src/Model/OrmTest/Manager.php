@@ -66,6 +66,7 @@ class Manager extends \Milanmadar\CoolioORM\Manager
         'fld_timestamptz' => 'timestamp_tz',
         'fld_timestamp_micro' => 'timestamp_micro',
         'fld_timestamptz_micro' => 'timestamp_tz_micro',
+        'fld_bool' => 'integer',
         'orm_other_id' => 'integer',
         'orm_third_key' => 'string',
     ]; }
@@ -76,6 +77,7 @@ class Manager extends \Milanmadar\CoolioORM\Manager
     protected function getDefaultValues(): array { return [
         'fld_decimal' => 1.23,
         'fld_varchar' => 'field\'s "quoted" def val',
+        'fld_bool' => 1,
     ]; }
 
     /**

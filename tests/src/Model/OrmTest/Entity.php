@@ -374,6 +374,28 @@ class Entity extends \Milanmadar\CoolioORM\Entity
         return $this->_get('fld_timestamptz_micro');
     }
 
+
+
+    /**
+     *
+     * @param bool|null $val
+     * @return $this
+     */
+    public function setFldBool(?bool $val): self
+    {
+        $this->_set('fld_bool', $val);
+        return $this;
+    }
+
+    /**
+     *
+     * @return bool
+     */
+    public function getFldBool(): bool
+    {
+        return $this->_get('fld_bool');
+    }
+
     /**
      * Sets the related \Model\OrmOther\Entity and synchronizes the 'orm_other_id' field
      * @param OrmOther\Entity|null $ormOther

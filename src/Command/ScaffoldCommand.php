@@ -422,8 +422,8 @@ class ScaffoldCommand extends Command
             switch($colType)
             {
                 case 'boolean':
+                case 'bool':
                 case 'tinyint':
-                case 'smallint':
                     $isBool = $io->confirm("\n ".$colName.' is "'.$colType.'" in the database. Is that bool or int in php? [Y=bool , N=int] ', false);
                     if($isBool) {
                         $io->writeln(" ".$colName.": boolean");
@@ -450,6 +450,7 @@ class ScaffoldCommand extends Command
                     $paramType = '\DateTime';
                     $docParamType = '\DateTime';
                     break;
+                case 'smallint':
                 case 'integer':
                 case 'bigint':
                     $paramType = 'int';
