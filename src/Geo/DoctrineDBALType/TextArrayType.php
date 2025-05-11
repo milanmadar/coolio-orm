@@ -36,7 +36,7 @@ class TextArrayType extends Type
         if(str_contains($value, '\\')) {
             $slashless = [];
             foreach($csv as $v) {
-                $slashless[] = stripslashes($v);
+                $slashless[] = stripslashes((string)$v);
             }
             return $slashless;
         }
