@@ -61,4 +61,27 @@ class BulkInsertTest extends TestCase
         $this->assertEquals($howMany+2, self::$dbHelper->countRows('orm_other'));
     }
 
+    public function testBulkInsertORMDifferentColumns()
+    {
+        $howMany = 1000;
+
+        $ents = [];
+
+        $mgr = self::$dbHelper->getManager(OrmTest\Manager::class);
+        $mgr2 = self::$dbHelper->getManager(OrmOther\Manager::class);
+        for($i=0; $i<$howMany; ++$i) {
+            $ents[] = $mgr->createEntity()->setFldInt($i);
+            if( $i % 10 == 0 ) {
+                $ents[] = $mgr2->createEntity()->setFldInt($i);
+            } else {
+                $ents[] = $mgr2->createEntity()->setFldInt($i)->setTitle('t');
+            }
+        }
+
+        ORM::instance()->bulkInsert($ents);
+
+        $this->assertEquals($howMany+10, self::$dbHelper->countRows('orm_test'));
+        $this->assertEquals($howMany+2, self::$dbHelper->countRows('orm_other'));
+    }
+
 }

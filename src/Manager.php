@@ -549,11 +549,27 @@ abstract class Manager
         $allValues = [];
         $allTypes = [];
 
-        foreach($entities as $ent) {
+        $ent = reset($entities);
+        $dataToSave = $ent->_getData();
+        $this->beforeToDb($dataToSave);
+        [$columns, $_values, $_placeholders, $_types] = $this->fromPHPdata_toDBdata( $dataToSave );
+        $lastColumns = $columns;
+
+        foreach($entities as $ent)
+        {
             $dataToSave = $ent->_getData();
             $this->beforeToDb($dataToSave);
-
             [$columns, $values, $placeholders, $types] = $this->fromPHPdata_toDBdata( $dataToSave );
+
+            // insert
+            if($lastColumns != $columns) {
+                $this->_bulkInsert_insert($lastColumns, $allValues, $allPlaceholdersStr, $allTypes);
+
+                $allPlaceholdersStr = '';
+                $allValues = [];
+                $allTypes = [];
+                $lastColumns = $columns;
+            }
 
             if(!empty($allPlaceholdersStr)) {
                 $allPlaceholdersStr .= ',';
@@ -564,6 +580,20 @@ abstract class Manager
             $allTypes = array_merge($allTypes, $types);
         }
 
+        $this->_bulkInsert_insert($columns, $allValues, $allPlaceholdersStr, $allTypes);
+    }
+
+    /**
+     * @param array<string> $columns
+     * @param array<mixed> $allValues
+     * @param string $allPlaceholdersStr
+     * @param array<mixed> $allTypes
+     * @return void
+     * @throws ORMException
+     * @throws \Doctrine\DBAL\Exception
+     */
+    private function _bulkInsert_insert(array $columns, array $allValues, string $allPlaceholdersStr, array $allTypes): void
+    {
         $escapedColumns = [];
         foreach($columns as $col) {
             $escapedColumns[] = Utils::escapeColumnName($col, $this->dbType);
@@ -574,7 +604,7 @@ abstract class Manager
         try {
             $this->db->executeStatement($sql, $allValues, $allTypes);
         }
-        // @codeCoverageIgnoreStart
+            // @codeCoverageIgnoreStart
         catch (\Doctrine\DBAL\Exception\ConnectionException|\Doctrine\DBAL\Exception\ConnectionLost|\Doctrine\DBAL\Exception\RetryableException $e) {
             sleep($_ENV['COOLIO_ORM_RETRY_SLEEP'] ?? 2);
             $this->db->executeStatement($sql, $allValues, $allTypes);
