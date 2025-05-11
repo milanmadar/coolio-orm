@@ -424,7 +424,7 @@ class ScaffoldCommand extends Command
                 case 'boolean':
                 case 'bool':
                 case 'tinyint':
-                    $isBool = $io->confirm("\n ".$colName.' is "'.$colType.'" in the database. Is that bool or int in php? [Y=bool , N=int] ', false);
+                    $isBool = $io->confirm("\n ".$colName.' is "'.$colType.'" in the database. Is that bool or int in php? [Y=bool , N=int] ');
                     if($isBool) {
                         $io->writeln(" ".$colName.": boolean");
                         $colType = 'boolean';
@@ -501,6 +501,11 @@ class ScaffoldCommand extends Command
                     } else {
                         $this->addUses('Milanmadar\CoolioORM\Geo\Shape2D');
                     }
+                    break;
+                case 'text[]':
+                    $colType = 'text[]';
+                    $paramType = 'array';
+                    $docParamType = 'array<string>';
                     break;
                 default:
                     exit("Can't scaffold column type: '".$colType."'\n");
@@ -612,7 +617,6 @@ class ScaffoldCommand extends Command
         // Output directory
         do {
             $guessOutDir = $modelsDir;
-            echo $guessOutDir."\n";
             $parts = explode('\\', $modelName);
             // if it has 'Model' in it anywhere, then we probably want all the parts after that
             if($position = array_search('Model', $parts)) {
@@ -622,7 +626,6 @@ class ScaffoldCommand extends Command
                 $lastPart = array_pop($parts);
                 $guessOutDir .= '/'.$lastPart;
             }
-            echo $guessOutDir."\n";
 
             $outDir = $io->ask("The directory where we should save the Entity.php and Manager.php ", $guessOutDir);
             $ok = $io->confirm("The files will be:\n   ".$outDir."/Entity.php\n   ".$outDir."/Manager.php\n Ok? [Y=ok, N=type again] ", true);

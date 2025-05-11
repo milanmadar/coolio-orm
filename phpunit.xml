@@ -7,11 +7,16 @@
          requireCoverageMetadata="false"
          beStrictAboutCoverageMetadata="false"
          beStrictAboutOutputDuringTests="true"
-         displayDetailsOnPhpunitDeprecations="true"
          failOnPhpunitDeprecation="true"
          failOnRisky="true"
          failOnWarning="true"
          colors="true"
+
+         displayDetailsOnTestsThatTriggerDeprecations="true"
+         displayDetailsOnTestsThatTriggerErrors="true"
+         displayDetailsOnTestsThatTriggerNotices="true"
+         displayDetailsOnTestsThatTriggerWarnings="true"
+         displayDetailsOnPhpunitDeprecations="true"
 >
     <testsuites>
         <testsuite name="default">

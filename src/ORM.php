@@ -8,6 +8,8 @@ use Doctrine\DBAL\Tools\DsnParser;
 use Doctrine\DBAL\Types\Type;
 use Milanmadar\CoolioORM\Geo\DoctrineDBALType\GeometryType;
 use Milanmadar\CoolioORM\Geo\DoctrineDBALType\TopoGeometryType;
+use Milanmadar\CoolioORM\Geo\DoctrineDBALType\TextArrayType;
+use Milanmadar\CoolioORM\Geo\DoctrineDBALType\TextArrayBracketsType;
 
 class ORM
 {
@@ -27,6 +29,7 @@ class ORM
     private static ?ORM $instance;
 
     private static bool $staticTypeAdded = false;
+    private static bool $staticTypeMapped = false;
 
     /**
      * Singleton, using the same as Symfony service container
@@ -57,6 +60,8 @@ class ORM
         if(!self::$staticTypeAdded) {
             Type::addType('geometry', GeometryType::class);
             Type::addType('topogeometry', TopoGeometryType::class);
+            Type::addType('_text', TextArrayType::class);
+            Type::addType('text[]', TextArrayBracketsType::class);
             self::$staticTypeAdded = true;
         }
 
@@ -75,10 +80,13 @@ class ORM
         if(!isset($this->doctrineConnectionsByUrl[$connUrl])) {
             $connectionParams = (new DsnParser())->parse($connUrl);
             $this->doctrineConnectionsByUrl[$connUrl] = DriverManager::getConnection($connectionParams);
-            if(str_contains($connUrl, 'pgsql')) {
+            if(!self::$staticTypeMapped && str_contains($connUrl, 'pgsql')) {
                 $this->doctrineConnectionsByUrl[$connUrl]->getDatabasePlatform()->registerDoctrineTypeMapping('geometry', GeometryType::NAME);
                 $this->doctrineConnectionsByUrl[$connUrl]->getDatabasePlatform()->registerDoctrineTypeMapping('topogeometry', TopoGeometryType::NAME);
+                $this->doctrineConnectionsByUrl[$connUrl]->getDatabasePlatform()->registerDoctrineTypeMapping('_text', TextArrayType::NAME);
+                $this->doctrineConnectionsByUrl[$connUrl]->getDatabasePlatform()->registerDoctrineTypeMapping('text[]', TextArrayBracketsType::NAME);
                 //$this->doctrineConnectionsByUrl[$connUrl]->getDatabasePlatform()->registerDoctrineTypeMapping('geometry', 'string');
+                self::$staticTypeMapped = true;
             }
 //            /** @var \PDO $pdoConn */
 //            $pdoConn = $this->dbsByConnUrl[$connUrl]->getWrappedConnection()->getWrappedConnection(); @ php stan-ig nore-li ne

@@ -192,9 +192,36 @@ class QueryBuilder extends DoctrineQueryBuilder
 
         $operator = strtoupper(trim($operator));
 
-        if(is_array($value)) {
-            if($operator == '=') $operator = 'IN';
-            elseif($operator == '!=') $operator = 'NOT IN';
+        if($operator == '@>') {
+            if(empty($value)) {
+                return ['1=2', []];
+            }
+            if(!is_array($value)) {
+                throw new \InvalidArgumentException('QueryBuilder->whereColumn() 2nd param must be an array when using @> operator'); // @codeCoverageIgnore
+            }
+            $sql = $column.' '.$operator.' ARRAY[:'.$paramName.']';
+            return [$sql, [$paramName=>$value]];
+        }
+
+        if($operator == '&&') {
+            if(empty($value)) {
+                return ['1=2', []];
+            }
+            if(!is_array($value)) {
+                throw new \InvalidArgumentException('QueryBuilder->whereColumn() 2nd param must be an array when using && operator'); // @codeCoverageIgnore
+            }
+            $sql = $column.' '.$operator.' ARRAY[:'.$paramName.']';
+            return [$sql, [$paramName=>$value]];
+        }
+
+        if(is_array($value))
+        {
+            if($operator == '=') {
+                $operator = 'IN';
+            }
+            elseif($operator == '!=') {
+                $operator = 'NOT IN';
+            }
 
             if(empty($value)) {
                 //return ['sql'=>$column.' '.$operator.' ()'];

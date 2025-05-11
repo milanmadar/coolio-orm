@@ -254,6 +254,26 @@ class Entity extends \Milanmadar\CoolioORM\Entity
 
     /**
      *
+     * @param array<string>|null $val
+     * @return $this
+     */
+    public function setFldStrArray(?array $val): self
+    {
+        $this->_set('fld_str_array', $val);
+        return $this;
+    }
+
+    /**
+     *
+     * @return array<string>
+     */
+    public function getFldStrArray(): array
+    {
+        return $this->_get('fld_str_array');
+    }
+
+    /**
+     *
      * @param \DateTime|null $val
      * @return $this
      */
