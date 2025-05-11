@@ -77,6 +77,10 @@ class ScaffoldCommand extends Command
         // table
         do {
             $tables = $sm->listTableNames();
+            $tables = array_filter($tables, function($tbl) {
+                return !str_starts_with($tbl, '_timescaledb');
+            });
+            $tables = array_values($tables);
             $tbl = $io->choice('Table', $tables);
 
             $tableColumns = $sm->listTableColumns($tbl);
