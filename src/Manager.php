@@ -636,15 +636,26 @@ abstract class Manager
         if($confirm != "I know what I'm doing!") {
             throw new \InvalidArgumentException(get_class($this)."::truncate() seems like you don't know what you are doing, so don't do it");
         }
-        if($fkOff) {
-            $this->db->executeStatement("SET foreign_key_checks = 0");
-        }
-        try {
-            $this->db->executeStatement('TRUNCATE '.$this->getDbTable());
-        } finally {
+
+        if($this->dbType == 'my') {
             if($fkOff) {
-                $this->db->executeStatement("SET foreign_key_checks = 1");
+                $this->db->executeStatement("SET foreign_key_checks = 0");
             }
+            try {
+                $this->db->executeStatement('TRUNCATE '.$this->getDbTable());
+            } finally {
+                if($fkOff) {
+                    $this->db->executeStatement("SET foreign_key_checks = 1");
+                }
+            }
+        }
+        elseif($this->dbType == 'pg')
+        {
+            $this->db->executeStatement('TRUNCATE TABLE '.$this->getDbTable().' RESTART IDENTITY CASCADE');
+        }
+        else
+        {
+            $this->db->executeStatement('TRUNCATE TABLE '.$this->getDbTable());
         }
     }
 
