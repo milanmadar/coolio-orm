@@ -411,6 +411,8 @@ class ScaffoldCommand extends Command
                     $defValSrc = "'".str_replace("'", "\\'", $colDefVal)."'";
                 } elseif(trim($colDefVal) == 'EXTRACT(epoch FROM CURRENT_TIMESTAMP)') {
                     $defValSrc = 'time()';
+                } elseif(trim($colDefVal) == 'CURRENT_TIMESTAMP') {
+                    $defValSrc = 'new \DateTime()';
                 } else {
                     $defValSrc = $colDefVal;
                 }
@@ -512,7 +514,7 @@ class ScaffoldCommand extends Command
                     $docParamType = 'array<string>';
                     break;
                 default:
-                    exit("Can't scaffold column type: '".$colType."'\n");
+                    exit("Can't scaffold column type: '".$colType."' (column name: ".$colName." , native type: ".$nativeColType.")\n");
             }
 
             $mgrFldTypes .= "\n        '".$colName."' => '".$colType."',";
