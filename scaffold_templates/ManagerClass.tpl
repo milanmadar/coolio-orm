@@ -5,14 +5,14 @@ namespace _NAMESPACE_;
 use Milanmadar\CoolioORM;
 
 /**
- * @method Entity createEntity(array $php_data = [], bool $skipEntityRepo = false)
- * @method Entity createEntityFromDbData(array $db_data = [], bool $skipEntityRepo = false)
+ * @method Entity createEntity(mixed[] $php_data = [], bool $skipEntityRepo = false)
+ * @method Entity createEntityFromDbData(mixed[] $db_data = [], bool $skipEntityRepo = false)
  * @method Entity|null findByField(string $field, mixed $value, bool $forceToGetFromDb = false)
  * @method Entity|null findById(?int $id, bool $forceToGetFromDb = false)
- * @method Entity|null findOneWhere(string $sqlAfterWHERE, array $binds = [], bool $forceToGetFromDb = false)
- * @method Entity|null findOne(string $sql, array $binds = [], bool $forceToGetFromDb = false)
- * @method Entity[] findManyWhere(string $sqlAfterWHERE, array $binds = [], bool $forceToGetFromDb = false)
- * @method Entity[] findMany(string $sql, array $binds = [], bool $forceToGetFromDb = false)
+ * @method Entity|null findOneWhere(string $sqlAfterWHERE, mixed[] $binds = [], bool $forceToGetFromDb = false)
+ * @method Entity|null findOne(string $sql, mixed[] $binds = [], bool $forceToGetFromDb = false)
+ * @method Entity[] findManyWhere(string $sqlAfterWHERE, mixed[] $binds = [], bool $forceToGetFromDb = false)
+ * @method Entity[] findMany(string $sql, mixed[] $binds = [], bool $forceToGetFromDb = false)
  */
 class Manager extends CoolioORM\Manager
 {
@@ -22,7 +22,7 @@ class Manager extends CoolioORM\Manager
      */
     public function save(CoolioORM\Entity $ent): void
     {
-        if( ! $ent instanceof Entity) {
+        if( ! $ent instanceof Entity) { /* @phpstan-ignore-line */
             throw new \InvalidArgumentException(get_class($this)."::save() can't save ".get_class($ent));
         }
         parent::save($ent);
@@ -34,7 +34,7 @@ class Manager extends CoolioORM\Manager
      */
     public function delete(CoolioORM\Entity $ent): void
     {
-        if( ! $ent instanceof Entity) {
+        if( ! $ent instanceof Entity) { /* @phpstan-ignore-line */
             throw new \InvalidArgumentException(get_class($this)."::delete() can't delete ".get_class($ent));
         }
         parent::delete($ent);
