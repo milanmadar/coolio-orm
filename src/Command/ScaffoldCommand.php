@@ -409,9 +409,9 @@ class ScaffoldCommand extends Command
             {
                 if($colType == 'string' || $colType == 'text' || $colType == 'character' || $colType == 'char' || $colType == 'varchar') {
                     $defValSrc = "'".str_replace("'", "\\'", $colDefVal)."'";
-                } elseif(trim($colDefVal) == 'EXTRACT(epoch FROM CURRENT_TIMESTAMP)') {
+                } elseif(strtoupper(trim($colDefVal)) == 'EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)' || strtoupper(trim($colDefVal)) == 'EXTRACT(EPOCH FROM NOW())') {
                     $defValSrc = 'time()';
-                } elseif(trim($colDefVal) == 'CURRENT_TIMESTAMP') {
+                } elseif(strtoupper(trim($colDefVal)) == 'CURRENT_TIMESTAMP'  || strtoupper(trim($colDefVal)) == 'NOW()' ) {
                     $defValSrc = 'new \DateTime()';
                 } else {
                     $defValSrc = $colDefVal;
