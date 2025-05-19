@@ -111,6 +111,11 @@ class ScaffoldCommand extends Command
         } else {
             $guessModelName = str_replace(' ', '_', ucwords(str_replace('.', ' ', $guessModelName)));
         }
+        // depluralize
+        $guessModelName = preg_replace('/ies$/', 'y', $guessModelName);
+        $guessModelName = preg_replace('/es$/', '', $guessModelName);
+        $guessModelName = preg_replace('/s$/', '', $guessModelName);
+
         $cwd = getcwd();
         $modelsDir = $cwd.'/src/Model';
         $bestModelNameGuessFound = false;
