@@ -426,7 +426,7 @@ class QueryBuilder extends DoctrineQueryBuilder
     /**
      * used for UPDATE queries (for INSERT use ->setValue(), for SELECT use ->andWhereColumn())
      * @param string $key
-     * @param mixed $value
+     * @param mixed $value UNSAFE! This goes into the query as-it-is. Probably us it lke this: $qb->set('column', ':NamedParam')->setParameter('NamedParam', $value);
      * @return $this
      */
     public function set(string $key, mixed $value): self
@@ -445,9 +445,9 @@ class QueryBuilder extends DoctrineQueryBuilder
                 throw new \InvalidArgumentException('QueryBuilder->set() 2nd param must be a named parameter, not a "?".'); // @codeCoverageIgnore
             }
 
-            if(!empty($value) && $value[0] != ':') {
-                $value = ':'.$value;
-            }
+//            if(!empty($value) && $value[0] != ':') {
+//                $value = ':'.$value;
+//            }
         }
         parent::set($key, $value);
         return $this;
