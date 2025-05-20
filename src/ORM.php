@@ -77,6 +77,9 @@ class ORM
      */
     public function getDbByUrl(string $connUrl): Connection
     {
+        if(empty($connUrl)) {
+            throw new \InvalidArgumentException('ORM::getDbByUrl() Empty connection url. Maybe check your Manager->getDefaultDbTable() and your .env files (or environment variables)');
+        }
         if(!isset($this->doctrineConnectionsByUrl[$connUrl])) {
             $connectionParams = (new DsnParser())->parse($connUrl);
             $this->doctrineConnectionsByUrl[$connUrl] = DriverManager::getConnection($connectionParams);
