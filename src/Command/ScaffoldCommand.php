@@ -214,6 +214,10 @@ class ScaffoldCommand extends Command
                 array_pop($parts);
                 $ns = implode('\\', $parts);
                 $guessRelatedModelName = $ns . '\\' . $guessRelatedModelName;
+                // depluralize
+                $guessRelatedModelName = preg_replace('/ies$/', 'y', $guessRelatedModelName);
+                $guessRelatedModelName = preg_replace('/es$/', '', $guessRelatedModelName);
+                $guessRelatedModelName = preg_replace('/s$/', '', $guessRelatedModelName);
 
                 $otherModelName = $io->ask($thisFldName.": Name of the related Model (full class name with namespace, writing 'Entity' at the end desn't matter): ", $guessRelatedModelName);
                 $otherModelName = str_replace("/", "\\", $otherModelName);
