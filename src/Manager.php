@@ -487,7 +487,14 @@ abstract class Manager
             if($forceInsert) {
                 $ent->_setForceInsertOnNextSave(false);
             } else {
-                $ent->setId(intval($this->db->lastInsertId()));
+                if($this->dbType == 'pg') {
+                    $ent->setId($this->db->getNativeConnection()->lastInsertId($this->dbTable.'_id_seq'));
+                } elseif($this->dbType == 'ms') {
+                    $ent->setId($this->db->lastInsertId());
+                } else { // MySQL
+                    $ent->setId(intval($this->db->lastInsertId()));
+                }
+                //$ent->setId(intval($this->db->lastInsertId()));
             }
 
             $ent->_commit();
