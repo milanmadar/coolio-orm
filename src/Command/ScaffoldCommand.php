@@ -480,6 +480,7 @@ class ScaffoldCommand extends Command
                     $docParamType = 'float';
                     break;
                 case 'json':
+                case 'jsonb':
                 case 'json_array':
                     $paramType = 'array';
                     $docParamType = 'array<string|int, mixed>';
