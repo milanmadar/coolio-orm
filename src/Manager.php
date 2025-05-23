@@ -886,6 +886,7 @@ abstract class Manager
                         $types[$p] = ParameterType::STRING;
                         break;
                     case 'json':
+                    case 'jsonb':
                     case 'json_array':
                         $p = 'mgrPm' . ++self::$placeholderNameIndex;
                         $placeholders[] = ':'.$p;
@@ -952,7 +953,7 @@ abstract class Manager
                         'float', 'decimal' => (float)$v,
                         'boolean' => (bool)$v,
                         'array', 'simple_array' => unserialize($v),
-                        'json', 'json_array' => json_decode($v, true),
+                        'json', 'jsonb', 'json_array' => json_decode($v, true),
                         'date', 'time', 'datetime', 'datetime2', 'smalldatetime', 'datetimeoffset', 'timestamp', 'timestamp_tz', 'timestamp_micro', 'timestamp_tz_micro' => new \DateTime($v),
                         //'geometry' => Geo\Shape2D3DFactory::createFromGeoJSONString($v, $data[$k.'_srid'] ?? null),
                         //'geometry_curved', 'topogeometry' => Geo\Shape2D3DFactory::createFromGeoEWKTString($v),
