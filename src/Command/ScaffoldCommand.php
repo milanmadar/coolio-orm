@@ -112,8 +112,11 @@ class ScaffoldCommand extends Command
             $guessModelName = str_replace(' ', '_', ucwords(str_replace('.', ' ', $guessModelName)));
         }
         // depluralize
+        /** @var string $guessModelName */
         $guessModelName = preg_replace('/ies$/', 'y', $guessModelName);
+        /** @var string $guessModelName */
         $guessModelName = preg_replace('/es$/', '', $guessModelName);
+        /** @var string $guessModelName */
         $guessModelName = preg_replace('/s$/', '', $guessModelName);
 
         $cwd = getcwd();
@@ -215,8 +218,11 @@ class ScaffoldCommand extends Command
                 $ns = implode('\\', $parts);
                 $guessRelatedModelName = $ns . '\\' . $guessRelatedModelName;
                 // depluralize
+                /** @var string $guessRelatedModelName */
                 $guessRelatedModelName = preg_replace('/ies$/', 'y', $guessRelatedModelName);
+                /** @var string $guessRelatedModelName */
                 $guessRelatedModelName = preg_replace('/es$/', '', $guessRelatedModelName);
+                /** @var string $guessRelatedModelName */
                 $guessRelatedModelName = preg_replace('/s$/', '', $guessRelatedModelName);
 
                 $otherModelName = $io->ask($thisFldName.": Name of the related Model (full class name with namespace, writing 'Entity' at the end desn't matter): ", $guessRelatedModelName);
@@ -524,7 +530,7 @@ class ScaffoldCommand extends Command
                     $docParamType = 'array<string>';
                     break;
                 default:
-                    exit("Can't scaffold column type: '".$colType."' (column name: ".$colName." , native type: ".$nativeColType.")\n");
+                    exit("Can't scaffold column type: '".$colType."' (column name: ".$colName." , native type: ".($nativeColType ?? '(unfined)').")\n");
             }
 
             $mgrFldTypes .= "\n        '".$colName."' => '".$colType."',";
