@@ -8,24 +8,40 @@ class AsyncQueries
 {
     /** @var array<string, array{conn_url:string, sql:string, params:array<int<0, max>|string, mixed>}> */
     private array $queries;
+    private int $maxWaitForResults;
 
-    public function __construct()
+    /**
+     * Constructor
+     * @param int $maxWaitForResults Maximum time to wait for results in seconds (default is 3600 seconds = 1 hour)
+     */
+    public function __construct(int $maxWaitForResults = 3600)
     {
+        $this->maxWaitForResults = $maxWaitForResults;
         $this->queries = [];
     }
 
     public function addQuery_fromQueryBuilder(string $name, QueryBuilder $queryBuilder): self
     {
         $connParams = $queryBuilder->getDoctrineConnection()->getParams();
-        if(!isset($connParams['driver']) || $connParams['driver'] !== 'pdo_pgsql') {
-            throw new \InvalidArgumentException('Milanmadar\CoolioORM\AsyncQueries: Only PostgreSQL queries are supported');
-        }
-        if(!isset($connParams['user']) || !isset($connParams['password']) || !isset($connParams['host']) || !isset($connParams['port'])) {
-            throw new \InvalidArgumentException('Milanmadar\CoolioORM\AsyncQueries: Missing connection parameters for PostgreSQL');
+
+        if (($connParams['driver'] ?? '') !== 'pdo_pgsql') {
+            throw new \InvalidArgumentException('Only PostgreSQL queries are supported');
         }
 
-        $connUrl ='postgresql://' . $connParams['user'] . ':' . $connParams['password'] . '@' . $connParams['host'] . ':' . $connParams['port'];
-        if(!empty($connParams['dbname'])) $connUrl .= '/' . $connParams['dbname'];
+        foreach (['user', 'password', 'host', 'port'] as $param) {
+            if (empty($connParams[$param])) {
+                throw new \InvalidArgumentException("Missing connection parameter: {$param}");
+            }
+        }
+
+        $connUrl = sprintf(
+            'postgresql://%s:%s@%s:%d%s',
+            $connParams['user'],
+            $connParams['password'],
+            $connParams['host'],
+            $connParams['port'],
+            !empty($connParams['dbname']) ? '/' . $connParams['dbname'] : ''
+        );
 
         return $this->addQuery(
             $name,
@@ -70,8 +86,9 @@ class AsyncQueries
         {
             // connect
             $connUrl = $query['conn_url']. '?application_name=conn'.$i;
-            $conn = pg_connect($connUrl);
+            $conn = @pg_connect($connUrl, PGSQL_CONNECT_FORCE_NEW);
             if ($conn === false) {
+                $this->closeConnections($connections);
                 throw new \RuntimeException("Milanmadar\CoolioORM\AsyncQueries::fetch() Could not connect to PostgreSQL database with URL: " . $connUrl);
             }
 
@@ -88,14 +105,13 @@ class AsyncQueries
 
                 $escapedValue = pg_escape_literal($conn, $value);
                 if($escapedValue === false) {
-                    pg_close($conn);
-                    foreach($connections as $c) {
-                        pg_close($c['conn']);
-                    }
+                    @pg_close($conn);
+                    $this->closeConnections($connections);
                     throw new \RuntimeException("Milanmadar\CoolioORM\AsyncQueries::fetch() Could not escape value for parameter '$param': " . pg_last_error($conn));
                 }
 
-                $sql = str_replace(':' . $param, $escapedValue, $sql);
+                //$sql = str_replace(':' . $param, $escapedValue, $sql);
+                $sql = preg_replace('/:' . preg_quote($param, '/') . '\b/', $escapedValue, $sql);
             }
 
             // this is to keep track on the connections
@@ -115,11 +131,7 @@ class AsyncQueries
 
             // send the query
             if (!pg_send_query($conn, $sql)) {
-                pg_close($conn);
-                unset($connections[$name]);
-                foreach($connections as $c) {
-                    pg_close($c['conn']);
-                }
+                $this->closeConnections($connections);
                 throw new \RuntimeException("Milanmadar\CoolioORM\AsyncQueries::fetch() Could not send query for '$name': " . pg_last_error($conn));
             }
 
@@ -136,7 +148,7 @@ class AsyncQueries
             $except = null;
 
             // see which sockets are ready
-            if (stream_select($read, $write, $except, 4)) { /* @phpstan-ignore-line */
+            if (stream_select($read, $write, $except, $this->maxWaitForResults)) { /* @phpstan-ignore-line */
                 foreach ($connections as $name => $connData) {
                     if (in_array($connData['sock'], $read, true))
                     {
@@ -145,7 +157,7 @@ class AsyncQueries
                             $results[$name] = pg_fetch_all($res);
                         }
 
-                        pg_close($connData['conn']);
+                        @pg_close($connData['conn']);
 
                         // remove this connection since it's done
                         unset($connections[$name]);
@@ -153,14 +165,27 @@ class AsyncQueries
                 }
             }
             else {
-                foreach ($connections as $name => $connData) {
-                    unset($connections[$name]);
-                }
+                $this->closeConnections($connections);
                 throw new \RuntimeException("Milanmadar\CoolioORM\AsyncQueries::fetch() stream_select() timed out or encountered an error for this query");
             }
         }
 
         return new AsyncResultset($results);
+    }
+
+    /**
+     * Close all given connections.
+     * @param array<string, array{conn:\PgSql\Connection, sock?:resource}> $connections
+     * @return void
+     */
+    private function closeConnections(array &$connections): void
+    {
+        foreach ($connections as $connData) {
+            if (isset($connData['conn'])) {
+                @pg_close($connData['conn']);
+            }
+        }
+        $connections = [];
     }
 
 }
