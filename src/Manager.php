@@ -5,6 +5,7 @@ namespace Milanmadar\CoolioORM;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\ParameterType;
+use Doctrine\DBAL\Exception;
 
 abstract class Manager
 {
@@ -106,7 +107,7 @@ abstract class Manager
         }
         elseif(!empty($php_data['id']) && $this->useEntityRepository && !$skipEntityRepo) // We have the id, so mayb it's already in the Entity EntityRepository?
         {
-            $existingEnt = $this->entityRepository->getByDbId($php_data['id'], $this->dbTable .$this->getDbConnUrl());
+            $existingEnt = $this->entityRepository->getByDbId($php_data['id'], $this->getDbTable() .$this->getDbConnUrl());
             if(isset($existingEnt))
             {
                 // See if some new data should be added to the existing Entity
@@ -128,7 +129,7 @@ abstract class Manager
 
         // Wasn't in the Repo (or we aren't using it), so create it and add it to the Repo
         if($this->useEntityRepository && !$skipEntityRepo) {
-            $this->entityRepository->add($newEnt, $this->dbTable.$this->getDbConnUrl());
+            $this->entityRepository->add($newEnt, $this->getDbTable().$this->getDbConnUrl());
         }
 
         return $newEnt;
@@ -323,7 +324,7 @@ abstract class Manager
 
         // If its in the Entity Repository, return what we already have
         if($this->useEntityRepository && !$forceToGetFromDb) {
-            $existingEnt = $this->entityRepository->getByDbId($id, $this->dbTable.$this->getDbConnUrl());
+            $existingEnt = $this->entityRepository->getByDbId($id, $this->getDbTable().$this->getDbConnUrl());
             if (isset($existingEnt)) {
                 return $existingEnt;
             }
@@ -369,7 +370,7 @@ abstract class Manager
      */
     public function findOneWhere(string $sqlAfterWHERE, array $binds = [], bool $forceToGetFromDb = false): ?Entity
     {
-        return $this->findOne("SELECT * FROM ".$this->dbTable." WHERE ".$sqlAfterWHERE, $binds, $forceToGetFromDb);
+        return $this->findOne("SELECT * FROM ".$this->getDbTable()." WHERE ".$sqlAfterWHERE, $binds, $forceToGetFromDb);
     }
 
     /**
@@ -400,7 +401,7 @@ abstract class Manager
      */
     public function findManyWhere(string $sqlAfterWHERE, array $binds = [], bool $forceToGetFromDb = false): array
     {
-        return $this->findMany("SELECT * FROM ".$this->dbTable." WHERE ".$sqlAfterWHERE, $binds, $forceToGetFromDb);
+        return $this->findMany("SELECT * FROM ".$this->getDbTable()." WHERE ".$sqlAfterWHERE, $binds, $forceToGetFromDb);
     }
 
     /**
@@ -432,7 +433,7 @@ abstract class Manager
     {
         return (new QueryBuilder( $this->orm, $this->db, $this ))
             //->select('*') // now its set with $qb->autoSetSelect() because we do magic with the '*' select
-            //->from($this->dbTable) // now its set with $qb->autoSetFrom() because Doctrine ADDs a new FROM expression to the query every time you call ->from()
+            //->from($this->getDbTable()) // now its set with $qb->autoSetFrom() because Doctrine ADDs a new FROM expression to the query every time you call ->from()
             ;
     }
 
@@ -459,77 +460,40 @@ abstract class Manager
             }
         }
 
+        // INSERT
         $forceInsert = $ent->_getForceInsertOnNextSave();
-        if($forceInsert || !$ent->hasId()) // INSERT
+        if($forceInsert || !$ent->hasId())
         {
             $dataToSave = $ent->_getData();
             $this->beforeToDb($dataToSave);
 
-            try {
-                $this->insert($dataToSave);
-            }
-            // @codeCoverageIgnoreStart
-            catch (\Doctrine\DBAL\Exception\ConnectionException|\Doctrine\DBAL\Exception\ConnectionLost|\Doctrine\DBAL\Exception\RetryableException $e) {
-                sleep($_ENV['COOLIO_ORM_RETRY_SLEEP'] ?? 2);
-                $this->insert($dataToSave);
-            }
-            catch(\Doctrine\DBAL\Exception $e) {
-                // log the data too, but truncate the too long things
-                foreach($dataToSave as $field=>$value) {
-                    if(is_string($value) && mb_strlen($value, 'UTF-8') > 1024) {
-                        $dataToSave[$field] = mb_substr($value, 0, 1018).'[...]';
-                    }
-                }
-                throw Utils::handleDriverException($e, "Manager::save() INSERT ".get_class($this), $dataToSave);
-            }
-            // @codeCoverageIgnoreEnd
+            $this->insert($dataToSave);
 
             if($forceInsert) {
                 $ent->_setForceInsertOnNextSave(false);
             } else {
                 if($this->dbType == 'pg') {
-                    /** @phpstan-ignore-next-line */
-                    $ent->setId($this->db->getNativeConnection()->lastInsertId($this->dbTable.'_id_seq'));
+                    $ent->setId($this->db->getNativeConnection()->lastInsertId($this->getDbTable().'_id_seq')); /* @phpstan-ignore-line */
                 } else {
                     $ent->setId(intval($this->db->lastInsertId()));
                 }
             }
-
-            $ent->_commit();
         }
-        elseif($ent->_didDataChange()) // UPDATE
+        // UPDATE
+        elseif($ent->_didDataChange())
         {
             $dataToSave = $ent->_getDataChanged();
             $this->beforeToDb($dataToSave);
 
-            try {
-                // its the primary id that changed
-                $whereId = isset($dataToSave['id'])
-                    ? $ent->_getDataOrigi()['id']
-                    : $ent->_get('id');
+            // its the primary id that changed
+            $whereId = isset($dataToSave['id'])
+                ? $ent->_getDataOrigi()['id']
+                : $ent->_get('id');
 
-                $this->update($dataToSave, ['id' => $whereId]);
-            }
-            // @codeCoverageIgnoreStart
-            catch (\Doctrine\DBAL\Exception\ConnectionException|\Doctrine\DBAL\Exception\ConnectionLost|\Doctrine\DBAL\Exception\RetryableException $e) {
-                try {
-                    sleep($_ENV['COOLIO_ORM_RETRY_SLEEP'] ?? 2);
-                    $this->update($dataToSave, ['id' => $whereId]);
-                }
-                catch (\Doctrine\DBAL\Exception $e) {
-                    // log the data too, but truncate the too long things
-                    foreach ($dataToSave as $field => $value) {
-                        if (is_string($value) && mb_strlen($value, 'UTF-8') > 1024) {
-                            $dataToSave[$field] = mb_substr($value, 0, 1000) . '... [truncated for log]';
-                        }
-                    }
-                    throw Utils::handleDriverException($e, "Manager::save() UPDATE " . get_class($this) . " (id:" . $ent->_get('id') . ")", $dataToSave);
-                }
-            }
-            // @codeCoverageIgnoreEnd
-
-            $ent->_commit();
+            $this->update($dataToSave, ['id' => $whereId]);
         }
+
+        $ent->_commit();
     }
 
     /**
@@ -604,20 +568,30 @@ abstract class Manager
             $escapedColumns[] = Utils::escapeColumnName($col, $this->dbType);
         }
 
-        $sql = 'INSERT INTO ' . $this->dbTable . ' (' . implode(', ', $escapedColumns) . ')' . ' VALUES ' . $allPlaceholdersStr;
+        $sql = 'INSERT INTO ' . $this->getDbTable()
+            . ' (' . implode(', ', $escapedColumns) . ')'
+            . ' VALUES ' . $allPlaceholdersStr;
 
-        try {
-            $this->db->executeStatement($sql, $allValues, $allTypes);
-        }
+        $maxTries = ($_ENV['COOLIO_ORM_RETRY_ATTEMPTS'] ?? 0)+1;
+        $retrySleep = $_ENV['COOLIO_ORM_RETRY_SLEEP'] ?? 2;
+
+        for ($i=1; $i<=$maxTries; ++$i) {
+            try {
+                $this->db->executeStatement($sql, $allValues, $allTypes);
+                return;
+            }
             // @codeCoverageIgnoreStart
-        catch (\Doctrine\DBAL\Exception\ConnectionException|\Doctrine\DBAL\Exception\ConnectionLost|\Doctrine\DBAL\Exception\RetryableException $e) {
-            sleep($_ENV['COOLIO_ORM_RETRY_SLEEP'] ?? 2);
-            $this->db->executeStatement($sql, $allValues, $allTypes);
+            catch (Exception\ConnectionException | Exception\ConnectionLost | Exception\RetryableException $e) {
+                if ($i == $maxTries) {
+                    throw Utils::handleDriverException($e, "Manager::insertBulk() ".get_class($this).", SQL: ".substr($sql, 0, 50).'...', null);
+                }
+                sleep($retrySleep);
+            }
+            catch (Exception $e) {
+                throw Utils::handleDriverException($e, "Manager::insertBulk() ".get_class($this).", SQL: ".substr($sql, 0, 50).'...', null);
+            }
+            // @codeCoverageIgnoreEnd
         }
-        catch(\Doctrine\DBAL\Exception $e) {
-            throw Utils::handleDriverException($e, "Manager::insertBulk() ".get_class($this), null);
-        }
-        // @codeCoverageIgnoreEnd
     }
 
     /**
@@ -645,18 +619,27 @@ abstract class Manager
 
         // Only bother the db if it had an id at all
         $oldId = $ent->_getDeletedId();
-        if(!empty($oldId)) {
-            try {
-                $this->db->delete($this->dbTable, ['id' => $oldId]);
-            }
-            catch (\Doctrine\DBAL\Exception\ConnectionException|\Doctrine\DBAL\Exception\ConnectionLost|\Doctrine\DBAL\Exception\RetryableException $e) {
+        if(!empty($oldId))
+        {
+            $maxTries = ($_ENV['COOLIO_ORM_RETRY_ATTEMPTS'] ?? 0)+1;
+            $retrySleep = $_ENV['COOLIO_ORM_RETRY_SLEEP'] ?? 2;
+
+            for ($i=1; $i<=$maxTries; ++$i) {
                 try {
-                    sleep($_ENV['COOLIO_ORM_RETRY_SLEEP'] ?? 2);
-                    $this->db->delete($this->dbTable, ['id' => $oldId]);
+                    $this->db->delete($this->getDbTable(), ['id' => $oldId]);
+                    return;
                 }
-                catch (\Doctrine\DBAL\Exception $e) {
-                    throw Utils::handleDriverException($e, "Manager::delete() (" . get_class($ent) . " ,id: " . $oldId . ")", null);
+                // @codeCoverageIgnoreStart
+                catch (Exception\ConnectionException | Exception\ConnectionLost | Exception\RetryableException $e) {
+                    if ($i == $maxTries) {
+                        throw Utils::handleDriverException($e, "Manager::delete() ".get_class($this).', TABLE: '.$this->getDbTable(), ['id' => $oldId]);
+                    }
+                    sleep($retrySleep);
                 }
+                catch (Exception $e) {
+                    throw Utils::handleDriverException($e, "Manager::delete() ".get_class($this).', TABLE: '.$this->getDbTable(), ['id' => $oldId]);
+                }
+                // @codeCoverageIgnoreEnd
             }
         }
     }
@@ -672,25 +655,44 @@ abstract class Manager
             throw new \InvalidArgumentException(get_class($this)."::truncate() seems like you don't know what you are doing, so don't do it");
         }
 
-        if($this->dbType == 'my') {
-            if($fkOff) {
-                $this->db->executeStatement("SET foreign_key_checks = 0");
-            }
+        $maxTries = ($_ENV['COOLIO_ORM_RETRY_ATTEMPTS'] ?? 0)+1;
+        $retrySleep = $_ENV['COOLIO_ORM_RETRY_SLEEP'] ?? 2;
+
+        for ($i=1; $i<=$maxTries; ++$i) {
             try {
-                $this->db->executeStatement('TRUNCATE '.$this->getDbTable());
-            } finally {
-                if($fkOff) {
-                    $this->db->executeStatement("SET foreign_key_checks = 1");
+                if($this->dbType == 'my') {
+                    if($fkOff) {
+                        $this->db->executeStatement("SET foreign_key_checks = 0");
+                    }
+                    try {
+                        $this->db->executeStatement('TRUNCATE '.$this->getDbTable());
+                    } finally {
+                        if($fkOff) {
+                            $this->db->executeStatement("SET foreign_key_checks = 1");
+                        }
+                    }
                 }
+                elseif($this->dbType == 'pg')
+                {
+                    $this->db->executeStatement('TRUNCATE TABLE '.$this->getDbTable().' RESTART IDENTITY CASCADE');
+                }
+                else
+                {
+                    $this->db->executeStatement('TRUNCATE TABLE '.$this->getDbTable());
+                }
+                return;
             }
-        }
-        elseif($this->dbType == 'pg')
-        {
-            $this->db->executeStatement('TRUNCATE TABLE '.$this->getDbTable().' RESTART IDENTITY CASCADE');
-        }
-        else
-        {
-            $this->db->executeStatement('TRUNCATE TABLE '.$this->getDbTable());
+            // @codeCoverageIgnoreStart
+            catch (Exception\ConnectionException | Exception\ConnectionLost | Exception\RetryableException $e) {
+                if ($i == $maxTries) {
+                    throw Utils::handleDriverException($e, "Manager::truncate() ".get_class($this).', TABLE: '.$this->getDbTable(), null);
+                }
+                sleep($retrySleep);
+            }
+            catch (Exception $e) {
+                throw Utils::handleDriverException($e, "Manager::truncate() ".get_class($this).', TABLE: '.$this->getDbTable(), null);
+            }
+            // @codeCoverageIgnoreEnd
         }
     }
 
@@ -720,7 +722,7 @@ abstract class Manager
      */
     public function clearRepository(bool $allTables): void
     {
-        $this->entityRepository->clear($allTables ? null : $this->dbTable.$this->getDbConnUrl());
+        $this->entityRepository->clear($allTables ? null : $this->getDbTable().$this->getDbConnUrl());
     }
 
     /**
@@ -734,7 +736,7 @@ abstract class Manager
         $qb = $this->createQueryBuilder()->delete();
         foreach($fields as $k=>$v){
             if(! $this->hasField($k)){
-                throw new \InvalidArgumentException($this->dbTable." has no field '$k'");
+                throw new \InvalidArgumentException($this->getDbTable()." has no field '$k'");
             }
             
             $qb = $qb->andWhereColumn($k, '=', $v);
@@ -749,23 +751,44 @@ abstract class Manager
      */
     private function insert(array $data): int|string
     {
-        if (count($data) === 0) {
-            return $this->db->executeStatement('INSERT INTO ' . $this->dbTable . ' () VALUES ()');
+        $maxTries = ($_ENV['COOLIO_ORM_RETRY_ATTEMPTS'] ?? 0)+1;
+        $retrySleep = $_ENV['COOLIO_ORM_RETRY_SLEEP'] ?? 2;
+
+        for ($i=1; $i<=$maxTries; ++$i) {
+            try {
+                if (count($data) === 0) {
+                    $sql = 'INSERT INTO ' . $this->getDbTable() . ' () VALUES ()';
+                    return $this->db->executeStatement($sql);
+                }
+
+                [$columns, $values, $placeholders, $types] = $this->fromPHPdata_toDBdata($data);
+
+                $escapedColumns = [];
+                foreach($columns as $col) {
+                    $escapedColumns[] = Utils::escapeColumnName($col, $this->dbType);
+                }
+
+                $sql = 'INSERT INTO ' . $this->getDbTable()
+                    . ' (' . implode(', ', $escapedColumns) . ')'
+                    . ' VALUES (' . implode(', ', $placeholders) . ')';
+
+                return $this->db->executeStatement($sql, $values, $types);
+            }
+            // @codeCoverageIgnoreStart
+            catch (Exception\ConnectionException | Exception\ConnectionLost | Exception\RetryableException $e) {
+                if ($i == $maxTries) {
+                    throw Utils::handleDriverException($e, "Manager::save() INSERT ".get_class($this).', SQL: '.($sql ?? '(no sql)'), $values ?? []);
+                }
+                sleep($retrySleep);
+            }
+            catch (Exception $e) {
+                throw Utils::handleDriverException($e, "Manager::save() INSERT ".get_class($this).', SQL: '.($sql ?? '(no sql)'), $values ?? []);
+            }
+            // @codeCoverageIgnoreEnd
         }
 
-        [$columns, $values, $placeholders, $types] = $this->fromPHPdata_toDBdata($data);
-
-        $escapedColumns = [];
-        foreach($columns as $col) {
-            $escapedColumns[] = Utils::escapeColumnName($col, $this->dbType);
-        }
-
-        return $this->db->executeStatement(
-            'INSERT INTO ' . $this->dbTable . ' (' . implode(', ', $escapedColumns) . ')' .
-            ' VALUES (' . implode(', ', $placeholders) . ')',
-            $values,
-            $types,
-        );
+        // this is just here for the IDE, in reality we always return above or throw an exception
+        return 1;
     }
 
     /**
@@ -783,7 +806,7 @@ abstract class Manager
             $set[] = Utils::escapeColumnName($colName, $this->dbType) . ' = ' . $placeholders[$i];
         }
 
-        $sql = 'UPDATE ' . $this->dbTable . ' SET ' . implode(', ', $set);
+        $sql = 'UPDATE ' . $this->getDbTable() . ' SET ' . implode(', ', $set);
 
         if (!empty($criteria))
         {
@@ -799,7 +822,28 @@ abstract class Manager
             $sql .= ' WHERE ' . implode(' AND ', $whereConditions);
         }
 
-        return $this->db->executeStatement($sql, $values, $types);
+        $maxTries = ($_ENV['COOLIO_ORM_RETRY_ATTEMPTS'] ?? 0)+1;
+        $retrySleep = $_ENV['COOLIO_ORM_RETRY_SLEEP'] ?? 2;
+
+        for ($i=1; $i<=$maxTries; ++$i) {
+            try {
+                return $this->db->executeStatement($sql, $values, $types);
+            }
+            // @codeCoverageIgnoreStart
+            catch (Exception\ConnectionException | Exception\ConnectionLost | Exception\RetryableException $e) {
+                if ($i == $maxTries) {
+                    throw Utils::handleDriverException($e, "Manager::save() UPDATE ".get_class($this).', SQL: '.$sql, $values);
+                }
+                sleep($retrySleep);
+            }
+            catch (Exception $e) {
+                throw Utils::handleDriverException($e, "Manager::save() UPDATE ".get_class($this).', SQL: '.$sql, $values);
+            }
+            // @codeCoverageIgnoreEnd
+        }
+
+        // this is just here for the IDE, in reality we always return above or throw an exception
+        return 1;
     }
 
     /**

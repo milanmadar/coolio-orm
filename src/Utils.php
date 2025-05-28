@@ -119,6 +119,7 @@ class Utils
                     return $conn->executeQuery($sql, $binds, $paramTypes);
                 }
             }
+            // @codeCoverageIgnoreStart
             catch (Exception\ConnectionException | Exception\ConnectionLost | Exception\RetryableException $e) {
                 if ($i == $maxTries) {
                     throw self::handleDriverException($e, $sql, $binds);
@@ -128,6 +129,7 @@ class Utils
             catch (Exception $e) {
                 throw self::handleDriverException($e, $sql, $binds);
             }
+            // @codeCoverageIgnoreEnd
         }
 
         // this is just so IDE doesn't complain, but the loop above always returns or throws
@@ -190,6 +192,7 @@ class Utils
                     return (int)$conn->executeStatement($sql, $binds, $paramTypes);
                 }
             }
+            // @codeCoverageIgnoreStart
             catch (Exception\ConnectionException | Exception\ConnectionLost | Exception\RetryableException $e) {
                 if ($i == $maxTries) {
                     throw self::handleDriverException($e, $sql, $binds);
@@ -199,6 +202,7 @@ class Utils
             catch (Exception $e) {
                 throw self::handleDriverException($e, $sql, $binds);
             }
+            // @codeCoverageIgnoreEnd
         }
 
         // this is just so IDE doesn't complain, but the loop above always returns or throws
