@@ -36,10 +36,10 @@ class AsyncQueries
 
         $connUrl = sprintf(
             'postgresql://%s:%s@%s:%d%s',
-            $connParams['user'],
-            $connParams['password'],
-            $connParams['host'],
-            $connParams['port'],
+            $connParams['user'], // @phpstan-ignore-line We check this above but phpstan doesn't know
+            $connParams['password'], // @phpstan-ignore-line We check this above but phpstan doesn't know
+            $connParams['host'], // @phpstan-ignore-line We check this above but phpstan doesn't know
+            $connParams['port'], // @phpstan-ignore-line We check this above but phpstan doesn't know
             !empty($connParams['dbname']) ? '/' . $connParams['dbname'] : ''
         );
 
@@ -111,7 +111,8 @@ class AsyncQueries
                 }
 
                 //$sql = str_replace(':' . $param, $escapedValue, $sql);
-                $sql = preg_replace('/:' . preg_quote($param, '/') . '\b/', $escapedValue, $sql);
+                /** @var string $sql */
+                $sql = preg_replace('/:' . preg_quote((string)$param, '/') . '\b/', $escapedValue, $sql);
             }
 
             // this is to keep track on the connections
@@ -175,13 +176,13 @@ class AsyncQueries
 
     /**
      * Close all given connections.
-     * @param array<string, array{conn:\PgSql\Connection, sock?:resource}> $connections
+     * @param array<string, array{conn:\PgSql\Connection}> $connections
      * @return void
      */
     private function closeConnections(array &$connections): void
     {
         foreach ($connections as $connData) {
-            if (isset($connData['conn'])) {
+            if (!empty($connData['conn'])) { // @phpstan-ignore-line
                 @pg_close($connData['conn']);
             }
         }
