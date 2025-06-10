@@ -114,19 +114,21 @@ class AsyncQueries
             foreach ($query['params'] as $param => $value)
             {
                 if (is_array($value)) {
-                    $value = implode(',', $value);
+                    $escapedValue = '';
+                    foreach ($value as $v) {
+                        $escapedValue .= pg_escape_literal($conn, $v) . ',';
+                    }
+                    $escapedValue = rtrim($escapedValue, ',');
+                } else {
+                    $escapedValue = pg_escape_literal($conn, $value);
+                    if($escapedValue === false) {
+                        @pg_close($conn);
+                        $this->closeConnections($connections);
+                        throw new \RuntimeException("Milanmadar\CoolioORM\AsyncQueries::fetch() Could not escape value for parameter '$param': " . pg_last_error($conn));
+                    }
                 }
 
-                $escapedValue = pg_escape_literal($conn, $value);
-                if($escapedValue === false) {
-                    @pg_close($conn);
-                    $this->closeConnections($connections);
-                    throw new \RuntimeException("Milanmadar\CoolioORM\AsyncQueries::fetch() Could not escape value for parameter '$param': " . pg_last_error($conn));
-                }
-
-                //$sql = str_replace(':' . $param, $escapedValue, $sql);
-                /** @var string $sql */
-                $sql = preg_replace('/:' . preg_quote((string)$param, '/') . '\b/', $escapedValue, $sql);
+                $sql = str_replace(':' . $param, $escapedValue, $sql);
             }
 
             // this is to keep track on the connections

@@ -49,7 +49,8 @@ class AsyncQueryTest extends TestCase
 
         $qb = $mgr2->createQueryBuilder()
             ->select('fld_char')
-            ->andWhereColumn('id', '=', 1);
+            ->andWhereColumn('id', 'in', [1, 2])
+            ->orderBy('id', 'asc');
         $asyncQueries->addQuery_fromQueryBuilder('q2', $qb);
 
         $resultSet = $asyncQueries->fetch();
