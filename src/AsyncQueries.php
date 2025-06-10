@@ -35,18 +35,18 @@ class AsyncQueries
         // Use the more robust key=value connection string format
         $connUrl = sprintf(
             'host=%s port=%d dbname=%s user=%s password=%s',
-            $connParams['host'],
-            $connParams['port'],
-            $connParams['dbname'],
-            $connParams['user'],
-            $connParams['password']
+            $connParams['host'], // @phpstan-ignore-line We check this above but phpstan doesn't know
+            $connParams['port'], // @phpstan-ignore-line We check this above but phpstan doesn't know
+            $connParams['dbname'], // @phpstan-ignore-line We check this above but phpstan doesn't know
+            $connParams['user'], // @phpstan-ignore-line We check this above but phpstan doesn't know
+            $connParams['password'] // @phpstan-ignore-line We check this above but phpstan doesn't know
         );
         /*$connUrl = sprintf(
             'postgresql://%s:%s@%s:%d%s',
-            $connParams['user'], // @phpstan-ignore-line We check this above but phpstan doesn't know
-            $connParams['password'], // @phpstan-ignore-line We check this above but phpstan doesn't know
-            $connParams['host'], // @phpstan-ignore-line We check this above but phpstan doesn't know
-            $connParams['port'], // @phpstan-ignore-line We check this above but phpstan doesn't know
+            $connParams['user'],
+            $connParams['password'],
+            $connParams['host'],
+            $connParams['port'],
             !empty($connParams['dbname']) ? '/' . $connParams['dbname'] : ''
         );*/
 
@@ -98,7 +98,7 @@ class AsyncQueries
             $conn = @pg_connect($connString, PGSQL_CONNECT_FORCE_NEW);
             if ($conn === false) {
                 $this->closeConnections($connections);
-                throw new \RuntimeException("Milanmadar\CoolioORM\AsyncQueries::fetch() Could not connect to PostgreSQL database with URL: " . $connUrl);
+                throw new \RuntimeException("Milanmadar\CoolioORM\AsyncQueries::fetch() Could not connect to PostgreSQL database with URL: " . $connString);
             }
 
             // 100% sure its not the same

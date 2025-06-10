@@ -11,12 +11,16 @@ use tests\Model\OrmTest;
 class AsyncQueryTest extends TestCase
 {
     private static DbHelper $dbHelper;
+    private static DbHelper $dbHelper2;
 
     // This method runs once when the test class is loaded
     public static function setUpBeforeClass(): void
     {
         $conn1 = ORM::instance()->getDbByUrl($_ENV['DB_POSTGRES_DB1']);
         self::$dbHelper = new DbHelper( $conn1 );
+
+        $conn2 = ORM::instance()->getDbByUrl($_ENV['DB_POSTGRES_DB2']);
+        self::$dbHelper2 = new DbHelper( $conn2 );
     }
 
     // This method runs before every $this->test*() method runs
@@ -24,6 +28,35 @@ class AsyncQueryTest extends TestCase
     {
         ORM::_clearSingleton();
         self::$dbHelper->resetTo('Pgsql/fixtures/fix.sql');
+        self::$dbHelper2->resetTo('Pgsql/fixtures/fix_async2.sql');
+    }
+
+    public function testSpeedAndResultsetDiffDBs()
+    {
+        $orm = \Milanmadar\CoolioORM\ORM::instance();
+
+        /** @var OrmTest\Manager $mgr1 */
+        $mgr1 = $orm->entityManager(OrmTest\Manager::class, $orm->getDbByUrl($_ENV['DB_POSTGRES_DB1']));
+        /** @var OrmTest\Manager $mgr2 */
+        $mgr2 = $orm->entityManager(OrmTest\Manager::class, $orm->getDbByUrl($_ENV['DB_POSTGRES_DB2']));
+
+        $asyncQueries = new AsyncQueries();
+
+        $qb = $mgr1->createQueryBuilder()
+            ->select('fld_char')
+            ->andWhereColumn('id', '=', 1);
+        $asyncQueries->addQuery_fromQueryBuilder('q1', $qb);
+
+        $qb = $mgr2->createQueryBuilder()
+            ->select('fld_char')
+            ->andWhereColumn('id', '=', 1);
+        $asyncQueries->addQuery_fromQueryBuilder('q2', $qb);
+
+        $resultSet = $asyncQueries->fetch();
+
+        $results = $resultSet->getResultset();
+        $this->assertEquals('fgeabdhc', $results['q1'][0]['fld_char']);
+        $this->assertEquals('aSYNC   ', $results['q2'][0]['fld_char']);
     }
 
     public function testSpeedAndResultset()
