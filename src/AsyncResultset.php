@@ -1,6 +1,6 @@
 <?php
 
-namespace Milanmadar\CoolioORM\Geo;
+namespace Milanmadar\CoolioORM;
 
 class AsyncResultset
 {

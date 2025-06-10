@@ -2,8 +2,6 @@
 
 namespace Milanmadar\CoolioORM;
 
-use Milanmadar\CoolioORM\Geo\AsyncResultset;
-
 class AsyncQueries
 {
     /** @var array<string, array{conn_url:string, sql:string, params:array<int<0, max>|string, mixed>}> */
@@ -34,14 +32,23 @@ class AsyncQueries
             }
         }
 
+        // Use the more robust key=value connection string format
         $connUrl = sprintf(
+            'host=%s port=%d dbname=%s user=%s password=%s',
+            $connParams['host'],
+            $connParams['port'],
+            $connParams['dbname'],
+            $connParams['user'],
+            $connParams['password']
+        );
+        /*$connUrl = sprintf(
             'postgresql://%s:%s@%s:%d%s',
             $connParams['user'], // @phpstan-ignore-line We check this above but phpstan doesn't know
             $connParams['password'], // @phpstan-ignore-line We check this above but phpstan doesn't know
             $connParams['host'], // @phpstan-ignore-line We check this above but phpstan doesn't know
             $connParams['port'], // @phpstan-ignore-line We check this above but phpstan doesn't know
             !empty($connParams['dbname']) ? '/' . $connParams['dbname'] : ''
-        );
+        );*/
 
         return $this->addQuery(
             $name,
@@ -84,13 +91,20 @@ class AsyncQueries
         $i = 1;
         foreach ($this->queries as $name => $query)
         {
+            // Append application_name to the connection string
+            $connString = $query['conn_url'] . ' application_name=conn' . $i;
+
             // connect
-            $connUrl = $query['conn_url']. '?application_name=conn'.$i;
-            $conn = @pg_connect($connUrl, PGSQL_CONNECT_FORCE_NEW);
+            $conn = @pg_connect($connString, PGSQL_CONNECT_FORCE_NEW);
             if ($conn === false) {
                 $this->closeConnections($connections);
                 throw new \RuntimeException("Milanmadar\CoolioORM\AsyncQueries::fetch() Could not connect to PostgreSQL database with URL: " . $connUrl);
             }
+
+            // 100% sure its not the same
+//            if (pg_dbname($conn) !== $this->queries[$name]['conn_params']['dbname']) { // You'll need to store dbname in addQuery
+//                // throw new \RuntimeException("Connected to wrong DB!");
+//            }
 
             // replace the parameters in the SQL query
             uksort($query['params'], function($a, $b) {
