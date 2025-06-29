@@ -64,6 +64,23 @@ class DateTest extends TestCase
         $ent1->setFldTimestampMicro($dt);
         $ent1->setFldTimestamptzMicro($dt);
 
+        $this->assertEquals($dt->format('Y-m-d H:i:s'), $ent1->getFldDate()->format('Y-m-d H:i:s'));
+        $this->assertEquals($dt->getTimestamp(), $ent1->getFldTime()->getTimestamp());
+        $this->assertEquals($dt->getTimestamp(), $ent1->getFldTimestamp()->getTimestamp());
+        $this->assertEquals($dt->getTimestamp(), $ent1->getFldTimestamptz()->getTimestamp());
+        $this->assertEquals($dt->getTimestamp(), $ent1->getFldTimestampMicro()->getTimestamp());
+        $this->assertEquals($dt->getTimestamp(), $ent1->getFldTimestamptzMicro()->getTimestamp());
+
+        // changing this should not change the one inside the entity
+        $dt->modify('+1 day');
+
+        $this->assertNotEquals($dt->format('Y-m-d H:i:s'), $ent1->getFldDate()->format('Y-m-d H:i:s'));
+        $this->assertNotEquals($dt->getTimestamp(), $ent1->getFldTime()->getTimestamp());
+        $this->assertNotEquals($dt->getTimestamp(), $ent1->getFldTimestamp()->getTimestamp());
+        $this->assertNotEquals($dt->getTimestamp(), $ent1->getFldTimestamptz()->getTimestamp());
+        $this->assertNotEquals($dt->getTimestamp(), $ent1->getFldTimestampMicro()->getTimestamp());
+        $this->assertNotEquals($dt->getTimestamp(), $ent1->getFldTimestamptzMicro()->getTimestamp());
+
         $mgr->save($ent1);
 
         $mgr->clearRepository(true);
