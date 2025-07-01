@@ -53,6 +53,21 @@ class SelectInArrayTest extends TestCase
         $this->assertEquals(1, $res->rowCount());
     }
 
+    public function testInArrayFromDbStringFetchFirstColumn()
+    {
+        $mgr = self::$dbHelper->getManager(OrmTest\Manager::class);
+
+        $rows = $mgr->getDb()
+            ->executeQuery(
+                'select fld_varchar from ' . 'orm_test' . ' where fld_varchar IN (?)',
+                [array('a','b','a varchar 8','c')],
+                [\Doctrine\DBAL\ArrayParameterType::STRING]
+            )
+            ->fetchFirstColumn();
+        $this->assertEquals(1, count($rows));
+        $this->assertEquals('a varchar 8', $rows[0]);
+    }
+
     public function testInArrayFromQueryBuilderInt()
     {
         $mgr = self::$dbHelper->getManager(OrmTest\Manager::class);
