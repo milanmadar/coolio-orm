@@ -94,4 +94,30 @@ class DateTest extends TestCase
         $this->assertEquals((new \DateTime('1985-08-14 12:00:00.123456+02'))->getTimestamp(), $ent1->getFldTimestamptzMicro()->getTimestamp());
     }
 
+    public function testFind()
+    {
+        $mgr = self::$dbHelper->getManager(OrmTest\Manager::class);
+
+        $dt = new \DateTime('2023-11-10T13:25:37.117659Z');
+
+        $ent = $mgr->createEntity()
+            ->setFldTimestampMicro($dt)
+            ->setFldTimestamptzMicro($dt);
+        $mgr->save($ent);
+
+        $ent2 = $mgr->createQueryBuilder()
+            ->andWhereColumn('fld_timestamp_micro', '=', $dt->format('Y-m-d H:i:s.u'))
+            ->andWhereColumn('fld_timestamptz_micro', '=', $dt->format('Y-m-d H:i:s.u'))
+            ->fetchOneEntity();
+        $this->assertNotNull($ent2);
+
+        $this->assertEquals(
+            $ent->getFldTimestampMicro()->format('Y-m-d H:i:s.u'),
+            $ent2->getFldTimestampMicro()->format('Y-m-d H:i:s.u')
+        );
+        $this->assertEquals(
+            $ent->getFldTimestamptzMicro()->format('Y-m-d H:i:s.u'),
+            $ent2->getFldTimestamptzMicro()->format('Y-m-d H:i:s.u')
+        );
+    }
 }
