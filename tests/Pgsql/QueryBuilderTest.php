@@ -247,6 +247,24 @@ class QueryBuilderTest extends TestCase
         $this->assertEquals(8642, $row['fld_int']);
     }
 
+    public function testUpdateJson()
+    {
+        $mgr = self::$dbHelper->getManager(OrmTest\Manager::class);
+
+        $newJson = json_encode(['new'=>1, 'b'=>2, 'c'=>3]);
+        $mgr->createQueryBuilder()
+            ->update()
+            ->set('fld_json', ':NewJson')->setParameter('NewJson', $newJson)
+            ->where('id=1')
+            ->executeStatement();
+
+        $row = $mgr->createQueryBuilder()
+            ->where('id=1')
+            ->fetchAssociative();
+
+        $this->assertEquals($newJson, $row['fld_json']);
+    }
+
     public function testUpdateNameparam()
     {
         $mgr = self::$dbHelper->getManager(OrmTest\Manager::class);

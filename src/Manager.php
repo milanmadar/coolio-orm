@@ -9,6 +9,8 @@ use Doctrine\DBAL\Exception;
 
 abstract class Manager
 {
+    private static int $placeholderNameIndex = 0;
+
     protected ORM $orm;
     protected Connection $db;
     protected ?StatementRepository $statementRepo;
@@ -27,7 +29,7 @@ abstract class Manager
     /** @var string pg, my, ms */
     private string $dbType;
 
-    private static int $placeholderNameIndex = 0;
+    private bool $isInTransaction;
 
     /**
      * Entity Manager
@@ -43,6 +45,49 @@ abstract class Manager
         $this->useEntityRepository = true;
         $this->fieldTypes = $this->getFieldTypes();
         $this->dbTable = $this->getDefaultDbTable();
+        $this->isInTransaction = false;
+    }
+
+    /**
+     * If a transaction is already started, it will do nothing
+     * @return $this
+     * @throws Exception
+     */
+    public function beginTransaction(): self
+    {
+        if(!$this->isInTransaction) {
+            $this->db->beginTransaction();
+            $this->isInTransaction = true;
+        }
+        return $this;
+    }
+
+    /**
+     * If you are not in a transaction, it will do nothing
+     * @return $this
+     * @throws Exception
+     */
+    public function commitTransaction(): self
+    {
+        if($this->isInTransaction) {
+            $this->db->commit();
+            $this->isInTransaction = false;
+        }
+        return $this;
+    }
+
+    /**
+     * If you are not in a transaction, it will do nothing
+     * @return $this
+     * @throws Exception
+     */
+    public function rollbackTransaction(): self
+    {
+        if($this->isInTransaction) {
+            $this->db->rollBack();
+            $this->isInTransaction = false;
+        }
+        return $this;
     }
 
     /**
