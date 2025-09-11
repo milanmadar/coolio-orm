@@ -503,4 +503,23 @@ class QueryBuilderTest extends TestCase
         $this->assertNotEmpty($res[0]['title']);
     }
 
+    public function testComplexQueryWith_JoinSimplified_Orderby_Distinct_Having()
+    {
+        $mgr = self::$dbHelper->getManager(OrmTest\Manager::class);
+
+        $res = $mgr->createQueryBuilder()
+            ->select('orm_other.title')
+            ->distinct()
+            ->joinSimple('orm_other', 'orm_test.orm_other_id=orm_other.id')
+            ->where('orm_test.fld_int > 0')
+            ->groupBy('orm_other.title')
+            ->having('COUNT(orm_other.id) > 0')
+            ->orderBy('orm_other.title', 'asc')
+            ->limit(0, 5)
+            ->fetchAllAssociative();
+
+        $this->assertEquals(1, count($res));
+        $this->assertNotEmpty($res[0]['title']);
+    }
+
 }

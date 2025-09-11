@@ -135,6 +135,21 @@ class QueryBuilder extends DoctrineQueryBuilder
     }
 
     /**
+     * @param string $otherTable
+     * @param string|null $condition
+     * @return $this
+     */
+    public function joinSimple(string $otherTable, ?string $condition = null): self
+    {
+        if($this->isFromSet) {
+            throw new \ErrorException("CoolioORM\\QueryBuilder::joinSimple() You must NOT call ->from() before calling ->joinSimple()"); // @codeCoverageIgnore
+        }
+        $thisTable = $this->entityMgr->getDbTable();
+        $this->from($thisTable, $thisTable);
+        return $this->join($thisTable, $otherTable, $otherTable, $condition);
+    }
+
+    /**
      * @inheritDoc
      * @return $this
      */
@@ -142,6 +157,21 @@ class QueryBuilder extends DoctrineQueryBuilder
     {
         parent::innerJoin($fromAlias, $join, $alias, $condition);
         return $this;
+    }
+
+    /**
+     * @param string $otherTable
+     * @param string|null $condition
+     * @return $this
+     */
+    public function innerJoinSimple(string $otherTable, ?string $condition = null): self
+    {
+        if($this->isFromSet) {
+            throw new \ErrorException("CoolioORM\\QueryBuilder::innerJoinSimple() You must NOT call ->from() before calling ->innerJoinSimple()"); // @codeCoverageIgnore
+        }
+        $thisTable = $this->entityMgr->getDbTable();
+        $this->from($thisTable, $thisTable);
+        return $this->innerJoin($thisTable, $otherTable, $otherTable, $condition);
     }
 
     /**
@@ -155,6 +185,21 @@ class QueryBuilder extends DoctrineQueryBuilder
     }
 
     /**
+     * @param string $otherTable
+     * @param string|null $condition
+     * @return $this
+     */
+    public function leftJoinSimple(string $otherTable, ?string $condition = null): self
+    {
+        if($this->isFromSet) {
+            throw new \ErrorException("CoolioORM\\QueryBuilder::leftJoinSimple() You must NOT call ->from() before calling ->leftJoinSimple()"); // @codeCoverageIgnore
+        }
+        $thisTable = $this->entityMgr->getDbTable();
+        $this->from($thisTable, $thisTable);
+        return $this->leftJoin($thisTable, $otherTable, $otherTable, $condition);
+    }
+
+    /**
      * @inheritDoc
      * @return $this
      */
@@ -162,6 +207,21 @@ class QueryBuilder extends DoctrineQueryBuilder
     {
         parent::rightJoin($fromAlias, $join, $alias, $condition);
         return $this;
+    }
+
+    /**
+     * @param string $otherTable
+     * @param string|null $condition
+     * @return $this
+     */
+    public function rightJoinSimple(string $otherTable, ?string $condition = null): self
+    {
+        if($this->isFromSet) {
+            throw new \ErrorException("CoolioORM\\QueryBuilder::rightJoinSimple() You must NOT call ->from() before calling ->rightJoinSimple()"); // @codeCoverageIgnore
+        }
+        $thisTable = $this->entityMgr->getDbTable();
+        $this->from($thisTable, $thisTable);
+        return $this->rightJoin($thisTable, $otherTable, $otherTable, $condition);
     }
 
     /**
