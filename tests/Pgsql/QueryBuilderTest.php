@@ -522,4 +522,15 @@ class QueryBuilderTest extends TestCase
         $this->assertNotEmpty($res[0]['title']);
     }
 
+    public function testSelectStar():  void
+    {
+        $mgr = self::$dbHelper->getManager(OrmTest\Manager::class);
+
+        $sql = $mgr->createQueryBuilder()
+            ->select('*')
+            ->where('id=1')
+            ->getSQLNamedParameters();
+
+        $this->assertStringContainsString('SELECT * ',  $sql);
+    }
 }

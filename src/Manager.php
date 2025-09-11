@@ -31,6 +31,8 @@ abstract class Manager
 
     private bool $isInTransaction;
 
+    private bool $hasGeoFields;
+
     /**
      * Entity Manager
      * @param ORM $orm
@@ -199,6 +201,28 @@ abstract class Manager
      * @param array<string, mixed> $data By Reference!
      */
     abstract protected function beforeToDb(array &$data): void;
+
+    /**
+     * @return bool
+     * @internal
+     */
+    public function _hasGeoFields():  bool
+    {
+        if(!isset($this->hasGeoFields))  {
+            $this->hasGeoFields = false;
+            if(!empty($this->getTopoGeometryFieldInfo()))  {
+                $this->hasGeoFields = true;
+            } else {
+                foreach($this->getFieldTypes() as $fld=>$type) {
+                    if(str_starts_with($type, 'geometry') || str_starts_with($type, 'topogeo')) {
+                        $this->hasGeoFields = true;
+                        break;
+                    }
+                }
+            }
+        }
+        return $this->hasGeoFields;
+    }
 
     /**
      * @return array<string, string>

@@ -89,7 +89,7 @@ class QueryBuilder extends DoctrineQueryBuilder
         $_exps = $expressions;
 
         // transform geometries
-        if($this->isPostgres && isset($this->entityMgr) && $expressions[0] == '*') {
+        if($this->isPostgres && isset($this->entityMgr) && $expressions[0] == '*' &&  $this->entityMgr->_hasGeoFields()) {
             $expressions = $this->entityMgr->getFields();
             $_exps = GeoQueryProcessor::SELECTgeometryToPostGISformat($this->entityMgr->getFieldTypes(), $expressions);
         }
