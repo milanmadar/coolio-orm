@@ -144,9 +144,19 @@ class QueryBuilder extends DoctrineQueryBuilder
         if($this->isFromSet) {
             throw new \ErrorException("CoolioORM\\QueryBuilder::joinSimple() You must NOT call ->from() before calling ->joinSimple()"); // @codeCoverageIgnore
         }
+
         $thisTable = $this->entityMgr->getDbTable();
-        $this->from($thisTable, $thisTable);
-        return $this->join($thisTable, $otherTable, $otherTable, $condition);
+        //  only the last part after the dot can be the alias
+        $thisAlias = ($this->isPostgres && str_contains($thisTable, '.'))
+            ? substr($thisTable, strrpos($thisTable, '.')+1)
+            : $thisTable;
+        //  only the last part after the dot can be the alias
+        $otherAlias = ($this->isPostgres && str_contains($otherTable, '.'))
+            ? substr($otherTable, strrpos($otherTable, '.')+1)
+            : $otherTable;
+
+        $this->from($thisTable, $thisAlias);
+        return $this->join($thisAlias, $otherTable, $otherAlias, $condition);
     }
 
     /**
@@ -169,9 +179,19 @@ class QueryBuilder extends DoctrineQueryBuilder
         if($this->isFromSet) {
             throw new \ErrorException("CoolioORM\\QueryBuilder::innerJoinSimple() You must NOT call ->from() before calling ->innerJoinSimple()"); // @codeCoverageIgnore
         }
+
         $thisTable = $this->entityMgr->getDbTable();
-        $this->from($thisTable, $thisTable);
-        return $this->innerJoin($thisTable, $otherTable, $otherTable, $condition);
+        //  only the last part after the dot can be the alias
+        $thisAlias = ($this->isPostgres && str_contains($thisTable, '.'))
+            ? substr($thisTable, strrpos($thisTable, '.')+1)
+            : $thisTable;
+        //  only the last part after the dot can be the alias
+        $otherAlias = ($this->isPostgres && str_contains($otherTable, '.'))
+            ? substr($otherTable, strrpos($otherTable, '.')+1)
+            : $otherTable;
+
+        $this->from($thisTable, $thisAlias);
+        return $this->innerJoin($thisTable, $otherTable, $otherAlias, $condition);
     }
 
     /**
@@ -194,9 +214,19 @@ class QueryBuilder extends DoctrineQueryBuilder
         if($this->isFromSet) {
             throw new \ErrorException("CoolioORM\\QueryBuilder::leftJoinSimple() You must NOT call ->from() before calling ->leftJoinSimple()"); // @codeCoverageIgnore
         }
+
         $thisTable = $this->entityMgr->getDbTable();
-        $this->from($thisTable, $thisTable);
-        return $this->leftJoin($thisTable, $otherTable, $otherTable, $condition);
+        //  only the last part after the dot can be the alias
+        $thisAlias = ($this->isPostgres && str_contains($thisTable, '.'))
+            ? substr($thisTable, strrpos($thisTable, '.')+1)
+            : $thisTable;
+        //  only the last part after the dot can be the alias
+        $otherAlias = ($this->isPostgres && str_contains($otherTable, '.'))
+            ? substr($otherTable, strrpos($otherTable, '.')+1)
+            : $otherTable;
+
+        $this->from($thisTable, $thisAlias);
+        return $this->leftJoin($thisTable, $otherTable, $otherAlias, $condition);
     }
 
     /**
@@ -219,9 +249,19 @@ class QueryBuilder extends DoctrineQueryBuilder
         if($this->isFromSet) {
             throw new \ErrorException("CoolioORM\\QueryBuilder::rightJoinSimple() You must NOT call ->from() before calling ->rightJoinSimple()"); // @codeCoverageIgnore
         }
+
         $thisTable = $this->entityMgr->getDbTable();
-        $this->from($thisTable, $thisTable);
-        return $this->rightJoin($thisTable, $otherTable, $otherTable, $condition);
+        //  only the last part after the dot can be the alias
+        $thisAlias = ($this->isPostgres && str_contains($thisTable, '.'))
+            ? substr($thisTable, strrpos($thisTable, '.')+1)
+            : $thisTable;
+        //  only the last part after the dot can be the alias
+        $otherAlias = ($this->isPostgres && str_contains($otherTable, '.'))
+            ? substr($otherTable, strrpos($otherTable, '.')+1)
+            : $otherTable;
+
+        $this->from($thisTable, $thisAlias);
+        return $this->rightJoin($thisTable, $otherTable, $otherAlias, $condition);
     }
 
     /**
