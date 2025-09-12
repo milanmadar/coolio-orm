@@ -290,10 +290,14 @@ abstract class Manager
     abstract public function getDefaultDbTable(): string;
 
     /**
+     * @param bool $removeSchema Remove the schema if any like "public."
      * @return string
      */
-    public function getDbTable(): string
+    public function getDbTable(bool $removeSchema = false): string
     {
+        if($removeSchema) {
+            return substr($this->dbTable, strrpos($this->dbTable, '.')+1);
+        }
         return $this->dbTable;
     }
 
