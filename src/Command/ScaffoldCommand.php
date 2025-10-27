@@ -509,6 +509,8 @@ class ScaffoldCommand extends Command
                     $docParamType = 'string';
                     break;
                 case 'text':
+                case 'citext':
+                    $colType = 'text';
                     $paramType = 'string';
                     $docParamType = 'string';
                     break;
