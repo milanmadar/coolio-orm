@@ -6,10 +6,11 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Tools\DsnParser;
 use Doctrine\DBAL\Types\Type;
+use Milanmadar\CoolioORM\DoctrineDBALType\CiTextType;
 use Milanmadar\CoolioORM\Geo\DoctrineDBALType\GeometryType;
 use Milanmadar\CoolioORM\Geo\DoctrineDBALType\TopoGeometryType;
-use Milanmadar\CoolioORM\Geo\DoctrineDBALType\TextArrayType;
-use Milanmadar\CoolioORM\Geo\DoctrineDBALType\TextArrayBracketsType;
+use Milanmadar\CoolioORM\DoctrineDBALType\TextArrayType;
+use Milanmadar\CoolioORM\DoctrineDBALType\TextArrayBracketsType;
 
 class ORM
 {
@@ -62,6 +63,7 @@ class ORM
             Type::addType('topogeometry', TopoGeometryType::class);
             Type::addType('_text', TextArrayType::class);
             Type::addType('text[]', TextArrayBracketsType::class);
+            Type::addType('citext', CiTextType::class);
             self::$staticTypeAdded = true;
         }
 
@@ -88,6 +90,7 @@ class ORM
                 $this->doctrineConnectionsByUrl[$connUrl]->getDatabasePlatform()->registerDoctrineTypeMapping('topogeometry', TopoGeometryType::NAME);
                 $this->doctrineConnectionsByUrl[$connUrl]->getDatabasePlatform()->registerDoctrineTypeMapping('_text', TextArrayType::NAME);
                 $this->doctrineConnectionsByUrl[$connUrl]->getDatabasePlatform()->registerDoctrineTypeMapping('text[]', TextArrayBracketsType::NAME);
+                $this->doctrineConnectionsByUrl[$connUrl]->getDatabasePlatform()->registerDoctrineTypeMapping('citext', CiTextType::NAME);
                 //$this->doctrineConnectionsByUrl[$connUrl]->getDatabasePlatform()->registerDoctrineTypeMapping('geometry', 'string');
                 self::$staticTypeMapped = true;
             }

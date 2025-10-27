@@ -1,6 +1,6 @@
 <?php
 
-namespace Milanmadar\CoolioORM\Geo\DoctrineDBALType;
+namespace Milanmadar\CoolioORM\DoctrineDBALType;
 
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\Type;
