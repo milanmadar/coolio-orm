@@ -314,6 +314,13 @@ class QueryBuilder extends DoctrineQueryBuilder
             return [$sql, [$paramName=>$value]];
         }
 
+        if($operator == '?') {
+            return [
+                'jsonb_exists('.$column.', :'.$paramName.')',
+                [$paramName=>$value]
+            ];
+        }
+
         if(is_array($value))
         {
             if($operator == '=') {
