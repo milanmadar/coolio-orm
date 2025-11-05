@@ -292,30 +292,69 @@ class QueryBuilder extends DoctrineQueryBuilder
 
         $operator = strtoupper(trim($operator));
 
+        // postgres jsonb: user is doing a mistake:
+        // he should do `@>' on a json column, but he did 'IN'
+        // so we correct the operator for him
+        if($operator == 'IN'
+        && (
+            str_contains($column, '->')
+            || ($this->entityMgr->getFieldTypes()[$column] ?? '') == 'json'
+            || ($this->entityMgr->getFieldTypes()[$column] ?? '') == 'jsonb'
+        )) {
+            $operator = '@>';
+        }
+
         // postgres jsonb: Contains operator: does the left json contains the right json
         // postgres jsonb: Contained in: is the left json contained in the right json
-        if($operator == '@>' || $operator == '<@') {
-            if(empty($value)) {
-                return ['1=2', []];
-            }
+        if($operator == '@>' || $operator == '<@')
+        {
             if(!is_array($value)) {
-                throw new \InvalidArgumentException('QueryBuilder->whereColumn() 2nd param must be an array when using @> or <@ operator'); // @codeCoverageIgnore
+                $value = [ $value ];
             }
-            if(array_key_exists(0, $value)) {
-                $sql = $column.' '.$operator.' ARRAY[:'.$paramName.']';
+
+            // the column type is json and we are checking against an simple array $value
+            if(array_key_exists(0, $value)
+            && (
+                str_contains($column, '->')
+                || ($this->entityMgr->getFieldTypes()[$column] ?? '') == 'json'
+                || ($this->entityMgr->getFieldTypes()[$column] ?? '') == 'jsonb'
+            )) {
+                $escapedValues = [];
+                foreach($value as $v) {
+                    if(is_null($v)) {
+                        $escapedValues[] = 'null';
+                    } elseif(is_numeric($v)) {
+                        $escapedValues[] = $v;
+                    } else {
+                        $v = str_replace("'", "''", $v);
+                        $v = str_replace('"', '\"', $v);
+                        $escapedValues[] = '"'.$v.'"';
+                    }
+                }
+                $sql = $column." ".$operator." '[".implode(',', $escapedValues)."]'::jsonb";
                 return [$sql, [$paramName=>$value]];
-            } else {
-                $sql = $column." ".$operator." '".json_encode($value)."'::jsonb";
-                return [$sql, []];
+            }
+            // the column is array type OR the given $value is json
+            else {
+                if(empty($value)) {
+                    return ['1=2', []];
+                }
+                if(array_key_exists(0, $value)) {
+                    $sql = $column.' '.$operator.' ARRAY[:'.$paramName.']';
+                    return [$sql, [$paramName=>$value]];
+                } else {
+                    $sql = $column." ".$operator." '".json_encode($value)."'::jsonb";
+                    return [$sql, []];
+                }
             }
         }
         // postgres jsonb: Overlaps operator: checks whether two arrays have any elements in common
         elseif($operator == '&&') {
+            if(!is_array($value)) {
+                $value = [ $value ];
+            }
             if(empty($value)) {
                 return ['1=2', []];
-            }
-            if(!is_array($value)) {
-                throw new \InvalidArgumentException('QueryBuilder->whereColumn() 2nd param must be an array when using && operator'); // @codeCoverageIgnore
             }
             $sql = $column.' '.$operator.' ARRAY[:'.$paramName.']';
             return [$sql, [$paramName=>$value]];

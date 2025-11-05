@@ -7,8 +7,8 @@ CREATE TABLE orm_json_test (
 
 INSERT INTO orm_json_test (fld_jsonb, fld_json) VALUES
 (
-  '{"str": "lollypop", "str_quotes": "He''s about to say \"hi\"", "num_int": 10, "num_float": 10.5, "bool": true, "null_value": null, "array": [1, 2, 3], "object": {"key": "value"}}',
-  '{"str": "lollypop", "str_quotes": "He''s about to say \"hi\"", "num_int": 10, "num_float": 10.5, "bool": true, "null_value": null, "array": [1, 2, 3], "object": {"key": "value"}}'
+  '{"str": "lollypop", "str_quotes": "He''s about to say \"hi\"", "num_int": 10, "num_float": 10.5, "bool": true, "null_value": null, "array": [1, 2, "lolly", "quoted \"hi\" str"], "object": {"key": "value"}}',
+  '{"str": "lollypop", "str_quotes": "He''s about to say \"hi\"", "num_int": 10, "num_float": 10.5, "bool": true, "null_value": null, "array": [1, 2, "lolly", "quoted \"hi\" str"], "object": {"key": "value"}}'
 ),(
   '["apple", "banana", "cherry"]',
   '["apple", "banana", "cherry"]'
