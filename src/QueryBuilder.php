@@ -292,18 +292,25 @@ class QueryBuilder extends DoctrineQueryBuilder
 
         $operator = strtoupper(trim($operator));
 
-        if($operator == '@>') {
+        // postgres jsonb: Contains operator: does the left json contains the right json
+        // postgres jsonb: Contained in: is the left json contained in the right json
+        if($operator == '@>' || $operator == '<@') {
             if(empty($value)) {
                 return ['1=2', []];
             }
             if(!is_array($value)) {
-                throw new \InvalidArgumentException('QueryBuilder->whereColumn() 2nd param must be an array when using @> operator'); // @codeCoverageIgnore
+                throw new \InvalidArgumentException('QueryBuilder->whereColumn() 2nd param must be an array when using @> or <@ operator'); // @codeCoverageIgnore
             }
-            $sql = $column.' '.$operator.' ARRAY[:'.$paramName.']';
-            return [$sql, [$paramName=>$value]];
+            if(array_key_exists(0, $value)) {
+                $sql = $column.' '.$operator.' ARRAY[:'.$paramName.']';
+                return [$sql, [$paramName=>$value]];
+            } else {
+                $sql = $column." ".$operator." '".json_encode($value)."'::jsonb";
+                return [$sql, []];
+            }
         }
-
-        if($operator == '&&') {
+        // postgres jsonb: Overlaps operator: checks whether two arrays have any elements in common
+        elseif($operator == '&&') {
             if(empty($value)) {
                 return ['1=2', []];
             }
@@ -313,12 +320,36 @@ class QueryBuilder extends DoctrineQueryBuilder
             $sql = $column.' '.$operator.' ARRAY[:'.$paramName.']';
             return [$sql, [$paramName=>$value]];
         }
+        // postgres jsonb: Key exists operator
+        elseif($operator == '?') {
+            $sql = 'jsonb_exists('.$column.', :'.$paramName.')';
+            return [$sql, [$paramName=>$value]];
+        }
+        // postgres jsonb: Key exists all operator
+        elseif($operator == '?&') {
+            $sql = 'jsonb_exists_all('.$column.', ARRAY[:'.$paramName.'])';
+            return [$sql, [$paramName=>$value]];
+        }
 
-        if($operator == '?') {
-            return [
-                'jsonb_exists('.$column.', :'.$paramName.')',
-                [$paramName=>$value]
-            ];
+        // postgres jsonb: compare as string
+        if(str_contains($column, '->>')) {
+            // that works like usual
+        }
+        // postgres jsonb: comparison
+        elseif(str_contains($column, '->')) {
+            if(is_null($value) || $value == 'NULL') {
+                $value = 'null';
+            } elseif(is_array($value)) {
+                throw new \InvalidArgumentException('QueryBuilder->whereColumn() Cannot compare json fields with arrays, using operators lke < > = <= >='); // @codeCoverageIgnore
+            } elseif(is_numeric($value)) {
+                $sql = $column." ".$operator." '".$value."'::jsonb";
+                return [$sql, []];
+            } else {
+                $value = str_replace("'", "''", $value);
+                $value = str_replace('"', '\"', $value);
+                $sql = $column." ".$operator." '\"".$value."\"'::jsonb";
+                return [$sql, []];
+            }
         }
 
         if(is_array($value))
