@@ -70,6 +70,17 @@ class QueryBuilderJsonbTest extends TestCase
         $this->assertEquals(1, $res);
     }
 
+    public function testJsonbContainsStringEscape()
+    {
+        $mgr = self::$dbHelper->getManager(OrmJsonTest\Manager::class);
+
+        $res = $mgr->createQueryBuilder()
+            ->select("count(*)")
+            ->andWhereColumn("fld_jsonb", "@>", ["str_quotes"=>"He's about to say \"hi\""])
+            ->fetchOne();
+        $this->assertEquals(1, $res);
+    }
+
     public function testJsonbContainedIn()
     {
         $mgr = self::$dbHelper->getManager(OrmJsonTest\Manager::class);

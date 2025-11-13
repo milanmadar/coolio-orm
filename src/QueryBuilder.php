@@ -343,7 +343,7 @@ class QueryBuilder extends DoctrineQueryBuilder
                     $sql = $column.' '.$operator.' ARRAY[:'.$paramName.']';
                     return [$sql, [$paramName=>$value]];
                 } else {
-                    $sql = $column." ".$operator." '".json_encode($value)."'::jsonb";
+                    $sql = $column." ".$operator." '".str_replace("'", "''", json_encode($value))."'::jsonb";
                     return [$sql, []];
                 }
             }
