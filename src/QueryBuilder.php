@@ -380,7 +380,7 @@ class QueryBuilder extends DoctrineQueryBuilder
                 $value = 'null';
             } elseif(is_array($value)) {
                 throw new \InvalidArgumentException('QueryBuilder->whereColumn() Cannot compare json fields with arrays, using operators lke < > = <= >='); // @codeCoverageIgnore
-            } elseif(is_numeric($value)) {
+            } elseif(is_int($value) || is_float($value)) {
                 $sql = $column." ".$operator." '".$value."'::jsonb";
                 return [$sql, []];
             } else {
