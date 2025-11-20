@@ -80,7 +80,7 @@ class QueryBuilder extends DoctrineQueryBuilder
 
     /**
      * @inheritDoc
-     * @return self
+     * @return $this
      */
     public function select(string ...$expressions): self
     {
@@ -100,9 +100,19 @@ class QueryBuilder extends DoctrineQueryBuilder
     }
 
     /**
+     * Its like ->select(), but it takes an array of strings as param
+     * @param array<string> $expressions
+     * @return $this
+     */
+    public function selectArray(array $expressions): self
+    {
+        return $this->select(...$expressions);
+    }
+
+    /**
      * It will include all the fields from the manager (so from the table), except those that you give as a param
      * @param array<string> $exceptFields
-     * @return QueryBuilder
+     * @return $this
      */
     public function selectExcept(array $exceptFields): self
     {
@@ -137,15 +147,23 @@ class QueryBuilder extends DoctrineQueryBuilder
     /**
      * @param string $otherTable
      * @param string|null $condition
+     * @param string|null $thisTable Used when we dont have the entity manager set
      * @return $this
      */
-    public function joinSimple(string $otherTable, ?string $condition = null): self
+    public function joinSimple(string $otherTable, ?string $condition = null, ?string $thisTable = null): self
     {
         if($this->isFromSet) {
             throw new \ErrorException("CoolioORM\\QueryBuilder::joinSimple() You must NOT call ->from() before calling ->joinSimple()"); // @codeCoverageIgnore
         }
 
-        $thisTable = $this->entityMgr->getDbTable();
+        if(!isset($thisTable)) {
+            if(isset($this->entityMgr)) {
+                $thisTable = $this->entityMgr->getDbTable();
+            } else {
+                throw new \ErrorException("CoolioORM\\QueryBuilder::joinSimple() You must provide the 3rd param \$thisTable when the entity manager is not set."); // @codeCoverageIgnore
+            }
+        }
+
         //  only the last part after the dot can be the alias
         $thisAlias = ($this->isPostgres && str_contains($thisTable, '.'))
             ? substr($thisTable, strrpos($thisTable, '.')+1)
@@ -172,15 +190,23 @@ class QueryBuilder extends DoctrineQueryBuilder
     /**
      * @param string $otherTable
      * @param string|null $condition
+     * @param string|null $thisTable Used when we dont have the entity manager set
      * @return $this
      */
-    public function innerJoinSimple(string $otherTable, ?string $condition = null): self
+    public function innerJoinSimple(string $otherTable, ?string $condition = null, ?string $thisTable = null): self
     {
         if($this->isFromSet) {
             throw new \ErrorException("CoolioORM\\QueryBuilder::innerJoinSimple() You must NOT call ->from() before calling ->innerJoinSimple()"); // @codeCoverageIgnore
         }
 
-        $thisTable = $this->entityMgr->getDbTable();
+        if(!isset($thisTable)) {
+            if(isset($this->entityMgr)) {
+                $thisTable = $this->entityMgr->getDbTable();
+            } else {
+                throw new \ErrorException("CoolioORM\\QueryBuilder::joinSimple() You must provide the 3rd param \$thisTable when the entity manager is not set."); // @codeCoverageIgnore
+            }
+        }
+
         //  only the last part after the dot can be the alias
         $thisAlias = ($this->isPostgres && str_contains($thisTable, '.'))
             ? substr($thisTable, strrpos($thisTable, '.')+1)
@@ -207,15 +233,23 @@ class QueryBuilder extends DoctrineQueryBuilder
     /**
      * @param string $otherTable
      * @param string|null $condition
+     * @param string|null $thisTable Used when we dont have the entity manager set
      * @return $this
      */
-    public function leftJoinSimple(string $otherTable, ?string $condition = null): self
+    public function leftJoinSimple(string $otherTable, ?string $condition = null, ?string $thisTable = null): self
     {
         if($this->isFromSet) {
             throw new \ErrorException("CoolioORM\\QueryBuilder::leftJoinSimple() You must NOT call ->from() before calling ->leftJoinSimple()"); // @codeCoverageIgnore
         }
 
-        $thisTable = $this->entityMgr->getDbTable();
+        if(!isset($thisTable)) {
+            if(isset($this->entityMgr)) {
+                $thisTable = $this->entityMgr->getDbTable();
+            } else {
+                throw new \ErrorException("CoolioORM\\QueryBuilder::joinSimple() You must provide the 3rd param \$thisTable when the entity manager is not set."); // @codeCoverageIgnore
+            }
+        }
+
         //  only the last part after the dot can be the alias
         $thisAlias = ($this->isPostgres && str_contains($thisTable, '.'))
             ? substr($thisTable, strrpos($thisTable, '.')+1)
@@ -242,15 +276,23 @@ class QueryBuilder extends DoctrineQueryBuilder
     /**
      * @param string $otherTable
      * @param string|null $condition
+     * @param string|null $thisTable Used when we dont have the entity manager set
      * @return $this
      */
-    public function rightJoinSimple(string $otherTable, ?string $condition = null): self
+    public function rightJoinSimple(string $otherTable, ?string $condition = null, ?string $thisTable = null): self
     {
         if($this->isFromSet) {
             throw new \ErrorException("CoolioORM\\QueryBuilder::rightJoinSimple() You must NOT call ->from() before calling ->rightJoinSimple()"); // @codeCoverageIgnore
         }
 
-        $thisTable = $this->entityMgr->getDbTable();
+        if(!isset($thisTable)) {
+            if(isset($this->entityMgr)) {
+                $thisTable = $this->entityMgr->getDbTable();
+            } else {
+                throw new \ErrorException("CoolioORM\\QueryBuilder::joinSimple() You must provide the 3rd param \$thisTable when the entity manager is not set."); // @codeCoverageIgnore
+            }
+        }
+
         //  only the last part after the dot can be the alias
         $thisAlias = ($this->isPostgres && str_contains($thisTable, '.'))
             ? substr($thisTable, strrpos($thisTable, '.')+1)
@@ -296,11 +338,11 @@ class QueryBuilder extends DoctrineQueryBuilder
         // he should do `@>' on a json column, but he did 'IN'
         // so we correct the operator for him
         if($operator == 'IN'
-        && (
-            str_contains($column, '->')
-            || ($this->entityMgr->getFieldTypes()[$column] ?? '') == 'json'
-            || ($this->entityMgr->getFieldTypes()[$column] ?? '') == 'jsonb'
-        )) {
+            && (
+                str_contains($column, '->')
+                || ($this->entityMgr?->getFieldTypes()[$column] ?? '') == 'json'
+                || ($this->entityMgr?->getFieldTypes()[$column])       == 'jsonb'
+            )) {
             $operator = '@>';
         }
 
@@ -314,18 +356,21 @@ class QueryBuilder extends DoctrineQueryBuilder
 
             // the column type is json and we are checking against an simple array $value
             if(array_key_exists(0, $value)
-            && (
-                str_contains($column, '->')
-                || ($this->entityMgr->getFieldTypes()[$column] ?? '') == 'json'
-                || ($this->entityMgr->getFieldTypes()[$column] ?? '') == 'jsonb'
-            )) {
+                && (
+                    str_contains($column, '->')
+                    || ($this->entityMgr?->getFieldTypes()[$column] ?? '') == 'json'
+                    || ($this->entityMgr?->getFieldTypes()[$column])       == 'jsonb'
+                )) {
                 $escapedValues = [];
                 foreach($value as $v) {
                     if(is_null($v)) {
                         $escapedValues[] = 'null';
                     } elseif(is_numeric($v)) {
                         $escapedValues[] = $v;
+                    } elseif(is_array($v)) {
+                        $escapedValues[] = str_replace("'", "''", (string)json_encode($v));
                     } else {
+                        $v = (string)$v;
                         $v = str_replace("'", "''", $v);
                         $v = str_replace('"', '\"', $v);
                         $escapedValues[] = '"'.$v.'"';
@@ -343,7 +388,7 @@ class QueryBuilder extends DoctrineQueryBuilder
                     $sql = $column.' '.$operator.' ARRAY[:'.$paramName.']';
                     return [$sql, [$paramName=>$value]];
                 } else {
-                    $sql = $column." ".$operator." '".str_replace("'", "''", json_encode($value))."'::jsonb";
+                    $sql = $column." ".$operator." '".str_replace("'", "''", (string)json_encode($value))."'::jsonb";
                     return [$sql, []];
                 }
             }
@@ -387,6 +432,7 @@ class QueryBuilder extends DoctrineQueryBuilder
                 return [$sql, []];
             }
             else {
+                $value = (string)$value;
                 $value = str_replace("'", "''", $value);
                 $value = str_replace('"', '\"', $value);
                 $sql = $column." ".$operator." '\"".$value."\"'::jsonb";
@@ -918,8 +964,8 @@ class QueryBuilder extends DoctrineQueryBuilder
             if(!empty($this->orderBys) && !str_contains($sql, 'ORDER BY')) {
                 $addedStuff = true;
                 $sql .= ' ORDER BY ' . implode(', ',
-                    array_map(fn($value): string => implode(' ',$value), $this->orderBys)
-                );
+                        array_map(fn($value): string => implode(' ',$value), $this->orderBys)
+                    );
             }
 
             // add LIMIT
@@ -977,7 +1023,7 @@ class QueryBuilder extends DoctrineQueryBuilder
                 Utils::handleArrayInSQLParams($sql, $params);
                 return $this->db->fetchAssociative($sql, $params, $paramTypes);
             }
-            // @codeCoverageIgnoreStart
+                // @codeCoverageIgnoreStart
             catch (Exception\ConnectionException|Exception\ConnectionLost|Exception\RetryableException $e) {
                 if ($i == $maxTries) {
                     throw Utils::handleDriverException($e, $sql, $params);
@@ -1018,7 +1064,7 @@ class QueryBuilder extends DoctrineQueryBuilder
                 Utils::handleArrayInSQLParams($sql, $params);
                 return $this->db->fetchNumeric($sql, $params, $paramTypes);
             }
-            // @codeCoverageIgnoreStart
+                // @codeCoverageIgnoreStart
             catch (Exception\ConnectionException|Exception\ConnectionLost|Exception\RetryableException $e) {
                 if ($i == $maxTries) {
                     throw Utils::handleDriverException($e, $sql, $params);
@@ -1059,7 +1105,7 @@ class QueryBuilder extends DoctrineQueryBuilder
                 Utils::handleArrayInSQLParams($sql, $params);
                 return $this->db->fetchAllNumeric($sql, $params, $paramTypes);
             }
-            // @codeCoverageIgnoreStart
+                // @codeCoverageIgnoreStart
             catch (Exception\ConnectionException|Exception\ConnectionLost|Exception\RetryableException $e) {
                 if ($i == $maxTries) {
                     throw Utils::handleDriverException($e, $sql, $params);
@@ -1100,7 +1146,7 @@ class QueryBuilder extends DoctrineQueryBuilder
                 Utils::handleArrayInSQLParams($sql, $params);
                 return $this->db->fetchAllAssociative($sql, $params, $paramTypes);
             }
-            // @codeCoverageIgnoreStart
+                // @codeCoverageIgnoreStart
             catch (Exception\ConnectionException|Exception\ConnectionLost|Exception\RetryableException $e) {
                 if ($i == $maxTries) {
                     throw Utils::handleDriverException($e, $sql, $params);
@@ -1141,7 +1187,7 @@ class QueryBuilder extends DoctrineQueryBuilder
                 Utils::handleArrayInSQLParams($sql, $params);
                 return $this->db->fetchAllKeyValue($sql, $params, $paramTypes);
             }
-            // @codeCoverageIgnoreStart
+                // @codeCoverageIgnoreStart
             catch (Exception\ConnectionException|Exception\ConnectionLost|Exception\RetryableException $e) {
                 if ($i == $maxTries) {
                     throw Utils::handleDriverException($e, $sql, $params);
@@ -1182,7 +1228,7 @@ class QueryBuilder extends DoctrineQueryBuilder
                 Utils::handleArrayInSQLParams($sql, $params);
                 return $this->db->fetchAllAssociativeIndexed($sql, $params, $paramTypes);
             }
-            // @codeCoverageIgnoreStart
+                // @codeCoverageIgnoreStart
             catch (Exception\ConnectionException|Exception\ConnectionLost|Exception\RetryableException $e) {
                 if ($i == $maxTries) {
                     throw Utils::handleDriverException($e, $sql, $params);
@@ -1223,7 +1269,7 @@ class QueryBuilder extends DoctrineQueryBuilder
                 Utils::handleArrayInSQLParams($sql, $params);
                 return $this->db->fetchOne($sql, $params, $paramTypes);
             }
-            // @codeCoverageIgnoreStart
+                // @codeCoverageIgnoreStart
             catch (Exception\ConnectionException|Exception\ConnectionLost|Exception\RetryableException $e) {
                 if ($i == $maxTries) {
                     throw Utils::handleDriverException($e, $sql, $params);
@@ -1264,7 +1310,7 @@ class QueryBuilder extends DoctrineQueryBuilder
                 Utils::handleArrayInSQLParams($sql, $params);
                 return $this->db->fetchFirstColumn($sql, $params, $paramTypes);
             }
-            // @codeCoverageIgnoreStart
+                // @codeCoverageIgnoreStart
             catch (Exception\ConnectionException|Exception\ConnectionLost|Exception\RetryableException $e) {
                 if ($i == $maxTries) {
                     throw Utils::handleDriverException($e, $sql, $params);
