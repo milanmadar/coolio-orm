@@ -533,4 +533,64 @@ class QueryBuilderTest extends TestCase
 
         $this->assertStringContainsString('SELECT * ',  $sql);
     }
+
+    public function testParenthesis1():  void
+    {
+        $mgr = self::$dbHelper->getManager(OrmTest\Manager::class);
+
+        $qb = $mgr->createQueryBuilder();
+
+        $qb
+            ->andWhereGroup([
+                $qb->whereColumn_inGroup('fld_int', '>', 0),
+                $qb->orWhereGroup_inGroup([
+                    $qb->whereColumn_inGroup("fld_varchar", '=', 'aaa'),
+                    $qb->orWhereColumn_inGroup("fld_char", '=', 'bbb'),
+                    $qb->andWhereGroup_inGroup([
+                        $qb->whereColumn_inGroup('fld_tiny_int', '>', 1),
+                        $qb->andWhereColumn_inGroup('fld_small_int', '>', 2)
+                    ])
+                ])
+            ]);
+
+        // smoke test
+        $qb->fetchManyEntity(true);
+
+        $sql = $qb->getSQL();
+        $this->assertEquals(
+            'SELECT * FROM orm_test WHERE  ( fld_int > :AutoGen1  OR ( fld_varchar = :AutoGen2  OR fld_char = :AutoGen3  AND ( fld_tiny_int > :AutoGen4  AND fld_small_int > :AutoGen5)))',
+            $sql
+        );
+    }
+
+    public function testParenthesis2():  void
+    {
+        $mgr = self::$dbHelper->getManager(OrmTest\Manager::class);
+
+        $qb = $mgr->createQueryBuilder();
+
+        $qb
+            ->andWhereColumn('id', '>', 0)
+            ->andWhereGroup([
+                $qb->whereColumn_inGroup('fld_int', '>', 0),
+                $qb->orWhereGroup_inGroup([
+                    $qb->whereColumn_inGroup("fld_varchar", '=', 'aaa'),
+                    $qb->orWhereColumn_inGroup("fld_char", '=', 'bbb'),
+                    $qb->andWhereGroup_inGroup([
+                        $qb->whereColumn_inGroup('fld_tiny_int', '>', 1),
+                        $qb->andWhereColumn_inGroup('fld_small_int', '>', 2)
+                    ])
+                ])
+            ]);
+
+        // smoke test
+        $qb->fetchManyEntity(true);
+
+        $sql = $qb->getSQL();
+
+        $this->assertEquals(
+            'SELECT * FROM orm_test WHERE (id > :AutoGen1) AND ( ( fld_int > :AutoGen2  OR ( fld_varchar = :AutoGen3  OR fld_char = :AutoGen4  AND ( fld_tiny_int > :AutoGen5  AND fld_small_int > :AutoGen6))))',
+            $sql
+        );
+    }
 }

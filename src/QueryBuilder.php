@@ -540,6 +540,115 @@ class QueryBuilder extends DoctrineQueryBuilder
     }
 
     /**
+     * It handles NULL and corrrect '=' to 'IN' when $value is an array
+     * @param string $column Field name
+     * @param string $operator
+     * @param mixed $value
+     * @return string The SQL part to be used in a grouped WHERE clause
+     */
+    public function whereColumn_inGroup(string $column, string $operator, mixed $value): string
+    {
+        [$sql, $paramNamesAndValues] = $this->correctWhereColumnParams($column, $operator, $value);
+
+        foreach($paramNamesAndValues as $k=>$v) {
+            $this->setParameter($k, $v);
+        }
+
+        return ' '.$sql;
+    }
+
+    /**
+     * It handles NULL and corrrect '=' to 'IN' when $value is an array
+     * @param string $column Field name
+     * @param string $operator
+     * @param mixed $value
+     * @return string The SQL part to be used in a grouped WHERE clause
+     */
+    public function andWhereColumn_inGroup(string $column, string $operator, mixed $value): string
+    {
+        [$sql, $paramNamesAndValues] = $this->correctWhereColumnParams($column, $operator, $value);
+
+        foreach($paramNamesAndValues as $k=>$v) {
+            $this->setParameter($k, $v);
+        }
+
+        return ' AND '.$sql;
+    }
+
+    /**
+     * It handles NULL and corrrect '=' to 'IN' when $value is an array
+     * @param string $column Field name
+     * @param string $operator
+     * @param mixed $value
+     * @return string The SQL part to be used in a grouped WHERE clause
+     */
+    public function orWhereColumn_inGroup(string $column, string $operator, mixed $value): string
+    {
+        [$sql, $paramNamesAndValues] = $this->correctWhereColumnParams($column, $operator, $value);
+
+        foreach($paramNamesAndValues as $k=>$v) {
+            $this->setParameter($k, $v);
+        }
+
+        return ' OR '.$sql;
+    }
+
+    /**
+     * @param array<string> $sqlParts
+     * @return string The SQL part to be used in a WHERE clause
+     */
+    public function whereGroup_inGroup(array $sqlParts): string
+    {
+        return ' (' . implode(' ', $sqlParts) . ')';
+    }
+
+    /**
+     * @param array<string> $sqlParts
+     * @return string The SQL part to be used in a WHERE clause
+     */
+    public function andWhereGroup_inGroup(array $sqlParts): string
+    {
+        return ' AND (' . implode(' ', $sqlParts) . ')';
+    }
+
+    /**
+     * @param array<string> $sqlParts
+     * @return string The SQL part to be used in a WHERE clause
+     */
+    public function orWhereGroup_inGroup(array $sqlParts): string
+    {
+        return ' OR (' . implode(' ', $sqlParts) . ')';
+    }
+
+    /**
+     * @param array<string> $sqlParts
+     * @return $this
+     */
+    public function andWhereGroup(array $sqlParts): self
+    {
+        $grouped = ' (' . implode(' ', $sqlParts) . ')';
+
+        // fix some things:
+        // actually not, because maybe a string expression has thos things
+        /*$grouped = str_replace('( AND ', '( ', $grouped);
+        $grouped = str_replace('( OR ', '( ', $grouped);*/
+
+        $this->andWhere($grouped);
+        return $this;
+    }
+
+    /**
+     * @param array<string> $sqlParts
+     * @return $this
+     */
+    public function orWhereGroup(array $sqlParts): self
+    {
+        $grouped = ' (' . implode(' ', $sqlParts) . ')';
+        $this->orWhere($grouped);
+        return $this;
+    }
+
+    /**
      * INSERT query. Use ->setValue() to set the values.
      * @return $this
      */
@@ -1414,4 +1523,5 @@ class QueryBuilder extends DoctrineQueryBuilder
             $this->from($this->entityMgr->getDbTable());
         }
     }
+
 }
