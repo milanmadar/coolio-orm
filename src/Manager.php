@@ -560,7 +560,7 @@ abstract class Manager
 
             // its the primary id that changed
             $whereId = isset($dataToSave['id'])
-                ? $ent->_getDataOrigi()['id']
+                ? ( $ent->_getDataOrigi()['id'] ?? $ent->_get('id') )
                 : $ent->_get('id');
 
             $this->update($dataToSave, ['id' => $whereId]);
