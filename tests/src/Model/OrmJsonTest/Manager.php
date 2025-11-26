@@ -6,7 +6,7 @@ use Milanmadar\CoolioORM;
 
 /**
  * @method Entity createEntity(mixed[] $php_data = [], bool $skipEntityRepo = false)
- * @method Entity createEntityFromDbData(mixed[] $db_data = [], bool $skipEntityRepo = false)
+ * @method Entity createEntityFromDbData(mixed[] $db_data = [], bool $skipEntityRepo = false, bool $checkIfTheColumnsBelongToThisManager = false)
  * @method Entity|null findByField(string $field, mixed $value, bool $forceToGetFromDb = false)
  * @method Entity|null findById(?int $id, bool $forceToGetFromDb = false)
  * @method Entity|null findOneWhere(string $sqlAfterWHERE, mixed[] $binds = [], bool $forceToGetFromDb = false)
