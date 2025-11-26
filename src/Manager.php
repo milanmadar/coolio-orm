@@ -116,15 +116,16 @@ abstract class Manager
      * Returns a new empty Entity. (If you are not really doing it from the database row, then use $manager->createEntity())
      * @param array<string, string> $db_data Db table row. (If you are not really doing it from the database row, then use $manager->createEntity())
      * @param bool $skipEntityRepo Optional. If TRUE it will not store this Entity in the Entity Repository
+     * @param bool $checkIfTheColumnsBelongToThisManager Optional. Default is false
      * @return Entity
      * @throws \LogicException If non of the given data belongs to this Entity
      */
-    public function createEntityFromDbData(array $db_data = [], bool $skipEntityRepo = false): Entity
+    public function createEntityFromDbData(array $db_data = [], bool $skipEntityRepo = false, bool $checkIfTheColumnsBelongToThisManager = false): Entity
     {
         // Maybe we got some data, but non of that is for this entity. That makes no sense
 //        $is_empty_data = empty($db_data);
 
-        $php_data = $this->fromDBdata_toPHPdata($db_data);
+        $php_data = $this->fromDBdata_toPHPdata($db_data, $checkIfTheColumnsBelongToThisManager);
 
 //        if(!$is_empty_data && empty($php_data)) {
 //            throw new \LogicException("Non of the given data belongs to the ".get_class($this));
@@ -1055,17 +1056,18 @@ abstract class Manager
     /**
      * Change the types
      * @param array<string, mixed> $dbData
+     * @param bool $checkIfTheColumnsBelongToThisManager
      * @return array<string, mixed>
      */
-    protected function fromDBdata_toPHPdata(array $dbData): array
+    protected function fromDBdata_toPHPdata(array $dbData, bool $checkIfTheColumnsBelongToThisManager): array
     {
         foreach($dbData as $k=> $v)
         {
-            /*if(!isset($this->fieldTypes[$k])) // this field doesn't belong to this entity
-            {
-                unset($data[$k]);
+            if($checkIfTheColumnsBelongToThisManager && !isset($this->fieldTypes[$k])) {
+                unset($dbData[$k]);
+                continue;
             }
-            else*/
+
             if(isset($v)) {
                 if(!str_ends_with($k, '_srid')) {
                     $dbData[$k] = match($this->fieldTypes[$k] ?? 'doesnt_belong_to_this_entity') {
