@@ -200,7 +200,7 @@ abstract class Entity implements Event\AnnouncerInterface
      */
     public function _getDataChanged(): array
     {
-        //$this->_deletedAccessException();
+        $this->_deletedAccessException();
 
         $changedData = [];
         foreach($this->_changedDataKeys as $fieldName=>$_) {
@@ -217,7 +217,7 @@ abstract class Entity implements Event\AnnouncerInterface
      */
     public function _didDataChange(?string $fieldName = null): bool
     {
-        //$this->_deletedAccessException();
+        $this->_deletedAccessException();
 
         if(isset($fieldName)) {
             return isset($this->_changedDataKeys[$fieldName]);
@@ -342,7 +342,7 @@ abstract class Entity implements Event\AnnouncerInterface
      */
     public function _getData(): array
     {
-        //$this->_deletedAccessException();
+        $this->_deletedAccessException();
 
         return $this->_data;
     }
@@ -476,7 +476,7 @@ abstract class Entity implements Event\AnnouncerInterface
      */
     protected function _relationGetEntity(string $fieldName): ?Entity
     {
-        //$this->_deletedAccessException();
+        $this->_deletedAccessException();
         return $this->_relatedEntities[$fieldName]->getRefEntity($this);
     }
 
@@ -487,7 +487,7 @@ abstract class Entity implements Event\AnnouncerInterface
      */
     protected function _relationHasEntity(string $fieldName): bool
     {
-        //$this->_deletedAccessException();
+        $this->_deletedAccessException();
         return $this->_relatedEntities[$fieldName]->hasRefEntity($this);
     }
 
