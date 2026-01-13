@@ -427,7 +427,7 @@ class ScaffoldCommand extends Command
                 } elseif(strtoupper(trim($colDefVal)) == 'EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)' || strtoupper(trim($colDefVal)) == 'EXTRACT(EPOCH FROM NOW())') {
                     $defValSrc = 'time()';
                 } elseif(strtoupper(trim($colDefVal)) == 'CURRENT_TIMESTAMP'  || strtoupper(trim($colDefVal)) == 'NOW()' ) {
-                    $defValSrc = 'new \DateTime()';
+                    $defValSrc = 'new \DateTimeImmutable()';
                 } else {
                     $defValSrc = $colDefVal;
                 }
@@ -468,8 +468,8 @@ class ScaffoldCommand extends Command
                 case 'datetimeoffset':
                 case 'timestamp_micro':
                 case 'timestamp_tz_micro':
-                    $paramType = '\DateTime';
-                    $docParamType = '\DateTime';
+                    $paramType = '\DateTimeInterface';
+                    $docParamType = '\DateTimeInterface';
                     break;
                 case 'smallint':
                 case 'integer':

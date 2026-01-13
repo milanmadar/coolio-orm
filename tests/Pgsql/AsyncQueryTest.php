@@ -115,7 +115,7 @@ class AsyncQueryTest extends TestCase
 
             $ent = $mgr->createEntityFromDbData($rows[0]);
             $this->assertEquals($id, $ent->getId());
-            $this->assertTrue($ent->getFldTimestamp() instanceof \DateTime);
+            $this->assertTrue($ent->getFldTimestamp() instanceof \DateTimeInterface);
         }
     }
 

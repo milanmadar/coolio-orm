@@ -964,7 +964,7 @@ abstract class Manager
                     case 'timestamp_tz_micro':
                         $p = 'mgrPm' . ++self::$placeholderNameIndex;
                         $placeholders[] = ':'.$p;
-                        if($val instanceof \DateTime) {
+                        if($val instanceof \DateTimeInterface) {
                             $values[$p] = match($this->fieldTypes[$colName]) {
                                 'date' => $val->format('Y-m-d'),
                                 'time' => $val->format('H:i:s'),
@@ -1078,7 +1078,7 @@ abstract class Manager
                         'boolean' => (bool)$v,
                         'array', 'simple_array' => unserialize($v),
                         'json', 'jsonb', 'json_array' => json_decode($v, true),
-                        'date', 'time', 'datetime', 'datetime2', 'smalldatetime', 'datetimeoffset', 'timestamp', 'timestamp_tz', 'timestamp_micro', 'timestamp_tz_micro' => new \DateTime($v),
+                        'date', 'time', 'datetime', 'datetime2', 'smalldatetime', 'datetimeoffset', 'timestamp', 'timestamp_tz', 'timestamp_micro', 'timestamp_tz_micro' => new \DateTimeImmutable($v),
                         //'geometry' => Geo\Shape2D3DFactory::createFromGeoJSONString($v, $data[$k.'_srid'] ?? null),
                         //'geometry_curved', 'topogeometry' => Geo\Shape2D3DFactory::createFromGeoEWKTString($v),
                         'geometry' , 'geometry_curved', 'topogeometry' => Geo\Shape2D3DFactory::createFromGeoEWKTString($v),

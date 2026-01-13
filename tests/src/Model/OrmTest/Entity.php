@@ -274,10 +274,10 @@ class Entity extends \Milanmadar\CoolioORM\Entity
 
     /**
      *
-     * @param \DateTime|null $val
+     * @param \DateTimeInterface|null $val
      * @return $this
      */
-    public function setFldDate(?\DateTime $val): self
+    public function setFldDate(?\DateTimeInterface $val): self
     {
         $this->_set('fld_date', $val);
         return $this;
@@ -285,19 +285,19 @@ class Entity extends \Milanmadar\CoolioORM\Entity
 
     /**
      *
-     * @return \DateTime
+     * @return \DateTimeInterface
      */
-    public function getFldDate(): \DateTime
+    public function getFldDate(): \DateTimeInterface
     {
         return $this->_get('fld_date');
     }
 
     /**
      *
-     * @param \DateTime|null $val
+     * @param \DateTimeInterface|null $val
      * @return $this
      */
-    public function setFldTime(?\DateTime $val): self
+    public function setFldTime(?\DateTimeInterface $val): self
     {
         $this->_set('fld_time', $val);
         return $this;
@@ -305,19 +305,19 @@ class Entity extends \Milanmadar\CoolioORM\Entity
 
     /**
      *
-     * @return \DateTime
+     * @return \DateTimeInterface
      */
-    public function getFldTime(): \DateTime
+    public function getFldTime(): \DateTimeInterface
     {
         return $this->_get('fld_time');
     }
 
     /**
      *
-     * @param \DateTime|null $val
+     * @param \DateTimeInterface|null $val
      * @return $this
      */
-    public function setFldTimestamp(?\DateTime $val): self
+    public function setFldTimestamp(?\DateTimeInterface $val): self
     {
         $this->_set('fld_timestamp', $val);
         return $this;
@@ -325,19 +325,19 @@ class Entity extends \Milanmadar\CoolioORM\Entity
 
     /**
      *
-     * @return \DateTime
+     * @return \DateTimeInterface
      */
-    public function getFldTimestamp(): \DateTime
+    public function getFldTimestamp(): \DateTimeInterface
     {
         return $this->_get('fld_timestamp');
     }
 
     /**
      *
-     * @param \DateTime|null $val
+     * @param \DateTimeInterface|null $val
      * @return $this
      */
-    public function setFldTimestamptz(?\DateTime $val): self
+    public function setFldTimestamptz(?\DateTimeInterface $val): self
     {
         $this->_set('fld_timestamptz', $val);
         return $this;
@@ -345,9 +345,9 @@ class Entity extends \Milanmadar\CoolioORM\Entity
 
     /**
      *
-     * @return \DateTime
+     * @return \DateTimeInterface
      */
-    public function getFldTimestamptz(): \DateTime
+    public function getFldTimestamptz(): \DateTimeInterface
     {
         return $this->_get('fld_timestamptz');
     }
@@ -356,10 +356,10 @@ class Entity extends \Milanmadar\CoolioORM\Entity
 
     /**
      *
-     * @param \DateTime|null $val
+     * @param \DateTimeInterface|null $val
      * @return $this
      */
-    public function setFldTimestampMicro(?\DateTime $val): self
+    public function setFldTimestampMicro(?\DateTimeInterface $val): self
     {
         $this->_set('fld_timestamp_micro', $val);
         return $this;
@@ -367,19 +367,19 @@ class Entity extends \Milanmadar\CoolioORM\Entity
 
     /**
      *
-     * @return \DateTime
+     * @return \DateTimeInterface
      */
-    public function getFldTimestampMicro(): \DateTime
+    public function getFldTimestampMicro(): \DateTimeInterface
     {
         return $this->_get('fld_timestamp_micro');
     }
 
     /**
      *
-     * @param \DateTime|null $val
+     * @param \DateTimeInterface|null $val
      * @return $this
      */
-    public function setFldTimestamptzMicro(?\DateTime $val): self
+    public function setFldTimestamptzMicro(?\DateTimeInterface $val): self
     {
         $this->_set('fld_timestamptz_micro', $val);
         return $this;
@@ -387,9 +387,9 @@ class Entity extends \Milanmadar\CoolioORM\Entity
 
     /**
      *
-     * @return \DateTime
+     * @return \DateTimeInterface
      */
-    public function getFldTimestamptzMicro(): \DateTime
+    public function getFldTimestamptzMicro(): \DateTimeInterface
     {
         return $this->_get('fld_timestamptz_micro');
     }

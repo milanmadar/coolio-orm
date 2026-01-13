@@ -33,12 +33,12 @@ class DateTest extends TestCase
         $ent1 = $mgr->findById(1);
         $this->assertInstanceOf('\tests\Model\OrmTest\Entity', $ent1);
 
-        $this->assertInstanceOf('\DateTime', $ent1->getFldDate());
-        $this->assertInstanceOf('\DateTime', $ent1->getFldTime());
-        $this->assertInstanceOf('\DateTime', $ent1->getFldTimestamp());
-        $this->assertInstanceOf('\DateTime', $ent1->getFldTimestamptz());
-        $this->assertInstanceOf('\DateTime', $ent1->getFldTimestampMicro());
-        $this->assertInstanceOf('\DateTime', $ent1->getFldTimestamptzMicro());
+        $this->assertInstanceOf('\DateTimeInterface', $ent1->getFldDate());
+        $this->assertInstanceOf('\DateTimeInterface', $ent1->getFldTime());
+        $this->assertInstanceOf('\DateTimeInterface', $ent1->getFldTimestamp());
+        $this->assertInstanceOf('\DateTimeInterface', $ent1->getFldTimestamptz());
+        $this->assertInstanceOf('\DateTimeInterface', $ent1->getFldTimestampMicro());
+        $this->assertInstanceOf('\DateTimeInterface', $ent1->getFldTimestamptzMicro());
 
         $this->assertEquals((new \DateTime('2025-05-01'))->getTimestamp(), $ent1->getFldDate()->getTimestamp());
         $this->assertEquals((new \DateTime('01:30:00'))->getTimestamp(), $ent1->getFldTime()->getTimestamp());

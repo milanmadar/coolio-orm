@@ -105,7 +105,7 @@ abstract class Entity implements Event\AnnouncerInterface
         // Change it
         $oldValue = $this->_data[$fieldName] ?? null;
 
-        if($value instanceof \DateTimeInterface) {
+        if($value instanceof \DateTime) {
             $this->_data[$fieldName] = clone $value;
         } else {
             $this->_data[$fieldName] = $value;
