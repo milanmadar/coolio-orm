@@ -385,6 +385,21 @@ class QueryBuilderTest extends TestCase
         $this->assertEquals(5, $res[4]['id']);
     }
 
+    public function testLimitOrder2()
+    {
+        $mgr = self::$dbHelper->getManager(OrmTest\Manager::class);
+
+        $res = $mgr->createQueryBuilder()
+            ->where('id>0')
+            ->limit(1, 5)
+            ->addOrderBy('id desc')
+            ->fetchAllAssociative();
+
+        $this->assertEquals(5, count($res));
+        $this->assertEquals(9, $res[0]['id']);
+        $this->assertEquals(5, $res[4]['id']);
+    }
+
     public function testLimitNoOffset()
     {
         $mgr = self::$dbHelper->getManager(OrmTest\Manager::class);

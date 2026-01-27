@@ -903,7 +903,7 @@ class QueryBuilder extends DoctrineQueryBuilder
      */
     public function addOrderBy(string $sort, ?string $order = null): self
     {
-        if(!isset($order)) $order = 'ASC';
+        //if(!isset($order)) $order = 'ASC';
         $this->orderBys[] = [$sort, $order];
         parent::addOrderBy($sort, $order);
         return $this;
