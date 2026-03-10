@@ -156,7 +156,7 @@ class MultiLineStringZM extends AbstractShapeZM
             throw new InvalidArgumentException('MultiLineStringZM must contain at least one LineStringZM.');
         }
         foreach ($lineStrings as $ls) {
-            if (!($ls instanceof LineStringZM)) {
+            if (!($ls instanceof LineStringZM)) { /** @phpstan-ignore-line */
                 throw new InvalidArgumentException('All elements must be instances of LineStringZM.');
             }
             if (count($ls->getPoints()) < 2) {

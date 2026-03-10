@@ -9,14 +9,15 @@ class MultiPolygonZM extends AbstractShapeZM
 
     /**
      * @param array<PolygonZM> $polygons
+     * @param int|null $srid
      */
-    public function __construct(array $polygons)
+    public function __construct(array $polygons, int|null $srid = null)
     {
         if (empty($polygons)) {
             throw new \InvalidArgumentException('MultiPolygonZM must contain at least one PolygonZM.');
         }
 
-        parent::__construct();
+        parent::__construct($srid);
         $this->polygons = $polygons;
     }
 
@@ -79,7 +80,7 @@ class MultiPolygonZM extends AbstractShapeZM
         $srid = (int) substr($sridPart, 5);
 
         // Remove leading "MULTIPOLYGON ZM" and trim
-        $geometryPart = trim(preg_replace('/^MULTIPOLYGON ?Z?M?\s*/i', '', $geometryPart));
+        $geometryPart = trim((string)preg_replace('/^MULTIPOLYGON ?Z?M?\s*/i', '', $geometryPart));
 
         // Now parse polygons with a parentheses-aware parser
         $polygons = [];

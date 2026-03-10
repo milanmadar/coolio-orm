@@ -102,7 +102,7 @@ class Shape2D3D4DFactory
                 } elseif ($coordCount == 3) {
                     return ShapeZ\MultiPolygonZ::createFromGeoJSON($geoJsonData, $srid);
                 } elseif ($coordCount == 4) {
-                    return ShapeZ\MultiPolygonZM::createFromGeoJSON($geoJsonData, $srid);
+                    return ShapeZM\MultiPolygonZM::createFromGeoJSON($geoJsonData, $srid);
                 }
                 break;
 
