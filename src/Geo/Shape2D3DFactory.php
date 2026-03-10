@@ -107,6 +107,18 @@ class Shape2D3DFactory
                 /** @var array<Shape2D\AbstractShape2D> $geometries */
                 return new Shape2D\GeometryCollection($geometries, $srid);
 
+            case 'Feature':
+                return Shape2D\Feature::createFromGeoJSON($geoJsonData, $srid);
+
+            case 'FeatureCollection':
+                return new Shape2D\FeatureCollection(
+                    array_map(
+                        fn(array $f) => Shape2D\Feature::createFromGeoJSON($f, $srid),
+                        $geoJsonData['features'] ?? []
+                    ),
+                    $srid
+                );
+
             default:
                 throw new \InvalidArgumentException('Unsupported GeoJSON type: ' . $geoJsonData['type']);
         }

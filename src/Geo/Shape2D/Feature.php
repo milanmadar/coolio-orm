@@ -13,7 +13,7 @@ class Feature extends AbstractShape2D
     private ?array $properties;
 
     /** @var string|int|float|null */
-    private string|int|null $id = null;
+    private string|int|float|null $id;
 
     /**
      * {
