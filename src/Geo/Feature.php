@@ -33,7 +33,7 @@ class Feature extends AbstractShape2D
         }
 
         // Use your factory to parse the geometry
-        $geometry = Shape2D3DFactory::createFromGeoJSON($jsonData['geometry'], $srid);
+        $geometry = Shape2D3D4DFactory::createFromGeoJSON($jsonData['geometry'], $srid);
 
         $properties = $jsonData['properties'] ?? null;
         $id = $jsonData['id'] ?? null;
@@ -49,7 +49,7 @@ class Feature extends AbstractShape2D
      */
     public static function createFromGeoEWKTString(string $ewktString): Feature
     {
-        $geometry = Shape2D3DFactory::createFromGeoEWKTString($ewktString);
+        $geometry = Shape2D3D4DFactory::createFromGeoEWKTString($ewktString);
 
         // EWKT cannot carry properties or id
         return new Feature($geometry, null, null, $geometry->getSrid());

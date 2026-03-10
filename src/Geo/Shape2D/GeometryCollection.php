@@ -2,7 +2,7 @@
 
 namespace Milanmadar\CoolioORM\Geo\Shape2D;
 
-use Milanmadar\CoolioORM\Geo\Shape2D3DFactory;
+use Milanmadar\CoolioORM\Geo\Shape2D3D4DFactory;
 
 class GeometryCollection extends AbstractShape2D
 {
@@ -27,7 +27,7 @@ class GeometryCollection extends AbstractShape2D
         $geometries = [];
         foreach ($jsonData['geometries'] as $geometryData) {
             /** @var AbstractShape2D $_ */
-            $_ = Shape2D3DFactory::createFromGeoJSON($geometryData, $srid);
+            $_ = Shape2D3D4DFactory::createFromGeoJSON($geometryData, $srid);
             $geometries[] = $_;
         }
 
@@ -104,7 +104,7 @@ class GeometryCollection extends AbstractShape2D
         foreach ($segments as $geometry) {
             $geometry = trim($geometry);
             /** @var AbstractShape2D $_ */
-            $_ = Shape2D3DFactory::createFromGeoEWKTString("SRID=$srid;$geometry");
+            $_ = Shape2D3D4DFactory::createFromGeoEWKTString("SRID=$srid;$geometry");
             $geometries[] = $_;
         }
 
