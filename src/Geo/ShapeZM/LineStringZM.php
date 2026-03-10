@@ -22,7 +22,7 @@ class LineStringZM extends AbstractShapeZM
         }
 
         foreach ($points as $pt) {
-            if (!$pt instanceof PointZM) {
+            if (!$pt instanceof PointZM) { /** @phpstan-ignore-line */
                 throw new InvalidArgumentException('All elements must be PointZM instances.');
             }
         }
@@ -35,6 +35,19 @@ class LineStringZM extends AbstractShapeZM
     public function getPoints(): array
     {
         return $this->points;
+    }
+
+    /**
+     * @param array<PointZM> $points
+     * @return $this
+     */
+    public function setPoints(array $points): self
+    {
+        if(count($points) < 2) {
+            throw new \InvalidArgumentException("A LineStringZM must have at least two points.");
+        }
+        $this->points = $points;
+        return $this;
     }
 
     public function toWKT(): string
@@ -120,6 +133,7 @@ class LineStringZM extends AbstractShapeZM
         $coordPairs = explode(',', $coordString);
         $points = [];
         foreach ($coordPairs as $pair) {
+            /** @var array<float|int> $nums */
             $nums = preg_split('/\s+/', trim($pair));
             if (count($nums) !== 4) {
                 throw new InvalidArgumentException('Each coordinate must have 4 elements [X,Y,Z,M].');

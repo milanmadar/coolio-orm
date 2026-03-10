@@ -386,6 +386,35 @@ class ScaffoldCommand extends Command
                         $colType = 'geometry_curved';
                     }
 
+                    // 4d
+                    elseif(str_contains($nativeColType, '(pointzm,')) {
+                        $geoShapeType = ShapeZM\PointZM::class;
+                    } elseif(str_contains($nativeColType, '(linestringzm,')) {
+                        $geoShapeType = ShapeZM\LineStringZM::class;
+                    } elseif(str_contains($nativeColType, '(polygonzm,')) {
+                        $geoShapeType = ShapeZM\PolygonZM::class;
+                    } elseif(str_contains($nativeColType, '(multipointzm,')) {
+                        $geoShapeType = ShapeZM\MultiPointZM::class;
+                    } elseif(str_contains($nativeColType, '(multilinestringzm,')) {
+                        $geoShapeType = ShapeZM\MultiLineStringZM::class;
+                    } elseif(str_contains($nativeColType, '(multipolygonzm,')) {
+                        $geoShapeType = ShapeZM\MultiPolygonZM::class;
+                    } elseif(str_contains($nativeColType, '(geometrycollectionzm,')) {
+                        $geoShapeType = ShapeZM\GeometryCollectionZM::class;
+                    } elseif(str_contains($nativeColType, '(circularstringzm,')) {
+                        $geoShapeType = ShapeZM\CircularStringZM::class;
+                        $colType = 'geometry_curved';
+                    } elseif(str_contains($nativeColType, '(compoundcurvezm,')) {
+                        $geoShapeType = ShapeZM\CompoundCurveZM::class;
+                        $colType = 'geometry_curved';
+                    } elseif(str_contains($nativeColType, '(curvepolygonzm,')) {
+                        $geoShapeType = ShapeZM\CurvePolygonZM::class;
+                        $colType = 'geometry_curved';
+                    } elseif(str_contains($nativeColType, '(multicurvezm,')) {
+                        $geoShapeType = ShapeZM\MultiCurveZM::class;
+                        $colType = 'geometry_curved';
+                    }
+
                     else {
                         $io->error("ERROR: Unknown geometry type: ".$nativeColType);
                         return Command::FAILURE;

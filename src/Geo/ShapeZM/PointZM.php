@@ -96,7 +96,7 @@ class PointZM extends AbstractShapeZM
     }
 
     /**
-     * @return array<float>
+     * @return array<string, mixed>
      */
     public function toGeoJSON(): array
     {

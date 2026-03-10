@@ -28,12 +28,12 @@ class Entity extends \Milanmadar\CoolioORM\Entity
         return $this;
     }
 
-    public function getPolygonZMGeom(): ShapeZM\PolygonZ
+    public function getPolygonZMGeom(): ShapeZM\PolygonZM
     {
         return $this->_get('polygonzm_geom');
     }
 
-    public function setPolygonZMGeom(ShapeZM\PolygonZ $val): self
+    public function setPolygonZMGeom(ShapeZM\PolygonZM $val): self
     {
         $this->_set('polygonzm_geom', $val);
         return $this;

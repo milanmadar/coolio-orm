@@ -9,10 +9,10 @@ class Shape2D3D4DFactory
      *
      * @param string $geoJsonStr The GeoJSON string to parse.
      * @param int|null $srid Optional SRID to assign to the geometry.
-     * @return Shape2D\AbstractShape2D|ShapeZ\AbstractShapeZ The created geometry (Point, PointZ, LineString, LineStringZ, etc.).
+     * @return Shape2D\AbstractShape2D|ShapeZ\AbstractShapeZ|ShapeZM\AbstractShapeZM The created geometry (Point, PointZ, LineString, LineStringZ, etc.).
      * @throws \InvalidArgumentException If the GeoJSON is invalid or unsupported.
      */
-    public static function createFromGeoJSONString(string $geoJsonStr, int|null $srid = null): Shape2D\AbstractShape2D|ShapeZ\AbstractShapeZ
+    public static function createFromGeoJSONString(string $geoJsonStr, int|null $srid = null): Shape2D\AbstractShape2D|ShapeZ\AbstractShapeZ|ShapeZM\AbstractShapeZM
     {
         if (!isset($srid)) $srid = $_ENV['GEO_DEFAULT_SRID'];
 
@@ -57,6 +57,8 @@ class Shape2D3D4DFactory
                     return Shape2D\LineString::createFromGeoJSON($geoJsonData, $srid);
                 } elseif ($coordCount == 3) {
                     return ShapeZ\LineStringZ::createFromGeoJSON($geoJsonData, $srid);
+                } elseif ($coordCount == 4) {
+                    return ShapeZM\LineStringZM::createFromGeoJSON($geoJsonData, $srid);
                 }
                 break;
 
@@ -66,6 +68,8 @@ class Shape2D3D4DFactory
                     return Shape2D\Polygon::createFromGeoJSON($geoJsonData, $srid);
                 } elseif ($coordCount == 3) {
                     return ShapeZ\PolygonZ::createFromGeoJSON($geoJsonData, $srid);
+                } elseif ($coordCount == 4) {
+                    return ShapeZM\PolygonZM::createFromGeoJSON($geoJsonData, $srid);
                 }
                 break;
 
@@ -226,7 +230,7 @@ class Shape2D3D4DFactory
 
             case 'POLYGON':
                 return match($dims) {
-                    //4 => ShapeZM\PolygonZM::createFromGeoEWKTString($ewktString),
+                    4 => ShapeZM\PolygonZM::createFromGeoEWKTString($ewktString),
                     3 => ShapeZ\PolygonZ::createFromGeoEWKTString($ewktString),
                     default => Shape2D\Polygon::createFromGeoEWKTString($ewktString),
                 };
