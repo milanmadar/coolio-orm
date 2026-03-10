@@ -39,8 +39,8 @@
         "php": "^8.2",
         "doctrine/dbal": "4.2.3",
         "ext-mbstring": "*",
-        "symfony/console": "^7.2",
-        "symfony/dotenv": "^7.2"
+        "symfony/console": "^7.2 || ^8.0",
+        "symfony/dotenv": "^7.2 || ^8.0"
     },
     "require-dev": {
         "ext-xdebug": "*",
