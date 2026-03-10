@@ -59,7 +59,7 @@ class GeometryCollectionTest extends TestCase
         $geometryCollection = new GeometryCollection([$point, $lineString, $polygon], 4326);
 
         // Construct the expected EWKT for the GeometryCollection
-        $expected = "ST_GeomFromEWKT('SRID=4326;GEOMETRYCOLLECTION(POINT(1 1),LINESTRING(2 2,3 3,4 4),POLYGON((0 0,0 5,5 5,5 0,0 0),(1 1,1 2,2 2,2 1,1 1)))')";
+        $expected = "ST_GeomFromEWKT('SRID=4326;GEOMETRYCOLLECTION(POINT(1 1),LINESTRING(2 2,3 3,4 4),POLYGON((0 0,5 0,5 5,0 5,0 0),(1 1,1 2,2 2,2 1,1 1)))')";
         $this->assertSame($expected, $geometryCollection->ST_GeomFromEWKT());
     }
 
