@@ -47,7 +47,7 @@ class MultiPolygonZTest extends TestCase
             ], 4326)
         ], 4326);
 
-        $expected = "ST_GeomFromEWKT('SRID=4326;MULTIPOLYGONZ(((0 0 1,0 5 1,5 5 1,5 0 1,0 0 1),(1 1 2,1 2 2,2 2 2,2 1 2,1 1 2)),((8 8 3,0 5 4,5 5 5,5 0 6,8 8 3),(9 9 2,1 2 2,2 2 2,2 1 2,9 9 2)))')";
+        $expected = "ST_GeomFromEWKT('SRID=4326;MULTIPOLYGONZ(((0 0 1,5 0 1,5 5 1,0 5 1,0 0 1),(1 1 2,1 2 2,2 2 2,2 1 2,1 1 2)),((8 8 3,0 5 4,5 5 5,5 0 6,8 8 3),(9 9 2,2 1 2,2 2 2,1 2 2,9 9 2)))')";
         $this->assertSame($expected, $multiPolygon->ST_GeomFromEWKT());
     }
 

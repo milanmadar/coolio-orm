@@ -8,14 +8,14 @@ class CurvePolygonZ extends AbstractShapeZ
     private array $boundaries;
 
     /**
-     * @param array<mixed> $jsonData
+     * @param array<string, mixed> $jsonData
      * @param int|null $srid
      * @return CurvePolygonZ
      */
-    /*public static function createFromGeoJSON(array $jsonData, int|null $srid = null): CurvePolygonZ
+    public static function createFromGeoJSON(array $jsonData, int|null $srid = null): CurvePolygonZ
     {
         throw new \RuntimeException('GeoJSON does not support CurvePolygonZ. Use EWKT instead.');
-    }*/
+    }
 
     /**
      * @param string $ewktString
@@ -88,14 +88,17 @@ class CurvePolygonZ extends AbstractShapeZ
         return 'CURVEPOLYGONZ(' . implode(',', $boundaryWKT) . ')';
     }
 
-    /*public function toGeoJSON(): array
+    /**
+     * @return array<string, mixed>
+     */
+    public function toGeoJSON(): array
     {
         $boundaryGeoJSON = array_map(fn($boundary) => $boundary->toGeoJSON(), $this->boundaries);
         return [
             'type' => 'CurvePolygonZ',
             'coordinates' => $boundaryGeoJSON
         ];
-    }*/
+    }
 
     /**
      * @return array<LineStringZ|CircularStringZ>
