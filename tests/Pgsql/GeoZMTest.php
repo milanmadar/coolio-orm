@@ -46,8 +46,9 @@ class GeoZMTest extends TestCase
             ->select(
                 'pointzm_geom',
                 'linestringzm_geom',
-                'polygonzm_geom'//,
-                //'multipointzm_geom', 'multilinestringzm_geom', 'multipolygonzm_geom', 'geomcollectionzm_geom', 'circularstringzm_geom', 'compoundcurvezm_geom', 'curvepolygonzm_geom', 'multicurvezm_geom'
+                'polygonzm_geom',
+                'multipointzm_geom',
+                //'multilinestringzm_geom', 'multipolygonzm_geom', 'geomcollectionzm_geom', 'circularstringzm_geom', 'compoundcurvezm_geom', 'curvepolygonzm_geom', 'multicurvezm_geom'
             )
             ->andWhere('1=1')
             ->limit(0, 1)
@@ -57,6 +58,7 @@ class GeoZMTest extends TestCase
         $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\ShapeZM\PointZM', $ent->getPointZMGeom());
         $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\ShapeZM\LineStringZM', $ent->getLinestringZMGeom());
         $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\ShapeZM\PolygonZM', $ent->getPolygonZMGeom());
+        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\ShapeZM\MultiPointZM', $ent->getMultiPointZMGeom());
     }
 
     public function testInsert_asObjects()

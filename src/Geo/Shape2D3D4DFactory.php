@@ -79,6 +79,8 @@ class Shape2D3D4DFactory
                     return Shape2D\MultiPoint::createFromGeoJSON($geoJsonData, $srid);
                 } elseif ($coordCount == 3) {
                     return ShapeZ\MultiPointZ::createFromGeoJSON($geoJsonData, $srid);
+                } elseif ($coordCount == 4) {
+                    return ShapeZM\MultiPointZM::createFromGeoJSON($geoJsonData, $srid);
                 }
                 break;
 
@@ -250,7 +252,7 @@ class Shape2D3D4DFactory
 
             case 'MULTIPOINT':
                 return match($dims) {
-                    //4 => ShapeZM\MultiPointZM::createFromGeoEWKTString($ewktString),
+                    4 => ShapeZM\MultiPointZM::createFromGeoEWKTString($ewktString),
                     3 => ShapeZ\MultiPointZ::createFromGeoEWKTString($ewktString),
                     default => Shape2D\MultiPoint::createFromGeoEWKTString($ewktString),
                 };

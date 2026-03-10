@@ -5,6 +5,7 @@ namespace Milanmadar\CoolioORM\Command;
 use Milanmadar\CoolioORM\ORM;
 use Milanmadar\CoolioORM\Geo\Shape2D;
 use Milanmadar\CoolioORM\Geo\ShapeZ;
+use Milanmadar\CoolioORM\Geo\ShapeZM;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
