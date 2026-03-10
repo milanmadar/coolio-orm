@@ -6,8 +6,6 @@ use Milanmadar\CoolioORM\Geo\AbstractShape;
 
 abstract class AbstractShape2D extends AbstractShape
 {
-    protected int $srid;
-
     /**
      * @param array<string, mixed> $jsonData
      * @param int|null $srid Optional SRID, defaults to the value in $_ENV['GEO_DEFAULT_SRID']

@@ -94,11 +94,8 @@ class MultiCurveZ extends AbstractShapeZ
      */
     public function toGeoJSON(): array
     {
-        $curveGeoJSON = array_map(fn($curve) => $curve->toGeoJSON(), $this->curves);
-        return [
-            'type' => 'MultiCurveZ',
-            'coordinates' => $curveGeoJSON
-        ];
+        // GeoJSON does not support CircularString or Z coordinates natively.
+        throw new \RuntimeException('GeoJSON does not support MultiCurveZ. Use EWKT instead.');
     }
 
     /**

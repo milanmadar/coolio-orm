@@ -19,7 +19,7 @@ class QueryBuilder extends DoctrineQueryBuilder
     private const TYPE_UPDATE = 'UPDATE';
     private const TYPE_DELETE = 'DELETE';
     private string|null $type;
-    /** @var array< array<string> > */
+    /** @var array< array{string, string|null} > */
     private array $orderBys;
 
     /** @var int in the whereColumn() methods we use this to generate unique named placeholders */

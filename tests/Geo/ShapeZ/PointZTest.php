@@ -32,4 +32,23 @@ class PointZTest extends TestCase
         $this->assertSame($expected, $point->ST_GeomFromEWKT());
     }
 
+    public function testGeoJSONPointZ()
+    {
+        $jsonData = [
+            'type' => 'Point',
+            'coordinates' => [30, 10, 5] // x, y, z
+        ];
+
+        $pointZ = PointZ::createFromGeoJSON($jsonData);
+
+        $this->assertInstanceOf(PointZ::class, $pointZ);
+        $this->assertEquals(4326, $pointZ->getSRID());
+
+        $this->assertEquals(30.0, $pointZ->getX());
+        $this->assertEquals(10.0, $pointZ->getY());
+        $this->assertEquals(5.0,  $pointZ->getZ());
+
+        $this->assertEquals($jsonData, $pointZ->toGeoJSON());
+    }
+
 }

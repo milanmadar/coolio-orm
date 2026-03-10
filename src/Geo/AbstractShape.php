@@ -11,7 +11,7 @@ abstract class AbstractShape
      * @param int|null $srid Optional SRID, defaults to the value in $_ENV['GEO_DEFAULT_SRID']
      * @return AbstractShape
      */
-    //abstract public static function createFromGeoJSON(array $jsonData, int|null $srid = null): AbstractShape;
+    abstract public static function createFromGeoJSON(array $jsonData, int|null $srid = null): AbstractShape;
 
     /**
      * @param string $ewktString
@@ -37,7 +37,7 @@ abstract class AbstractShape
     /**
      * @return array<string, mixed>
      */
-    //abstract public function toGeoJSON(): array;
+    abstract public function toGeoJSON(): array;
 
     /**
      * @return string

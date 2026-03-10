@@ -93,11 +93,7 @@ class CurvePolygonZ extends AbstractShapeZ
      */
     public function toGeoJSON(): array
     {
-        $boundaryGeoJSON = array_map(fn($boundary) => $boundary->toGeoJSON(), $this->boundaries);
-        return [
-            'type' => 'CurvePolygonZ',
-            'coordinates' => $boundaryGeoJSON
-        ];
+        throw new \RuntimeException('GeoJSON does not support CurvePolygonZ. Use EWKT instead.');
     }
 
     /**
