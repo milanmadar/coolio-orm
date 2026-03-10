@@ -43,14 +43,14 @@ class GeoZMTest extends TestCase
 
         /** @var GeoShapeZMAll\Entity $ent */
         $ent = $mgr->createQueryBuilder()
-            ->select('pointzm_geom'/*, 'linestringzm_geom'*/)
+            ->select('pointzm_geom', 'linestringzm_geom')
             ->andWhere('1=1')
             ->limit(0, 1)
             ->fetchOneEntity()
         ;
 
         $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\ShapeZM\PointZM', $ent->getPointZMGeom());
-        //$this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\ShapeZ\LineStringZM', $ent->getLinestringZMGeom());
+        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\ShapeZM\LineStringZM', $ent->getLinestringZMGeom());
     }
 
     public function testInsert_asObjects()

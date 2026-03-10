@@ -49,7 +49,7 @@ class Manager extends \Milanmadar\CoolioORM\Manager
     public function getFieldTypes(): array { return [
         'id' => 'integer',
         'pointzm_geom' => 'geometry',
-//        'linestringzm_geom' => 'geometry',
+        'linestringzm_geom' => 'geometry',
 //        'polygonzm_geom' => 'geometry',
 //        'multipointzm_geom' => 'geometry',
 //        'multilinestringzm_geom' => 'geometry',

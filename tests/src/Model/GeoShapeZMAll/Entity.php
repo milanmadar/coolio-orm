@@ -17,12 +17,12 @@ class Entity extends \Milanmadar\CoolioORM\Entity
         return $this;
     }
 
-    public function getLineStringZMGeom(): ShapeZM\LineStringZ
+    public function getLineStringZMGeom(): ShapeZM\LineStringZM
     {
         return $this->_get('linestringzm_geom');
     }
 
-    public function setLineStringZMGeom(ShapeZM\LineStringZ $val): self
+    public function setLineStringZMGeom(ShapeZM\LineStringZM $val): self
     {
         $this->_set('linestringzm_geom', $val);
         return $this;

@@ -236,7 +236,7 @@ class Shape2D3D4DFactory
 
             case 'LINESTRING':
                 return match($dims) {
-                    //4 => ShapeZM\LineStringZM::createFromGeoEWKTString($ewktString),
+                    4 => ShapeZM\LineStringZM::createFromGeoEWKTString($ewktString),
                     3 => ShapeZ\LineStringZ::createFromGeoEWKTString($ewktString),
                     default => Shape2D\LineString::createFromGeoEWKTString($ewktString),
                 };
