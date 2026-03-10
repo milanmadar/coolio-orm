@@ -16,9 +16,6 @@ class Feature extends AbstractShape2D
     private string|int|null $id = null;
 
     /**
-     * Create a Feature from GeoJSON.
-     *
-     * Expected:
      * {
      *   "type": "Feature",
      *   "geometry": { ... valid geometry ... },
@@ -32,27 +29,20 @@ class Feature extends AbstractShape2D
      */
     public static function createFromGeoJSON(array $jsonData, int|null $srid = null): Feature
     {
-        if (!isset($geoJsonData['geometry'])) {
+        if (!isset($jsonData['geometry'])) {
             throw new \InvalidArgumentException('Feature GeoJSON must have a "geometry" key.');
         }
 
         // Use your factory to parse the geometry
-        $geometry = Shape2D3DFactory::createFromGeoJSON($geoJsonData['geometry']);
+        $geometry = Shape2D3DFactory::createFromGeoJSON($jsonData['geometry'], $srid);
 
-        $properties = $geoJsonData['properties'] ?? null;
-        $id = $geoJsonData['id'] ?? null;
+        $properties = $jsonData['properties'] ?? null;
+        $id = $jsonData['id'] ?? null;
 
-        return new Feature($geometry, $properties, $id);
+        return new Feature($geometry, $properties, $id, $srid);
     }
 
     /**
-     * Parse from EWKT-based feature (nonstandard, but allowed in your domain).
-     *
-     * We expect something like:
-     * SRID=4326;GEOMETRYCOLLECTION(...)
-     * SRID=4326;POINT(...)
-     * etc.
-     *
      * (Properties cannot be encoded in EWKT - this method only extracts geometry)
      *
      * @param string $ewktString
@@ -60,19 +50,10 @@ class Feature extends AbstractShape2D
      */
     public static function createFromGeoEWKTString(string $ewktString): Feature
     {
-        $upper = strtoupper($ewktString);
-        return new Feature(
-            match (true) {
-                str_contains($upper, 'MULTIPOINT')         => MultiPoint::createFromGeoEWKTString($ewktString),
-                str_contains($upper, 'MULTILINESTRING')    => MultiLineString::createFromGeoEWKTString($ewktString),
-                str_contains($upper, 'MULTIPOLYGON')       => MultiPolygon::createFromGeoEWKTString($ewktString),
-                str_contains($upper, 'GEOMETRYCOLLECTION') => GeometryCollection::createFromGeoEWKTString($ewktString),
-                str_contains($upper, 'POINT')              => Point::createFromGeoEWKTString($ewktString),
-                str_contains($upper, 'LINESTRING')         => LineString::createFromGeoEWKTString($ewktString),
-                str_contains($upper, 'POLYGON')            => Polygon::createFromGeoEWKTString($ewktString),
-                default => throw new \InvalidArgumentException("Unsupported EWKT geometry in Feature: $ewktString")
-            }
-        );
+        $geometry = Shape2D3DFactory::createFromGeoEWKTString($ewktString);
+
+        // EWKT cannot carry properties or id
+        return new Feature($geometry, null, null, $geometry->getSrid());
     }
 
     /**
@@ -144,5 +125,10 @@ class Feature extends AbstractShape2D
         }
 
         return $data;
+    }
+
+    public function toWKT(): string
+    {
+        return $this->geometry->toWKT();
     }
 }
