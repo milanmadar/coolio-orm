@@ -12,7 +12,7 @@ class CompoundCurveZ extends AbstractShapeZ implements HasStartEndPointZInterfac
      * @param int|null $srid
      * @return CompoundCurveZ
      */
-    /*public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): CompoundCurveZ
+    /*public static function createFromGeoJSON(array $jsonData, int|null $srid = null): CompoundCurveZ
     {
         throw new \RuntimeException('GeoJSON does not support CompoundCurveZ. Use EWKT instead.');
     }*/

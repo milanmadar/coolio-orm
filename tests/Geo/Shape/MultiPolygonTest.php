@@ -51,4 +51,40 @@ class MultiPolygonTest extends TestCase
         $this->assertSame($expected, $multiPolygon->ST_GeomFromEWKT());
     }
 
+    public function testGeoJSON()
+    {
+        $jsonData = [
+            'type' => 'MultiPolygon',
+            'coordinates' => [
+                [   // first polygon
+                    [   // outer ring (CCW)
+                        [330, 320],
+                        [345, 340],
+                        [310, 340],
+                        [330, 320]
+                    ]
+                ],
+                [   // second polygon
+                    [   // outer ring (CCW)
+                        [215, 25],
+                        [240, 210],
+                        [210, 220],
+                        [25, 210],
+                        [215, 25]
+                    ],
+                    [   // inner ring / hole (CW)
+                        [120, 110],
+                        [115, 115],
+                        [125, 115],
+                        [120, 110]
+                    ]
+                ]
+            ]
+        ];
+
+        $multiPolygon = MultiPolygon::createFromGeoJSON($jsonData);
+
+        $this->assertEquals(4326, $multiPolygon->getSRID());
+        $this->assertEquals($jsonData, $multiPolygon->toGeoJSON());
+    }
 }

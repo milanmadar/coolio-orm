@@ -10,28 +10,29 @@ class GeometryCollection extends AbstractShape2D
     private array $geometries;
 
     /**
-     * @param array<mixed> $jsonData
+     * @param array<string, mixed> $jsonData
+     * @param int|null $srid Optional SRID, defaults to the value in $_ENV['GEO_DEFAULT_SRID']
      * @return GeometryCollection
      */
-//    public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): GeometryCollection
-//    {
-//        if (
-//            !isset($jsonData['type'], $jsonData['geometries']) ||
-//            $jsonData['type'] !== 'GeometryCollection' ||
-//            !is_array($jsonData['geometries'])
-//        ) {
-//            throw new \InvalidArgumentException('Invalid GeoJSON for GeometryCollection.');
-//        }
-//
-//        $geometries = [];
-//        foreach ($jsonData['geometries'] as $geometryData) {
-//            /** @var AbstractShape2D $_ */
-//            $_ = Shape2D3DFactory::createFromGeoJSONData($geometryData, $srid);
-//            $geometries[] = $_;
-//        }
-//
-//        return new GeometryCollection($geometries, $srid);
-//    }
+    public static function createFromGeoJSON(array $jsonData, int|null $srid = null): GeometryCollection
+    {
+        if (
+            !isset($jsonData['type'], $jsonData['geometries']) ||
+            $jsonData['type'] !== 'GeometryCollection' ||
+            !is_array($jsonData['geometries'])
+        ) {
+            throw new \InvalidArgumentException('Invalid GeoJSON for GeometryCollection.');
+        }
+
+        $geometries = [];
+        foreach ($jsonData['geometries'] as $geometryData) {
+            /** @var AbstractShape2D $_ */
+            $_ = Shape2D3DFactory::createFromGeoJSON($geometryData, $srid);
+            $geometries[] = $_;
+        }
+
+        return new GeometryCollection($geometries, $srid);
+    }
 
     /**
      * @param string $ewktString
@@ -129,13 +130,16 @@ class GeometryCollection extends AbstractShape2D
         return 'GEOMETRYCOLLECTION(' . implode(',', $wktGeometries) . ')';
     }
 
-    /*public function toGeoJSON(): array
+    /**
+     * @return array<string, mixed>
+     */
+    public function toGeoJSON(): array
     {
         return [
             'type' => 'GeometryCollection',
             'geometries' => array_map(fn(AbstractShape2D $g) => $g->toGeoJSON(), $this->geometries)
         ];
-    }*/
+    }
 
     /**
      * @return AbstractShape2D[]

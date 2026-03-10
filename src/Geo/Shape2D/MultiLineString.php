@@ -8,11 +8,11 @@ class MultiLineString extends AbstractShape2D
     private array $lineStrings;
 
     /**
-     * @param array<mixed> $jsonData
+     * @param array<string, mixed> $jsonData
      * @param int|null $srid Optional SRID, defaults to the value in $_ENV['GEO_DEFAULT_SRID']
      * @return MultiLineString
      */
-    /*public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): MultiLineString
+    public static function createFromGeoJSON(array $jsonData, int|null $srid = null): MultiLineString
     {
         if (!isset($srid)) $srid = $_ENV['GEO_DEFAULT_SRID'];
 
@@ -44,7 +44,7 @@ class MultiLineString extends AbstractShape2D
         }
 
         return new MultiLineString($lineStrings, $srid);
-    }*/
+    }
 
     /**
      * @param string $ewktString
@@ -162,17 +162,20 @@ class MultiLineString extends AbstractShape2D
         return 'MULTILINESTRING(' . implode(',', $segments) . ')';
     }
 
-    /*public function toGeoJSON(): array
+    /**
+     * @return array<string, mixed>
+     */
+    public function toGeoJSON(): array
     {
         return [
             'type' => 'MultiLineString',
             'coordinates' => array_map(
                 fn(LineString $ls) => array_map(
-                    fn(Point $p) => [$p->getX(), $p->getY()],
+                    fn(Point $p) => $p->getCoordinates(),
                     $ls->getPoints()
                 ),
                 $this->lineStrings
             )
         ];
-    }*/
+    }
 }

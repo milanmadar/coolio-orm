@@ -12,7 +12,7 @@ class MultiLineStringZ extends AbstractShapeZ
      * @param int|null $srid Optional SRID, defaults to the value in $_ENV['GEO_DEFAULT_SRID']
      * @return MultiLineStringZ
      */
-    /*public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): MultiLineStringZ
+    /*public static function createFromGeoJSON(array $jsonData, int|null $srid = null): MultiLineStringZ
     {
         if (!isset($srid)) $srid = $_ENV['GEO_DEFAULT_SRID'];
 

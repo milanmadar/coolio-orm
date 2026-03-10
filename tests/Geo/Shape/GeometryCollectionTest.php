@@ -63,4 +63,132 @@ class GeometryCollectionTest extends TestCase
         $this->assertSame($expected, $geometryCollection->ST_GeomFromEWKT());
     }
 
+    public function testGeometryCollectionGeoJSON()
+    {
+        $srid = 4326;
+
+        $jsonData = [
+            'type' => 'GeometryCollection',
+            'geometries' => [
+                // Point
+                [
+                    'type' => 'Point',
+                    'coordinates' => [10, 20]
+                ],
+
+                // MultiPoint
+                [
+                    'type' => 'MultiPoint',
+                    'coordinates' => [
+                        [30, 40],
+                        [50, 60]
+                    ]
+                ],
+
+                // LineString
+                [
+                    'type' => 'LineString',
+                    'coordinates' => [
+                        [0, 0],
+                        [10, 10],
+                        [20, 0]
+                    ]
+                ],
+
+                // MultiLineString
+                [
+                    'type' => 'MultiLineString',
+                    'coordinates' => [
+                        [
+                            [0, 0],
+                            [10, 0],
+                            [10, 10]
+                        ],
+                        [
+                            [20, 20],
+                            [30, 30],
+                            [40, 20]
+                        ]
+                    ]
+                ],
+
+                // Polygon (outer ring CCW, one hole CW)
+                [
+                    'type' => 'Polygon',
+                    'coordinates' => [
+                        [
+                            [0, 0],
+                            [10, 0],
+                            [10, 10],
+                            [0, 10],
+                            [0, 0]
+                        ],
+                        [
+                            [2, 2],
+                            [5, 5],
+                            [5, 2],
+                            [2, 2]
+                        ]
+                    ]
+                ],
+
+                // MultiPolygon (outer rings CCW, inner rings CW)
+                [
+                    'type' => 'MultiPolygon',
+                    'coordinates' => [
+                        [
+                            [
+                                [0, 0],
+                                [5, 0],
+                                [5, 5],
+                                [0, 5],
+                                [0, 0]
+                            ]
+                        ],
+                        [
+                            [
+                                [10, 10],
+                                [15, 10],
+                                [15, 15],
+                                [10, 15],
+                                [10, 10]
+                            ],
+                            [
+                                [11, 11],
+                                [14, 14],
+                                [14, 11],
+                                [11, 11]
+                            ]
+                        ]
+                    ]
+                ],
+
+                // Nested GeometryCollection
+                [
+                    'type' => 'GeometryCollection',
+                    'geometries' => [
+                        [
+                            'type' => 'Point',
+                            'coordinates' => [99, 88]
+                        ],
+                        [
+                            'type' => 'LineString',
+                            'coordinates' => [
+                                [1, 1],
+                                [2, 2],
+                                [3, 3]
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ];
+
+        $geometryCollection = GeometryCollection::createFromGeoJSON($jsonData);
+
+        $this->assertEquals($srid, $geometryCollection->getSRID());
+
+        $this->assertEquals($jsonData, $geometryCollection->toGeoJSON());
+    }
+
 }

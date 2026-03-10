@@ -96,4 +96,80 @@ class PolygonTest extends TestCase
         $this->assertSame($expected, $polygon->ST_GeomFromEWKT());
     }
 
+    public function testGeoJSONPolygon()
+    {
+        $jsonData = [
+            'type' => 'Polygon',
+            'coordinates' => [
+                [   // outer ring
+                    [30, 10],
+                    [40, 40],
+                    [20, 40],
+                    [10, 20],
+                    [30, 10]
+                ],
+                [   // inner ring (hole)
+                    [20, 30],
+                    [35, 35],
+                    [30, 20],
+                    [20, 30]
+                ]
+            ]
+        ];
+
+        $polygon = Polygon::createFromGeoJSON($jsonData);
+
+        $this->assertEquals(4326, $polygon->getSRID());
+        $this->assertEquals($jsonData, $polygon->toGeoJSON());
+    }
+
+    public function testPolygonWindingFix()
+    {
+        $srid = 4326;
+
+        // Outer ring (incorrectly clockwise)
+        $outerPoints = [
+            new Point(0,0,$srid),
+            new Point(0,10,$srid),
+            new Point(10,10,$srid),
+            new Point(10,0,$srid),
+            new Point(0,0,$srid),
+        ];
+
+        // Inner ring (hole) (incorrectly counter-clockwise)
+        $innerPoints = [
+            new Point(2,2,$srid),
+            new Point(8,2,$srid),
+            new Point(8,8,$srid),
+            new Point(2,8,$srid),
+            new Point(2,2,$srid),
+        ];
+
+        $outerLine = new LineString($outerPoints, $srid);
+        $innerLine = new LineString($innerPoints, $srid);
+
+        $polygon = new Polygon([$outerLine, $innerLine], $srid);
+
+        $outerAfter = $polygon->getLineStrings()[0]->getPoints();
+        $innerAfter = $polygon->getLineStrings()[1]->getPoints();
+
+        // The outer ring should now be counter-clockwise
+        $this->assertTrue($this->_callPrivateIsCCW($outerAfter));
+
+        // The inner ring should now be clockwise
+        $this->assertFalse($this->_callPrivateIsCCW($innerAfter));
+    }
+
+    /**
+     * Helper to call the private _isCCW method of Polygon.
+     */
+    private function _callPrivateIsCCW(array $points): bool
+    {
+        $polygon = new Polygon([new LineString(array_merge($points, [$points[0]]))]); // dummy Polygon
+        $reflection = new \ReflectionClass($polygon);
+        $method = $reflection->getMethod('_isCCW');
+        $method->setAccessible(true);
+        return $method->invoke($polygon, $points);
+    }
+
 }

@@ -13,7 +13,7 @@ class GeometryCollectionZ extends AbstractShapeZ
      * @param array<mixed> $jsonData
      * @return GeometryCollectionZ
      */
-//    public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): GeometryCollectionZ
+//    public static function createFromGeoJSON(array $jsonData, int|null $srid = null): GeometryCollectionZ
 //    {
 //        if (!isset($srid)) $srid = $_ENV['GEO_DEFAULT_SRID'];
 //
@@ -28,7 +28,7 @@ class GeometryCollectionZ extends AbstractShapeZ
 //        $geometries = [];
 //        foreach ($jsonData['geometries'] as $geometryData) {
 //            /** @var AbstractShapeZ $_ */
-//            $_ = Shape2D3DFactory::createFromGeoJSONData($geometryData, $srid);
+//            $_ = Shape2D3DFactory::createFromGeoJSON($geometryData, $srid);
 //            $geometries[] = $_;
 //        }
 //

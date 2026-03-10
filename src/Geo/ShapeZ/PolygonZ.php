@@ -12,7 +12,7 @@ class PolygonZ extends AbstractShapeZ
      * @param int|null $srid Optional SRID, defaults to the value in $_ENV['GEO_DEFAULT_SRID']
      * @return PolygonZ
      */
-    /*public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): PolygonZ
+    /*public static function createFromGeoJSON(array $jsonData, int|null $srid = null): PolygonZ
     {
         if (!isset($srid)) $srid = $_ENV['GEO_DEFAULT_SRID'];
 

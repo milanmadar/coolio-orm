@@ -33,4 +33,22 @@ class LineStringTest extends TestCase
         $this->assertSame($expected, $lineString->ST_GeomFromEWKT());
     }
 
+    public function testGeoJSON()
+    {
+        $jsonData = [
+            'type' => 'LineString',
+            'coordinates' => [
+                [30, 10],
+                [40, 40],
+                [20, 40],
+                [10, 20]
+            ]
+        ];
+
+        $lineString = LineString::createFromGeoJSON($jsonData);
+
+        $this->assertEquals(4326, $lineString->getSRID());
+        $this->assertEquals($jsonData, $lineString->toGeoJSON());
+    }
+
 }

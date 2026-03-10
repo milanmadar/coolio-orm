@@ -12,7 +12,7 @@ class MultiCurveZ extends AbstractShapeZ
      * @param int|null $srid Optional SRID, defaults to the value in $_ENV['GEO_DEFAULT_SRID']
      * @return MultiCurveZ
      */
-    /*public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): MultiCurveZ
+    /*public static function createFromGeoJSON(array $jsonData, int|null $srid = null): MultiCurveZ
     {
         // GeoJSON does not support CircularString or Z coordinates natively.
         throw new \RuntimeException('GeoJSON does not support MultiCurveZ. Use EWKT instead.');

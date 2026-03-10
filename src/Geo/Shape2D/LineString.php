@@ -8,11 +8,11 @@ class LineString extends AbstractShape2D implements HasStartEndPointInterface
     private array $points;
 
     /**
-     * @param array<mixed> $jsonData
+     * @param array<string, mixed> $jsonData
      * @param int|null $srid Optional SRID, defaults to the value in $_ENV['GEO_DEFAULT_SRID']
      * @return LineString
      */
-    /*public static function createFromGeoJSONData(array $jsonData, ?int $srid = null): LineString
+    public static function createFromGeoJSON(array $jsonData, ?int $srid = null): LineString
     {
         if (!isset($srid)) $srid = $_ENV['GEO_DEFAULT_SRID'];
 
@@ -35,7 +35,7 @@ class LineString extends AbstractShape2D implements HasStartEndPointInterface
         }
 
         return new LineString($points, $srid);
-    }*/
+    }
 
     /**
      * @param string $ewktString
@@ -134,13 +134,16 @@ class LineString extends AbstractShape2D implements HasStartEndPointInterface
         return 'LINESTRING(' . implode(',', $pointStrings) . ')';
     }
 
-    /*public function toGeoJSON(): array
+    /**
+     * @return array<string, mixed>
+     */
+    public function toGeoJSON(): array
     {
         return [
             'type' => 'LineString',
-            'coordinates' => $this->points
+            'coordinates' => array_map(fn(Point $e)=>$e->getCoordinates(), $this->points)
         ];
-    }*/
+    }
 
     /**
      * @inheritDoc
