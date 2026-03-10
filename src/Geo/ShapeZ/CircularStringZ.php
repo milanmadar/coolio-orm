@@ -50,7 +50,7 @@ class CircularStringZ extends AbstractShapeZ implements HasStartEndPointZInterfa
             throw new \InvalidArgumentException('Invalid CIRCULARSTRINGZ format in EWKT.');
         }
 
-        $pointsData = explode(',', $matches[1]);
+        $pointsData = array_map('trim', explode(',', $matches[1]));
         $points = [];
 
         foreach ($pointsData as $pointData) {

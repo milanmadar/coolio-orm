@@ -2,18 +2,17 @@
 
 namespace Pgsql;
 
-use Milanmadar\CoolioORM\Geo\ShapeZM\GeometryCollectionZM;
 use Milanmadar\CoolioORM\Geo\ShapeZM\PointZM;
-use Milanmadar\CoolioORM\Geo\ShapeZ\LineStringZ;
-use Milanmadar\CoolioORM\Geo\ShapeZ\PolygonZ;
-use Milanmadar\CoolioORM\Geo\ShapeZ\MultiPointZ;
-use Milanmadar\CoolioORM\Geo\ShapeZ\MultiLineStringZ;
-use Milanmadar\CoolioORM\Geo\ShapeZ\MultiPolygonZ;
-use Milanmadar\CoolioORM\Geo\ShapeZ\GeometryCollectionZ;
-use Milanmadar\CoolioORM\Geo\ShapeZ\CircularStringZ;
-use Milanmadar\CoolioORM\Geo\ShapeZ\CompoundCurveZ;
-use Milanmadar\CoolioORM\Geo\ShapeZ\CurvePolygonZ;
-use Milanmadar\CoolioORM\Geo\ShapeZ\MultiCurveZ;
+use Milanmadar\CoolioORM\Geo\ShapeZM\LineStringZM;
+use Milanmadar\CoolioORM\Geo\ShapeZM\PolygonZM;
+use Milanmadar\CoolioORM\Geo\ShapeZM\MultiPointZM;
+use Milanmadar\CoolioORM\Geo\ShapeZM\MultiLineStringZM;
+use Milanmadar\CoolioORM\Geo\ShapeZM\MultiPolygonZM;
+use Milanmadar\CoolioORM\Geo\ShapeZM\GeometryCollectionZM;
+use Milanmadar\CoolioORM\Geo\ShapeZM\CircularStringZM;
+//use Milanmadar\CoolioORM\Geo\ShapeZM\CompoundCurveZM;
+//use Milanmadar\CoolioORM\Geo\ShapeZM\CurvePolygonZM;
+//use Milanmadar\CoolioORM\Geo\ShapeZM\MultiCurveZM;
 use Milanmadar\CoolioORM\ORM;
 use PHPUnit\Framework\TestCase;
 use tests\DbHelper;
@@ -52,7 +51,8 @@ class GeoZMTest extends TestCase
                 'multilinestringzm_geom',
                 'multipolygonzm_geom',
                 'geomcollectionzm_geom',
-                //'circularstringzm_geom', 'compoundcurvezm_geom', 'curvepolygonzm_geom', 'multicurvezm_geom'
+                'circularstringzm_geom',
+                //'compoundcurvezm_geom', 'curvepolygonzm_geom', 'multicurvezm_geom'
             )
             ->andWhere('1=1')
             ->limit(0, 1)
@@ -66,6 +66,7 @@ class GeoZMTest extends TestCase
         $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\ShapeZM\MultiLineStringZM', $ent->getMultiLineStringZMGeom());
         $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\ShapeZM\MultiPolygonZM', $ent->getMultipolygonZMGeom());
         $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\ShapeZM\GeometryCollectionZM', $ent->getGeomcollectionZMGeom());
+        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\ShapeZM\CircularStringZM', $ent->getCircularStringZMGeom());
     }
 
     public function testInsert_asObjects()

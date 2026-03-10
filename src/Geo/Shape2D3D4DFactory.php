@@ -176,7 +176,7 @@ class Shape2D3D4DFactory
         switch ($type) {
             case 'CIRCULARSTRING':
                 return match($dims) {
-                    //4 => ShapeZM\CircularStringZM::createFromGeoEWKTString($ewktString),
+                    4 => ShapeZM\CircularStringZM::createFromGeoEWKTString($ewktString),
                     3 => ShapeZ\CircularStringZ::createFromGeoEWKTString($ewktString),
                     default => Shape2D\CircularString::createFromGeoEWKTString($ewktString),
                 };
