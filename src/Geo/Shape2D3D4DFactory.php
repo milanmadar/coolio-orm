@@ -112,10 +112,17 @@ class Shape2D3D4DFactory
                     $geometries[] = self::createFromGeoJSONString((string)json_encode($geometry), $srid);
                 }
 
-                if(!empty($geometries) && $geometries[0] instanceof ShapeZ\AbstractShapeZ) {
-                    /** @var array<ShapeZ\AbstractShapeZ> $geometries */
-                    return new ShapeZ\GeometryCollectionZ($geometries, $srid);
+                if(!empty($geometries)) {
+                    if($geometries[0] instanceof ShapeZM\AbstractShapeZM) {
+                        /** @var array<ShapeZM\AbstractShapeZM> $geometries */
+                        return new ShapeZM\GeometryCollectionZM($geometries, $srid);
+                    }
+                    if($geometries[0] instanceof ShapeZ\AbstractShapeZ) {
+                        /** @var array<ShapeZ\AbstractShapeZ> $geometries */
+                        return new ShapeZ\GeometryCollectionZ($geometries, $srid);
+                    }
                 }
+
                 /** @var array<Shape2D\AbstractShape2D> $geometries */
                 return new Shape2D\GeometryCollection($geometries, $srid);
 
@@ -216,7 +223,7 @@ class Shape2D3D4DFactory
 
             case 'GEOMETRYCOLLECTION':
                 return match($dims) {
-                    //4 => ShapeZM\GeometryCollectionZM::createFromGeoEWKTString($ewktString),
+                    4 => ShapeZM\GeometryCollectionZM::createFromGeoEWKTString($ewktString),
                     3 => ShapeZ\GeometryCollectionZ::createFromGeoEWKTString($ewktString),
                     default => Shape2D\GeometryCollection::createFromGeoEWKTString($ewktString),
                 };
