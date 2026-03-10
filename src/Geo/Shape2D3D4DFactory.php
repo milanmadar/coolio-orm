@@ -101,6 +101,8 @@ class Shape2D3D4DFactory
                     return Shape2D\MultiPolygon::createFromGeoJSON($geoJsonData, $srid);
                 } elseif ($coordCount == 3) {
                     return ShapeZ\MultiPolygonZ::createFromGeoJSON($geoJsonData, $srid);
+                } elseif ($coordCount == 4) {
+                    return ShapeZ\MultiPolygonZM::createFromGeoJSON($geoJsonData, $srid);
                 }
                 break;
 
@@ -224,7 +226,7 @@ class Shape2D3D4DFactory
 
             case 'MULTIPOLYGON':
                 return match($dims) {
-                    //4 => ShapeZM\MultiPolygonZM::createFromGeoEWKTString($ewktString),
+                    4 => ShapeZM\MultiPolygonZM::createFromGeoEWKTString($ewktString),
                     3 => ShapeZ\MultiPolygonZ::createFromGeoEWKTString($ewktString),
                     default => Shape2D\MultiPolygon::createFromGeoEWKTString($ewktString),
                 };

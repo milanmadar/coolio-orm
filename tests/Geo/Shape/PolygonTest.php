@@ -160,6 +160,33 @@ class PolygonTest extends TestCase
         $this->assertFalse($this->_callPrivateIsCCW($innerAfter));
     }
 
+    public function testCreatePolygonFromEWKTComplex()
+    {
+        $ewkt = 'SRID=4326;POLYGON((0 0,0 3,3 3,3 0,0 0),(4 4,4 6,6 6,6 4,4 4))';
+
+        $polygon = Polygon::createFromGeoEWKTString($ewkt);
+
+        // Check outer ring
+        $outer = $polygon->getLineStrings()[0]->getPoints();
+        $this->assertEquals([
+            [0,0],
+            [3,0],
+            [3,3],
+            [0,3],
+            [0,0]
+        ], array_map(fn(Point $p) => [$p->getX(), $p->getY()], $outer));
+
+        // Check inner ring (hole)
+        $inner = $polygon->getLineStrings()[1]->getPoints();
+        $this->assertEquals([
+            [4,4],
+            [4,6],
+            [6,6],
+            [6,4],
+            [4,4]
+        ], array_map(fn(Point $p) => [$p->getX(), $p->getY()], $inner));
+    }
+
     /**
      * Helper to call the private _isCCW method of Polygon.
      */

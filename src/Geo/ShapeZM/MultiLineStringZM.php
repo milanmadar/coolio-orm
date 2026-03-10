@@ -2,7 +2,6 @@
 
 namespace Milanmadar\CoolioORM\Geo\ShapeZM;
 
-use Milanmadar\CoolioORM\Geo\AbstractShape;
 use InvalidArgumentException;
 
 class MultiLineStringZM extends AbstractShapeZM

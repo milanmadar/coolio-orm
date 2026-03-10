@@ -157,4 +157,15 @@ class PointZM extends AbstractShapeZM
     {
         return [$this->x, $this->y, $this->z, $this->m];
     }
+
+    public function __equals(PointZM $other): bool
+    {
+        return (
+            $this->x === $other->getX() &&
+            $this->y === $other->getY() &&
+            $this->z === $other->getZ()
+            // The last one is not actually a coordinate, but usually a timestamp or measure, so we might want to ignore it in equality checks
+            //&& $this->m === $other->getM()
+        );
+    }
 }

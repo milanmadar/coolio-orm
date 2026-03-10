@@ -53,7 +53,7 @@ class Manager extends \Milanmadar\CoolioORM\Manager
         'polygonzm_geom' => 'geometry',
         'multipointzm_geom' => 'geometry',
         'multilinestringzm_geom' => 'geometry',
-//        'multipolygonzm_geom' => 'geometry',
+        'multipolygonzm_geom' => 'geometry',
 //        'geomcollectionzm_geom' => 'geometry',
 //        'circularstringzm_geom' => 'geometry_curved',
 //        'compoundcurvezm_geom' => 'geometry_curved',

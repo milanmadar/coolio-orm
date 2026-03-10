@@ -87,4 +87,40 @@ class MultiPolygonTest extends TestCase
         $this->assertEquals(4326, $multiPolygon->getSRID());
         $this->assertEquals($jsonData, $multiPolygon->toGeoJSON());
     }
+
+    public function testMultiPolygonWithSinglePolygon()
+    {
+        // Single polygon inside a MULTIPOLYGON
+        $ewkt = 'SRID=4326;MULTIPOLYGON(((0 0,0 5,5 5,5 0,0 0)))';
+
+        $multi = MultiPolygon::createFromGeoEWKTString($ewkt);
+
+        // Should have exactly 1 polygon
+        $this->assertCount(1, $multi->getPolygons());
+
+        $polygon = $multi->getPolygons()[0];
+
+        // Polygon should have 1 ring (the outer ring)
+        $this->assertCount(1, $polygon->getLineStrings());
+
+        $ring = $polygon->getLineStrings()[0];
+
+        $expectedCoordinates = [
+            [0,0],
+            [5,0],
+            [5,5],
+            [0,5],
+            [0,0],
+        ];
+
+        $points = $ring->getPoints();
+        foreach ($expectedCoordinates as $i => [$x, $y]) {
+            $this->assertEquals($x, $points[$i]->getX());
+            $this->assertEquals($y, $points[$i]->getY());
+        }
+
+        // WKT check
+        $expectedWKT = 'MULTIPOLYGON(((0 0,5 0,5 5,0 5,0 0)))';
+        $this->assertEquals($expectedWKT, $multi->toWKT());
+    }
 }
