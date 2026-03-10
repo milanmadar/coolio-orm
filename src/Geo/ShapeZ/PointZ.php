@@ -76,7 +76,7 @@ class PointZ extends AbstractShapeZ
 
     public function toWKT(): string
     {
-        return sprintf('POINTZ(%s %s %s)', $this->x, $this->y, $this->z);
+        return sprintf('POINT Z(%s %s %s)', $this->x, $this->y, $this->z);
     }
 
     /**

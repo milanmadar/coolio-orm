@@ -86,7 +86,7 @@ class MultiCurveZ extends AbstractShapeZ
     public function toWKT(): string
     {
         $curveWKT = array_map(fn($curve) => $curve->toWKT(), $this->curves);
-        return 'MULTICURVEZ(' . implode(',', $curveWKT) . ')';
+        return 'MULTICURVE Z(' . implode(',', $curveWKT) . ')';
     }
 
     /**

@@ -209,7 +209,7 @@ class MultiPolygonZ extends AbstractShapeZ
             $this->polygons
         );
 
-        return 'MULTIPOLYGONZ(' . implode(',', $polygonStrings) . ')';
+        return 'MULTIPOLYGON Z(' . implode(',', $polygonStrings) . ')';
     }
 
     /**

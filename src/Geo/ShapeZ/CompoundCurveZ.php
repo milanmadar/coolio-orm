@@ -102,7 +102,7 @@ class CompoundCurveZ extends AbstractShapeZ implements HasStartEndPointZInterfac
     public function toWKT(): string
     {
         $segmentWKT = array_map(fn($segment) => $segment->toWKT(), $this->segments);
-        return 'COMPOUNDCURVEZ(' . implode(',', $segmentWKT) . ')';
+        return 'COMPOUNDCURVE Z(' . implode(',', $segmentWKT) . ')';
     }
 
     /**

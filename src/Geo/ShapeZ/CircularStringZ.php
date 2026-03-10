@@ -90,7 +90,7 @@ class CircularStringZ extends AbstractShapeZ implements HasStartEndPointZInterfa
             $this->points
         );
 
-        return 'CIRCULARSTRINGZ(' . implode(',', $pointStrings) . ')';
+        return 'CIRCULARSTRING Z(' . implode(',', $pointStrings) . ')';
     }
 
     /**

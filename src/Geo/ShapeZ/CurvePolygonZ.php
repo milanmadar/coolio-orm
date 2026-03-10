@@ -85,7 +85,7 @@ class CurvePolygonZ extends AbstractShapeZ
     public function toWKT(): string
     {
         $boundaryWKT = array_map(fn($boundary) => $boundary->toWKT(), $this->boundaries);
-        return 'CURVEPOLYGONZ(' . implode(',', $boundaryWKT) . ')';
+        return 'CURVEPOLYGON Z(' . implode(',', $boundaryWKT) . ')';
     }
 
     /**

@@ -18,7 +18,7 @@ class CompoundCurveZTest extends TestCase
             new CircularStringZ([new PointZ(3, 1, 1.5), new PointZ(4, 2, 1.5), new PointZ(5, 1, 1.5)]),
         ], 4326);
 
-        $expected = "ST_GeomFromEWKT('SRID=4326;COMPOUNDCURVEZ(LINESTRING Z(2 0 1.5,3 1 1.5),CIRCULARSTRINGZ(3 1 1.5,4 2 1.5,5 1 1.5))')";
+        $expected = "ST_GeomFromEWKT('SRID=4326;COMPOUNDCURVE Z(LINESTRING Z(2 0 1.5,3 1 1.5),CIRCULARSTRING Z(3 1 1.5,4 2 1.5,5 1 1.5))')";
         $this->assertSame($expected, $compoundCurve->ST_GeomFromEWKT());
     }
 
@@ -31,7 +31,7 @@ class CompoundCurveZTest extends TestCase
             new LineStringZ([new PointZ(5, 1, 0), new PointZ(6, 0, 0)]),
         ], 4326);
 
-        $expected = "ST_GeomFromEWKT('SRID=4326;COMPOUNDCURVEZ(LINESTRING Z(2 0 0,3 1 0),CIRCULARSTRINGZ(3 1 0,4 2 0,5 1 0),LINESTRING Z(5 1 0,6 0 0))')";
+        $expected = "ST_GeomFromEWKT('SRID=4326;COMPOUNDCURVE Z(LINESTRING Z(2 0 0,3 1 0),CIRCULARSTRING Z(3 1 0,4 2 0,5 1 0),LINESTRING Z(5 1 0,6 0 0))')";
         $this->assertSame($expected, $compoundCurve->ST_GeomFromEWKT());
     }
 

@@ -127,7 +127,7 @@ class GeometryCollectionZ extends AbstractShapeZ
     public function toWKT(): string
     {
         $wktGeometries = array_map(fn(AbstractShapeZ $g) => $g->toWKT(), $this->geometries);
-        return 'GEOMETRYCOLLECTIONZ(' . implode(',', $wktGeometries) . ')';
+        return 'GEOMETRYCOLLECTION Z(' . implode(',', $wktGeometries) . ')';
     }
 
     /**

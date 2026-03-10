@@ -16,7 +16,7 @@ class CircularStringZTest extends TestCase
             new PointZ(2, 0, 2),
         ], 4326);
 
-        $expected = "ST_GeomFromEWKT('SRID=4326;CIRCULARSTRINGZ(0 0 1,1 1 1,2 0 2)')";
+        $expected = "ST_GeomFromEWKT('SRID=4326;CIRCULARSTRING Z(0 0 1,1 1 1,2 0 2)')";
         $this->assertSame($expected, $circularString->ST_GeomFromEWKT());
     }
 
@@ -30,7 +30,7 @@ class CircularStringZTest extends TestCase
             new PointZ(0, 0, 1),
         ], 4326);
 
-        $expected = "ST_GeomFromEWKT('SRID=4326;CIRCULARSTRINGZ(0 0 1,4 0 1,4 4 1,0 4 1,0 0 1)')";
+        $expected = "ST_GeomFromEWKT('SRID=4326;CIRCULARSTRING Z(0 0 1,4 0 1,4 4 1,0 4 1,0 0 1)')";
         $this->assertSame($expected, $circularString->ST_GeomFromEWKT());
     }
 
