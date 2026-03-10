@@ -1,9 +1,9 @@
 <?php
 
-namespace Milanmadar\CoolioORM\Geo\Shape2D;
+namespace Milanmadar\CoolioORM\Geo;
 
-use Milanmadar\CoolioORM\Geo\AbstractShape;
 use InvalidArgumentException;
+use Milanmadar\CoolioORM\Geo\Shape2D\AbstractShape2D;
 
 class FeatureCollection extends AbstractShape2D
 {

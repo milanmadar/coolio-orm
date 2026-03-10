@@ -1,9 +1,9 @@
 <?php
 
-namespace Geo\Shape;
+namespace Geo;
 
-use Milanmadar\CoolioORM\Geo\Shape2D\Feature;
-use Milanmadar\CoolioORM\Geo\Shape2D\FeatureCollection;
+use Milanmadar\CoolioORM\Geo\Feature;
+use Milanmadar\CoolioORM\Geo\FeatureCollection;
 use Milanmadar\CoolioORM\Geo\Shape2D\Point;
 use PHPUnit\Framework\TestCase;
 

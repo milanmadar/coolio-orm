@@ -1,9 +1,8 @@
 <?php
 
-namespace Milanmadar\CoolioORM\Geo\Shape2D;
+namespace Milanmadar\CoolioORM\Geo;
 
-use Milanmadar\CoolioORM\Geo\AbstractShape;
-use Milanmadar\CoolioORM\Geo\Shape2D3DFactory;
+use Milanmadar\CoolioORM\Geo\Shape2D\AbstractShape2D;
 
 class Feature extends AbstractShape2D
 {

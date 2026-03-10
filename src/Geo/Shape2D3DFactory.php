@@ -108,12 +108,12 @@ class Shape2D3DFactory
                 return new Shape2D\GeometryCollection($geometries, $srid);
 
             case 'Feature':
-                return Shape2D\Feature::createFromGeoJSON($geoJsonData, $srid);
+                return \Milanmadar\CoolioORM\Geo\Feature::createFromGeoJSON($geoJsonData, $srid);
 
             case 'FeatureCollection':
-                return new Shape2D\FeatureCollection(
+                return new \Milanmadar\CoolioORM\Geo\FeatureCollection(
                     array_map(
-                        fn(array $f) => Shape2D\Feature::createFromGeoJSON($f, $srid),
+                        fn(array $f) => \Milanmadar\CoolioORM\Geo\Feature::createFromGeoJSON($f, $srid),
                         $geoJsonData['features'] ?? []
                     ),
                     $srid

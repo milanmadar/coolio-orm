@@ -1,12 +1,12 @@
 <?php
 
-namespace Geo\Shape;
+namespace Geo;
 
-use Milanmadar\CoolioORM\Geo\Shape2D\Feature;
-use Milanmadar\CoolioORM\Geo\Shape2D\Point;
+use Milanmadar\CoolioORM\Geo\Feature;
 use Milanmadar\CoolioORM\Geo\Shape2D\LineString;
-use Milanmadar\CoolioORM\Geo\Shape2D\Polygon;
 use Milanmadar\CoolioORM\Geo\Shape2D\MultiPolygon;
+use Milanmadar\CoolioORM\Geo\Shape2D\Point;
+use Milanmadar\CoolioORM\Geo\Shape2D\Polygon;
 use PHPUnit\Framework\TestCase;
 
 class FeatureTest extends TestCase
