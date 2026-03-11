@@ -19,7 +19,7 @@ class MultiCurveZTest extends TestCase
 
         $multiCurve = new MultiCurveZ([$curve1, $curve2], 4326);
 
-        $expected = "ST_GeomFromEWKT('SRID=4326;MULTICURVEZ(CIRCULARSTRINGZ(0 0 4,1 2 4,2 0 4),LINESTRING Z(3 3 4,4 4 4,5 5 4))')";
+        $expected = "ST_GeomFromEWKT('SRID=4326;MULTICURVE Z(CIRCULARSTRING Z(0 0 4,1 2 4,2 0 4),LINESTRING Z(3 3 4,4 4 4,5 5 4))')";
         $this->assertSame($expected, $multiCurve->ST_GeomFromEWKT());
     }
 
@@ -34,7 +34,7 @@ class MultiCurveZTest extends TestCase
         $multiCurve = new MultiCurveZ([$curve1, $curve2, $curve3], 4326);
 
         // Construct the expected EWKT for the MultiCurve
-        $expected = "ST_GeomFromEWKT('SRID=4326;MULTICURVEZ(CIRCULARSTRINGZ(0 0 0,2 0 0,2 2 0,0 2 0,0 0 0),LINESTRING Z(3 3 0,5 5 0),COMPOUNDCURVEZ(LINESTRING Z(6 6 0,7 7 0),CIRCULARSTRINGZ(7 7 0,8 8 0,9 7 0)))')";
+        $expected = "ST_GeomFromEWKT('SRID=4326;MULTICURVE Z(CIRCULARSTRING Z(0 0 0,2 0 0,2 2 0,0 2 0,0 0 0),LINESTRING Z(3 3 0,5 5 0),COMPOUNDCURVE Z(LINESTRING Z(6 6 0,7 7 0),CIRCULARSTRING Z(7 7 0,8 8 0,9 7 0)))')";
         $this->assertSame($expected, $multiCurve->ST_GeomFromEWKT());
     }
 

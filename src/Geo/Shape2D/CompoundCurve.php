@@ -8,15 +8,17 @@ class CompoundCurve extends AbstractShape2D implements HasStartEndPointInterface
     private array $segments;
 
     /**
-     * @param array<mixed> $jsonData
+     * GeoJSON does not support CompoundCurve
+     * @param array<string, mixed> $jsonData
      * @param int|null $srid Optional SRID, defaults to the value in $_ENV['GEO_DEFAULT_SRID']
      * @return CompoundCurve
+     * @throws \RuntimeException
      */
-    /*public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): CompoundCurve
+    public static function createFromGeoJSON(array $jsonData, int|null $srid = null): CompoundCurve
     {
         // GeoJSON does not support CircularString by spec
         throw new \RuntimeException('GeoJSON does not support CompoundCurve. Use EWKT instead.');
-    }*/
+    }
 
     /**
      * Creates a CompoundCurve from a GeoEWKT string.
@@ -117,14 +119,15 @@ class CompoundCurve extends AbstractShape2D implements HasStartEndPointInterface
         return 'COMPOUNDCURVE(' . implode(',', $segmentWKT) . ')';
     }
 
-    /*public function toGeoJSON(): array
+    /**
+     * GeoJSON does not support CompoundCurve
+     * @return array<string, mixed>
+     * @throws \RuntimeException
+     */
+    public function toGeoJSON(): array
     {
-        $segmentGeoJSON = array_map(fn($segment) => $segment->toGeoJSON(), $this->segments);
-        return [
-            'type' => 'MultiCurve',
-            'coordinates' => $segmentGeoJSON
-        ];
-    }*/
+        throw new \RuntimeException('GeoJSON does not support CompoundCurve.');
+    }
 
     /**
      * @return array<LineString|CircularString>
@@ -161,7 +164,7 @@ class CompoundCurve extends AbstractShape2D implements HasStartEndPointInterface
             $currentEndPoint = $currentSegment->getEndPoint();
             $nextStartPoint = $nextSegment->getStartPoint();
 
-            if ($currentEndPoint != $nextStartPoint) {
+            if (!$currentEndPoint->equals($nextStartPoint)) {
                 throw new \InvalidArgumentException("Segments are not continuous. End point of one segment does not match the start point of the next.");
             }
         }

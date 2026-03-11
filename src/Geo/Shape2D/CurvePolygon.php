@@ -8,15 +8,17 @@ class CurvePolygon extends AbstractShape2D
     private array $boundaries;
 
     /**
-     * @param array<mixed> $jsonData
+     * GeoJSON does not support CurvePolygon
+     * @param array<string, mixed> $jsonData
      * @param int|null $srid Optional SRID, defaults to the value in $_ENV['GEO_DEFAULT_SRID']
      * @return CurvePolygon
+     * @throws \RuntimeException
      */
-    /*public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): CurvePolygon
+    public static function createFromGeoJSON(array $jsonData, int|null $srid = null): CurvePolygon
     {
         // GeoJSON does not support CircularString by spec
         throw new \RuntimeException('GeoJSON does not support CurvePolygon. Use EWKT instead.');
-    }*/
+    }
 
     /**
      * @param string $ewktString
@@ -98,14 +100,15 @@ class CurvePolygon extends AbstractShape2D
         return 'CURVEPOLYGON(' . implode(',', $boundaryWKT) . ')';
     }
 
-    /*public function toGeoJSON(): array
+    /**
+     * GeoJSON does not support CurvePolygon
+     * @return array<string, mixed>
+     * @throws \RuntimeException
+     */
+    public function toGeoJSON(): array
     {
-        $boundaryGeoJSON = array_map(fn($boundary) => $boundary->toGeoJSON(), $this->boundaries);
-        return [
-            'type' => 'CurvePolygon',
-            'coordinates' => $boundaryGeoJSON
-        ];
-    }*/
+        throw new \RuntimeException('GeoJSON does not support CurvePolygon.');
+    }
 
     /**
      * @return array<LineString|CircularString>
@@ -139,7 +142,7 @@ class CurvePolygon extends AbstractShape2D
 
         foreach ($lineStrings as $lineString) {
             $points = $lineString->getPoints();
-            if (count($points) < 4 || $points[0] != end($points)) {
+            if (count($points) < 4 || !$points[0]->equals(end($points))) {
                 throw new \InvalidArgumentException('All rings must be a closed LineString (minimum 4 points, first and last point must be the same).');
             }
         }

@@ -148,9 +148,9 @@ class GeoZTest extends TestCase
         $this->assertTrue($multiPolygonZ == $ent->getMultipolygonZGeom());
         $this->assertTrue($geometryCollectionZ == $ent->getGeomcollectionZGeom());
         $this->assertTrue($circularStringZ == $ent->getCircularstringZGeom());
-        $this->assertTrue($compoundCurveZ == $ent->getCompoundcurvezGeom());
-        $this->assertTrue($curvePolygonZ == $ent->getCurvepolygonzGeom());
-        $this->assertTrue($multiCurveZ == $ent->getMulticurvezGeom());
+        $this->assertTrue($compoundCurveZ == $ent->getCompoundcurveZGeom());
+        $this->assertTrue($curvePolygonZ == $ent->getCurvepolygonZGeom());
+        $this->assertTrue($multiCurveZ == $ent->getMulticurveZGeom());
     }
 
     public function testInsert_asEntity()
@@ -248,8 +248,8 @@ class GeoZTest extends TestCase
         $this->assertTrue($multiPolygonZ == $ent->getMultipolygonZGeom());
         $this->assertTrue($geometryCollectionZ == $ent->getGeomcollectionZGeom());
         $this->assertTrue($circularStringZ == $ent->getCircularstringZGeom());
-        $this->assertTrue($compoundCurveZ == $ent->getCompoundcurvezGeom());
-        $this->assertTrue($curvePolygonZ == $ent->getCurvepolygonzGeom());
-        $this->assertTrue($multiCurveZ == $ent->getMulticurvezGeom());
+        $this->assertTrue($compoundCurveZ == $ent->getCompoundcurveZGeom());
+        $this->assertTrue($curvePolygonZ == $ent->getCurvepolygonZGeom());
+        $this->assertTrue($multiCurveZ == $ent->getMulticurveZGeom());
     }
 }

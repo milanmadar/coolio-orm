@@ -9,15 +9,17 @@ class MultiCurve extends AbstractShape2D
     private array $curves;
 
     /**
+     * GeoJSON does not support MultiCurve
      * @param array<mixed> $jsonData
      * @param int|null $srid Optional SRID, defaults to the value in $_ENV['GEO_DEFAULT_SRID']
      * @return MultiCurve
+     * @throws \RuntimeException
      */
-    /*public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): MultiCurve
+    public static function createFromGeoJSON(array $jsonData, int|null $srid = null): MultiCurve
     {
         // GeoJSON does not support CircularString by spec
         throw new \RuntimeException('GeoJSON does not support MultiCurve. Use EWKT instead.');
-    }*/
+    }
 
     /**
      * @param string $ewktString
@@ -92,14 +94,15 @@ class MultiCurve extends AbstractShape2D
         return 'MULTICURVE(' . implode(',', $curveWKT) . ')';
     }
 
-    /*public function toGeoJSON(): array
+    /**
+     * GeoJSON does not support MultiCurve
+     * @return array<string, mixed>
+     * @throws \RuntimeException
+     */
+    public function toGeoJSON(): array
     {
-        $curveGeoJSON = array_map(fn($curve) => $curve->toGeoJSON(), $this->curves);
-        return [
-            'type' => 'MultiCurve',
-            'coordinates' => $curveGeoJSON
-        ];
-    }*/
+        throw new \RuntimeException('GeoJSON does not support MultiCurve.');
+    }
 
     /**
      * @return array<LineString|CircularString|CompoundCurve>

@@ -31,4 +31,21 @@ class MultiPointTest extends TestCase
         $this->assertSame($expected, $multiPoint->ST_GeomFromEWKT());
     }
 
+    public function testGeoJSONMultiPoint()
+    {
+        $jsonData = [
+            'type' => 'MultiPoint',
+            'coordinates' => [
+                [10, 40],
+                [40, 30],
+                [20, 20],
+                [30, 10]
+            ]
+        ];
+
+        $multiPoint = MultiPoint::createFromGeoJSON($jsonData);
+
+        $this->assertEquals(4326, $multiPoint->getSRID());
+        $this->assertEquals($jsonData, $multiPoint->toGeoJSON());
+    }
 }

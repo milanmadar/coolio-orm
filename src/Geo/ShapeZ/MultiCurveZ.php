@@ -8,15 +8,15 @@ class MultiCurveZ extends AbstractShapeZ
     private array $curves;
 
     /**
-     * @param array<mixed> $jsonData
+     * @param array<string, mixed> $jsonData
      * @param int|null $srid Optional SRID, defaults to the value in $_ENV['GEO_DEFAULT_SRID']
      * @return MultiCurveZ
      */
-    /*public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): MultiCurveZ
+    public static function createFromGeoJSON(array $jsonData, int|null $srid = null): MultiCurveZ
     {
         // GeoJSON does not support CircularString or Z coordinates natively.
         throw new \RuntimeException('GeoJSON does not support MultiCurveZ. Use EWKT instead.');
-    }*/
+    }
 
     /**
      * @param string $ewktString
@@ -86,17 +86,17 @@ class MultiCurveZ extends AbstractShapeZ
     public function toWKT(): string
     {
         $curveWKT = array_map(fn($curve) => $curve->toWKT(), $this->curves);
-        return 'MULTICURVEZ(' . implode(',', $curveWKT) . ')';
+        return 'MULTICURVE Z(' . implode(',', $curveWKT) . ')';
     }
 
-    /*public function toGeoJSON(): array
+    /**
+     * @return array<string, mixed>
+     */
+    public function toGeoJSON(): array
     {
-        $curveGeoJSON = array_map(fn($curve) => $curve->toGeoJSON(), $this->curves);
-        return [
-            'type' => 'MultiCurveZ',
-            'coordinates' => $curveGeoJSON
-        ];
-    }*/
+        // GeoJSON does not support CircularString or Z coordinates natively.
+        throw new \RuntimeException('GeoJSON does not support MultiCurveZ. Use EWKT instead.');
+    }
 
     /**
      * @return array<LineStringZ|CircularStringZ|CompoundCurveZ>

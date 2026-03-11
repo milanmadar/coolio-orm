@@ -2,7 +2,7 @@
 
 namespace Pgsql;
 
-use Milanmadar\CoolioORM\Geo\Shape2D3DFactory;
+use Milanmadar\CoolioORM\Geo\Shape2D3D4DFactory;
 use Milanmadar\CoolioORM\Geo\ShapeZ\LineStringZ;
 use Milanmadar\CoolioORM\Geo\ShapeZ\PointZ;
 use PHPUnit\Framework\TestCase;
@@ -578,7 +578,7 @@ class GeoFunctionsTest extends TestCase
             ->andWhereColumn('id', '=', 1)
             ->fetchOne()
         ;
-        $shortestLine = Shape2D3DFactory::createFromGeoEWKTString($result);
+        $shortestLine = Shape2D3D4DFactory::createFromGeoEWKTString($result);
         $expectedLine = new LineString([new Point(1, 2), new Point(1, 0)]);
         $this->assertTrue($shortestLine == $expectedLine);
     }

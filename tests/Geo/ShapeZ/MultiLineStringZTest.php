@@ -54,4 +54,47 @@ class MultiLineStringZTest extends TestCase
         $this->assertSame($expected, $multiLineString->ST_GeomFromEWKT());
     }
 
+    public function testGeoJSONMultiLineStringZ()
+    {
+        $jsonData = [
+            'type' => 'MultiLineString',
+            'coordinates' => [
+                [
+                    [10, 20, 5],
+                    [20, 30, 6],
+                    [30, 40, 7]
+                ],
+                [
+                    [50, 60, 1],
+                    [60, 70, 2],
+                    [70, 80, 3]
+                ]
+            ]
+        ];
+
+        $multiLineStringZ = MultiLineStringZ::createFromGeoJSON($jsonData);
+
+        $this->assertInstanceOf(MultiLineStringZ::class, $multiLineStringZ);
+        $this->assertEquals(4326, $multiLineStringZ->getSRID());
+
+        // Validate number of LineStrings
+        $lineStrings = $multiLineStringZ->getLineStrings();
+        $this->assertCount(2, $lineStrings);
+
+        // First segment
+        $ls1 = $lineStrings[0]->getPoints();
+        $this->assertEquals([10.0, 20.0, 5.0], $ls1[0]->getCoordinates());
+        $this->assertEquals([20.0, 30.0, 6.0], $ls1[1]->getCoordinates());
+        $this->assertEquals([30.0, 40.0, 7.0], $ls1[2]->getCoordinates());
+
+        // Second segment
+        $ls2 = $lineStrings[1]->getPoints();
+        $this->assertEquals([50.0, 60.0, 1.0], $ls2[0]->getCoordinates());
+        $this->assertEquals([60.0, 70.0, 2.0], $ls2[1]->getCoordinates());
+        $this->assertEquals([70.0, 80.0, 3.0], $ls2[2]->getCoordinates());
+
+        // Round trip
+        $this->assertEquals($jsonData, $multiLineStringZ->toGeoJSON());
+    }
+
 }

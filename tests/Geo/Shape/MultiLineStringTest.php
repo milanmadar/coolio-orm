@@ -54,4 +54,29 @@ class MultiLineStringTest extends TestCase
         $this->assertSame($expected, $multiLineString->ST_GeomFromEWKT());
     }
 
+    public function testGeoJSONMultiLineString()
+    {
+        $jsonData = [
+            'type' => 'MultiLineString',
+            'coordinates' => [
+                [
+                    [10, 10],
+                    [20, 20],
+                    [10, 40]
+                ],
+                [
+                    [40, 40],
+                    [30, 30],
+                    [40, 20],
+                    [30, 10]
+                ]
+            ]
+        ];
+
+        $multiLineString = MultiLineString::createFromGeoJSON($jsonData);
+
+        $this->assertEquals(4326, $multiLineString->getSRID());
+        $this->assertEquals($jsonData, $multiLineString->toGeoJSON());
+    }
+
 }

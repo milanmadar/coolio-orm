@@ -8,14 +8,14 @@ class CompoundCurveZ extends AbstractShapeZ implements HasStartEndPointZInterfac
     private array $segments;
 
     /**
-     * @param array<mixed> $jsonData
+     * @param array<string, mixed> $jsonData
      * @param int|null $srid
      * @return CompoundCurveZ
      */
-    /*public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): CompoundCurveZ
+    public static function createFromGeoJSON(array $jsonData, int|null $srid = null): CompoundCurveZ
     {
         throw new \RuntimeException('GeoJSON does not support CompoundCurveZ. Use EWKT instead.');
-    }*/
+    }
 
     /**
      * Creates a CompoundCurveZ from a GeoEWKT string.
@@ -102,17 +102,16 @@ class CompoundCurveZ extends AbstractShapeZ implements HasStartEndPointZInterfac
     public function toWKT(): string
     {
         $segmentWKT = array_map(fn($segment) => $segment->toWKT(), $this->segments);
-        return 'COMPOUNDCURVEZ(' . implode(',', $segmentWKT) . ')';
+        return 'COMPOUNDCURVE Z(' . implode(',', $segmentWKT) . ')';
     }
 
-    /*public function toGeoJSON(): array
+    /**
+     * @return array<string, mixed>
+     */
+    public function toGeoJSON(): array
     {
-        $segmentGeoJSON = array_map(fn($segment) => $segment->toGeoJSON(), $this->segments);
-        return [
-            'type' => 'MultiCurve',
-            'coordinates' => $segmentGeoJSON
-        ];
-    }*/
+        throw new \RuntimeException('GeoJSON does not support CompoundCurveZ. Use EWKT instead.');
+    }
 
     /**
      * @return array<LineStringZ|CircularStringZ>
@@ -145,7 +144,7 @@ class CompoundCurveZ extends AbstractShapeZ implements HasStartEndPointZInterfac
             $currentEndPoint = $currentSegment->getEndPointZ();
             $nextStartPoint = $nextSegment->getStartPointZ();
 
-            if ($currentEndPoint != $nextStartPoint) {
+            if (!$currentEndPoint->equals($nextStartPoint)) {
                 throw new \InvalidArgumentException("Segments are not continuous. End point of one segment does not match the start point of the next.");
             }
         }

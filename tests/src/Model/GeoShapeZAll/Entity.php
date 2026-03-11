@@ -116,23 +116,6 @@ class Entity extends \Milanmadar\CoolioORM\Entity
         return $this;
     }
 
-    public function setMulticurveGeom(Shape\MultiCurve $val): self
-    {
-        $this->_set('multicurve_geom', $val);
-        return $this;
-    }
-
-    /**
-     *
-     * @param Shape\Polygon $val
-     * @return $this
-     */
-    public function setPolygonGeom(Shape\Polygon $val): self
-    {
-        $this->_set('polygon_geom', $val);
-        return $this;
-    }
-
     public function getMulticurveZGeom(): ShapeZ\MultiCurveZ
     {
         return $this->_get('multicurvez_geom');

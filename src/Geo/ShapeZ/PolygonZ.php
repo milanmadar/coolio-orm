@@ -8,11 +8,11 @@ class PolygonZ extends AbstractShapeZ
     private array $lineStrings;
 
     /**
-     * @param array<mixed> $jsonData
+     * @param array<string, mixed> $jsonData
      * @param int|null $srid Optional SRID, defaults to the value in $_ENV['GEO_DEFAULT_SRID']
      * @return PolygonZ
      */
-    /*public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): PolygonZ
+    public static function createFromGeoJSON(array $jsonData, int|null $srid = null): PolygonZ
     {
         if (!isset($srid)) $srid = $_ENV['GEO_DEFAULT_SRID'];
 
@@ -36,7 +36,7 @@ class PolygonZ extends AbstractShapeZ
         }
 
         return new PolygonZ($lineStrings, $srid);
-    }*/
+    }
 
     /**
      * @param string $ewktString
@@ -150,7 +150,10 @@ class PolygonZ extends AbstractShapeZ
         return 'POLYGON Z(' . implode(',', $ringStrings) . ')';
     }
 
-    /*public function toGeoJSON(): array
+    /**
+     * @return array<string, mixed>
+     */
+    public function toGeoJSON(): array
     {
         return [
             'type' => 'Polygon',
@@ -162,7 +165,7 @@ class PolygonZ extends AbstractShapeZ
                 $this->lineStrings
             )
         ];
-    }*/
+    }
 
     /**
      * Validates that the first and last points of the LineString are the same.
@@ -175,11 +178,38 @@ class PolygonZ extends AbstractShapeZ
             throw new \InvalidArgumentException('A PolygonZ must have at least one LineString.');
         }
 
+        // make sure the rings are closed (first and last point must be the same, minimum 4 points)
         foreach ($lineStrings as $lineString) {
             $points = $lineString->getPoints();
-            if (count($points) < 4 || $points[0] != end($points)) {
+            if (count($points) < 4 || !$points[0]->equals(end($points))) {
                 throw new \InvalidArgumentException('All rings must be a closed LineStringZ (minimum 4 points, first and last point must be the same).');
             }
         }
+
+        // winding order: outer ring must be CCW, holes must be CW
+        foreach ($lineStrings as $i => $ls) {
+            $points = $ls->getPoints();
+            $isOuter = ($i === 0);
+            if ($isOuter && !$this->_isCCW($points)) {
+                $ls->setPoints(array_reverse($points));
+            } elseif (!$isOuter && $this->_isCCW($points)) {
+                $ls->setPoints(array_reverse($points));
+            }
+        }
+    }
+
+    /**
+     * Checks if the points of a ring are in counter-clockwise order (right hand rule).
+     * @param array<PointZ> $points
+     * @return bool
+     */
+    private function _isCCW(array $points): bool {
+        $sum = 0;
+        $n = count($points);
+        for ($i = 0; $i < $n - 1; $i++) {
+            $sum += ($points[$i+1]->getX() - $points[$i]->getX()) *
+                ($points[$i+1]->getY() + $points[$i]->getY());
+        }
+        return $sum < 0; // CCW if sum < 0
     }
 }

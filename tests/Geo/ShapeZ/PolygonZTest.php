@@ -68,7 +68,7 @@ class PolygonZTest extends TestCase
 
         $polygon = new PolygonZ([$outerRing], 4326);
 
-        $expected = "ST_GeomFromEWKT('SRID=4326;POLYGON Z((0 0 3,0 1 3,1 1 3,1 0 3,0 0 3))')";
+        $expected = "ST_GeomFromEWKT('SRID=4326;POLYGON Z((0 0 3,1 0 3,1 1 3,0 1 3,0 0 3))')";
         $this->assertSame($expected, $polygon->ST_GeomFromEWKT());
     }
 
@@ -92,8 +92,61 @@ class PolygonZTest extends TestCase
 
         $polygon = new PolygonZ([$outerRing, $hole], 4326);
 
-        $expected = "ST_GeomFromEWKT('SRID=4326;POLYGON Z((0 0 4,0 5 4,5 5 4,5 0 4,0 0 4),(1 1 4,1 2 4,2 2 4,2 1 4,1 1 4))')";
+        $expected = "ST_GeomFromEWKT('SRID=4326;POLYGON Z((0 0 4,5 0 4,5 5 4,0 5 4,0 0 4),(1 1 4,1 2 4,2 2 4,2 1 4,1 1 4))')";
         $this->assertSame($expected, $polygon->ST_GeomFromEWKT());
+    }
+
+    public function testGeoJSONPolygonZ()
+    {
+        $jsonData = [
+            'type' => 'Polygon',
+            'coordinates' => [
+                [   // outer ring (CCW)
+                    [0, 0, 0],
+                    [10, 0, 1],
+                    [10, 10, 2],
+                    [0, 10, 3],
+                    [0, 0, 0]
+                ],
+                [   // inner ring (CW)
+                    [2, 2, 0],
+                    [2, 5, 1],
+                    [5, 5, 2],
+                    [5, 2, 3],
+                    [2, 2, 0]
+                ]
+            ]
+        ];
+
+        $polygonZ = PolygonZ::createFromGeoJSON($jsonData);
+
+        $this->assertInstanceOf(PolygonZ::class, $polygonZ);
+        $this->assertEquals(4326, $polygonZ->getSRID());
+
+        // Validate rings
+        $rings = $polygonZ->getLineStrings();
+        $this->assertCount(2, $rings);
+
+        // Outer ring
+        $outer = $rings[0]->getPoints();
+        $this->assertCount(5, $outer);
+        $this->assertEquals([0.0, 0.0, 0.0],  $outer[0]->getCoordinates());
+        $this->assertEquals([10.0, 0.0, 1.0], $outer[1]->getCoordinates());
+        $this->assertEquals([10.0, 10.0, 2.0], $outer[2]->getCoordinates());
+        $this->assertEquals([0.0, 10.0, 3.0],  $outer[3]->getCoordinates());
+        $this->assertEquals([0.0, 0.0, 0.0],   $outer[4]->getCoordinates());
+
+        // Inner ring
+        $inner = $rings[1]->getPoints();
+        $this->assertCount(5, $inner);
+        $this->assertEquals([2.0, 2.0, 0.0],  $inner[0]->getCoordinates());
+        $this->assertEquals([2.0, 5.0, 1.0],  $inner[1]->getCoordinates());
+        $this->assertEquals([5.0, 5.0, 2.0],  $inner[2]->getCoordinates());
+        $this->assertEquals([5.0, 2.0, 3.0],  $inner[3]->getCoordinates());
+        $this->assertEquals([2.0, 2.0, 0.0],  $inner[4]->getCoordinates());
+
+        // Round trip
+        $this->assertEquals($jsonData, $polygonZ->toGeoJSON());
     }
 
 }

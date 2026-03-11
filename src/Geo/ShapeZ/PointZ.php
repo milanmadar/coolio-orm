@@ -17,11 +17,11 @@ class PointZ extends AbstractShapeZ
     }
 
     /**
-     * @param array<mixed> $jsonData
+     * @param array<string, mixed> $jsonData
      * @param int|null $srid Optional SRID, defaults to the value in $_ENV['GEO_DEFAULT_SRID']
      * @return PointZ
      */
-    /*public static function createFromGeoJSONData(array $jsonData, int|null $srid = null): PointZ
+    public static function createFromGeoJSON(array $jsonData, int|null $srid = null): PointZ
     {
         if (!isset($srid)) $srid = $_ENV['GEO_DEFAULT_SRID'];
 
@@ -35,7 +35,7 @@ class PointZ extends AbstractShapeZ
         }
 
         return new PointZ($jsonData['coordinates'][0], $jsonData['coordinates'][1], $jsonData['coordinates'][2], $srid);
-    }*/
+    }
 
     /**
      * @param string $ewktString
@@ -76,16 +76,19 @@ class PointZ extends AbstractShapeZ
 
     public function toWKT(): string
     {
-        return sprintf('POINTZ(%s %s %s)', $this->x, $this->y, $this->z);
+        return sprintf('POINT Z(%s %s %s)', $this->x, $this->y, $this->z);
     }
 
-    /*public function toGeoJSON(): array
+    /**
+     * @return array<string, mixed>
+     */
+    public function toGeoJSON(): array
     {
         return [
             'type' => 'Point',
             'coordinates' => [$this->x, $this->y, $this->z],
         ];
-    }*/
+    }
 
     public function getX(): float
     {
@@ -126,5 +129,14 @@ class PointZ extends AbstractShapeZ
     public function getCoordinates(): array
     {
         return [$this->x, $this->y, $this->z];
+    }
+
+    public function equals(PointZ $other): bool
+    {
+        return (
+            $this->x === $other->getX() &&
+            $this->y === $other->getY() &&
+            $this->z === $other->getZ()
+        );
     }
 }
