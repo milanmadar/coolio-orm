@@ -2,6 +2,7 @@
 
 namespace Pgsql;
 
+use Milanmadar\CoolioORM\Geo\Shape2D3D4DFactory;
 use Milanmadar\CoolioORM\Geo\ShapeZM\PointZM;
 use Milanmadar\CoolioORM\Geo\ShapeZM\LineStringZM;
 use Milanmadar\CoolioORM\Geo\ShapeZM\PolygonZM;
@@ -306,5 +307,79 @@ $_AAA = $ent->getCurvepolygonZMGeom();
         $this->assertTrue($compoundCurveZM == $ent->getCompoundcurveZMGeom());
         $this->assertTrue($curvePolygonZM == $ent->getCurvepolygonZMGeom());
         $this->assertTrue($multiCurveZM == $ent->getMulticurveZMGeom());
+    }
+
+    public function testStoreBig()
+    {
+        $mgr = self::$dbHelper->getManager(GeoShapeZMAll\Manager::class);
+
+        // Generate EWKT with 15,000 points linestringZM
+        $startLon = 16.28035066733;
+        $startLat = 48.16368140732;
+        $startAlt = 2234.554377288;
+        $startEpoch = 1773224707.425861;
+        $ewkt = $this->generateSkiTrackEWKT(
+            $startLon,
+            $startLat,
+            $startAlt,
+            $startEpoch,
+            15000
+        );
+
+        // parse it, store it
+        /** @var LineStringZM $line */
+        $line = Shape2D3D4DFactory::createFromGeoEWKTString($ewkt);
+
+        $newEnt = $mgr->createEntity()
+            ->setLinestringZMGeom($line)
+        ;
+
+        $mgr->save($newEnt);
+
+        // read it out again
+        $mgr->_getEntityRepository()->clear();
+        $ent = $mgr->findById(2);
+
+        // randomly check some points
+        $readLinePoints = $ent->getLinestringZMGeom()->getPoints();
+        $origiPoints = $line->getPoints();
+
+        $this->assertEquals( count($origiPoints), count($readLinePoints) );
+
+        for($i=0; $i<15000; $i+=1000) {
+            $this->assertTrue( $origiPoints[$i]->equals( $readLinePoints[$i] ));
+        }
+    }
+
+    private function generateSkiTrackEWKT(
+        float $lon,
+        float $lat,
+        float $alt,
+        float $epoch,
+        int $points = 15000
+    ): string {
+
+        $coords = [];
+
+        for ($i = 0; $i < $points; $i++) {
+
+            $epoch += rand(20, 30) / 10.0;
+
+            $lon += rand(-4,4) / 100000.0;
+            $lat += rand(-4,4) / 100000.0;
+
+            if (rand(0,100) < 95) {
+                $alt -= rand(1,20) / 10.0;
+            } else {
+                $alt += rand(1,30) / 10.0;
+            }
+
+            $coords[] = sprintf(
+                '%.7f %.7f %.6f %.6f',
+                $lon, $lat, $alt, $epoch
+            );
+        }
+
+        return 'SRID=4326;LINESTRING ZM(' . implode(',', $coords) . ')';
     }
 }
