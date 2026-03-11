@@ -27,6 +27,7 @@ class CurvePolygonZM extends AbstractShapeZM
             throw new \InvalidArgumentException('Invalid EWKT format for CurvePolygonZM.');
         }
 
+        // Split SRID and geometry
         $ewktParts = explode(';', $ewktString, 2);
         if (count($ewktParts) !== 2) {
             throw new \InvalidArgumentException('Invalid EWKT string: missing SRID or geometry.');
@@ -35,32 +36,48 @@ class CurvePolygonZM extends AbstractShapeZM
         $srid = (int) substr($ewktParts[0], 5);
         $geometryPart = $ewktParts[1];
 
-        preg_match('/CURVEPOLYGON ?Z?M?\((.*)\)/', $geometryPart, $matches);
+        // Extract the content inside CURVEPOLYGON(...)
+        preg_match('/CURVEPOLYGON ?Z?M?\((.*)\)/i', $geometryPart, $matches);
         if (empty($matches)) {
             throw new \InvalidArgumentException('Invalid CurvePolygonZM format in EWKT.');
         }
+        $content = $matches[1];
 
-        $geometryContent = $matches[1];
+        // Parentheses-aware split for segments
+        $segments = [];
+        $buffer = '';
+        $depth = 0;
+        $len = strlen($content);
 
-        // Split boundaries (LineStringZM or CircularStringZM)
-        $boundaryMatches = [];
-        preg_match_all('/(CIRCULARSTRING ?Z?M?\([^\)]*\)|LINESTRING ?Z?M?\([^\)]*\))/i', $geometryContent, $boundaryMatches);
+        for ($i = 0; $i < $len; $i++) {
+            $ch = $content[$i];
 
-        if (empty($boundaryMatches[0])) {
-            throw new \InvalidArgumentException('Invalid boundaries in CurvePolygonZM.');
+            if ($ch === '(') $depth++;
+            if ($ch === ')') $depth--;
+
+            // Split at commas at depth 0 (between segments)
+            if ($depth === 0 && $ch === ',') {
+                if (trim($buffer) !== '') $segments[] = trim($buffer);
+                $buffer = '';
+            } else {
+                $buffer .= $ch;
+            }
+        }
+        if (trim($buffer) !== '') {
+            $segments[] = trim($buffer);
         }
 
         $boundaries = [];
-        foreach ($boundaryMatches[0] as $boundaryString) {
-            $boundaryString = trim($boundaryString);
+        foreach ($segments as $seg) {
+            $seg = trim($seg);
 
-            if (str_starts_with($boundaryString, 'CIRCULARSTRING')) {
-                $boundaries[] = CircularStringZM::createFromGeoEWKTString("SRID=$srid;$boundaryString");
-            } elseif (str_starts_with($boundaryString, 'LINESTRING')) {
-                $boundaries[] = LineStringZM::createFromGeoEWKTString("SRID=$srid;$boundaryString");
+            if (str_starts_with(strtoupper($seg), 'CIRCULARSTRING')) {
+                $boundaries[] = CircularStringZM::createFromGeoEWKTString("SRID=$srid;$seg");
+            } elseif (str_starts_with(strtoupper($seg), 'LINESTRING')) {
+                $boundaries[] = LineStringZM::createFromGeoEWKTString("SRID=$srid;$seg");
             } else {
-                // Untyped boundary, assume LineStringZM
-                $boundaries[] = LineStringZM::createFromGeoEWKTString("SRID=$srid;LINESTRINGZM$boundaryString");
+                // Implicit LineString, just parentheses with points
+                $boundaries[] = LineStringZM::createFromGeoEWKTString("SRID=$srid;LINESTRING ZM$seg");
             }
         }
 

@@ -25,6 +25,15 @@ class PolygonZMTest extends TestCase
         $this->assertSame([$lineString], $polygon->getLineStrings());
     }
 
+    public function testCreate2()
+    {
+        new PolygonZM([
+            new LineStringZM([new PointZM(0, 0, 2.5,90), new PointZM(0, 5, 1,91), new PointZM(5, 5, 4,92), new PointZM(5, 0, 4,93), new PointZM(0, 0, 2.5,94)]),
+            new LineStringZM([new PointZM(1, 1, 2.5,95), new PointZM(1, 2, 1,96), new PointZM(2, 2, 4,97), new PointZM(2, 1, 4,98), new PointZM(1, 1, 2.5,99)])
+        ], 4326);
+        $this->assertTrue(true);
+    }
+
     public function testToGeoJSONIncludesZM()
     {
         $points = [

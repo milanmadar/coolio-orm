@@ -143,7 +143,7 @@ class CompoundCurveZM extends AbstractShapeZM implements HasStartEndPointZMInter
             $end = $segments[$i]->getEndPointZM();
             $start = $segments[$i+1]->getStartPointZM();
 
-            if ($end != $start) {
+            if (!$end->equals($start)) {
                 throw new \InvalidArgumentException("Segments are not continuous. Segment {$i} end does not match segment " . ($i+1) . " start.");
             }
         }

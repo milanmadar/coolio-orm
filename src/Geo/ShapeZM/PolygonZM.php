@@ -164,7 +164,7 @@ class PolygonZM extends AbstractShapeZM
 
         foreach ($lineStrings as $lineString) {
             $points = $lineString->getPoints();
-            if (count($points) < 4 || $points[0] != end($points)) {
+            if (count($points) < 4 || !$points[0]->equals(end($points))) {
                 throw new \InvalidArgumentException('All rings must be closed with at least 4 points.');
             }
         }

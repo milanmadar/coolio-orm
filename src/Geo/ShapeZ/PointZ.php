@@ -131,7 +131,7 @@ class PointZ extends AbstractShapeZ
         return [$this->x, $this->y, $this->z];
     }
 
-    public function __equals(PointZ $other): bool
+    public function equals(PointZ $other): bool
     {
         return (
             $this->x === $other->getX() &&

@@ -130,7 +130,7 @@ class LineStringZM extends AbstractShapeZM
         $points = [];
         foreach ($coordPairs as $pair) {
             /** @var array<float|int> $nums */
-            $nums = preg_split('/\s+/', trim($pair));
+            $nums = preg_split('/\s+/', trim($pair, '() '));
             if (count($nums) !== 4) {
                 throw new \InvalidArgumentException('Each coordinate must have 4 elements [X,Y,Z,M].');
             }

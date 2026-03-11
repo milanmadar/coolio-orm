@@ -49,109 +49,35 @@ class MultiPolygonZ extends AbstractShapeZ
      */
     public static function createFromGeoEWKTString(string $ewktString): MultiPolygonZ
     {
-        // Parse the EWKT string, expected format: SRID=<srid>;MULTIPOLYGONZ(((<x1> <y1> <z1>, <x2> <y2> <z2>, ...), (<x3> <y3> <z3>, <x4> <y4> <z4>, ...)), ((...)))
-        //if (strpos($ewktString, 'MULTIPOLYGONZ') === false) {
-        if (strpos($ewktString, 'MULTIPOLYGON') === false) {
-            throw new \InvalidArgumentException('Invalid EWKT format. Expected MULTIPOLYGONZ type.');
+        if (strpos($ewktString, ';MULTIPOLYGON') === false) {
+            throw new \InvalidArgumentException('Invalid EWKT string for MultiPolygonZM.');
         }
 
-        // Extract the SRID and the WKT string
-        $ewktParts = explode(';', $ewktString, 2);
-        if (count($ewktParts) != 2) {
-            throw new \InvalidArgumentException('Invalid EWKT string, could not find SRID and geometry parts.');
-        }
-
-        $sridPart = $ewktParts[0];
-        $geometryPart = $ewktParts[1];
-
-        // Extract SRID value
+        // Extract SRID and geometry
+        [$sridPart, $geometryPart] = explode(';', $ewktString, 2);
         if (strpos($sridPart, 'SRID=') !== 0) {
-            throw new \InvalidArgumentException('Invalid SRID part in EWKT string.');
+            throw new \InvalidArgumentException('Invalid SRID part in EWKT.');
         }
-
         $srid = (int) substr($sridPart, 5);
 
-        // Validate and extract the MULTIPOLYGONZ coordinates
-        preg_match('/MULTIPOLYGON ?Z?\((.*)\)/', $geometryPart, $matches);
-        if (empty($matches)) {
-            throw new \InvalidArgumentException('Invalid MULTIPOLYGONZ format in EWKT.');
-        }
+        // Remove leading "MULTIPOLYGON ZM" and trim
+        $geometryPart = trim((string)preg_replace('/^MULTIPOLYGON ?Z?\s*/i', '', $geometryPart));
 
-        // Now we need to split the segments inside the CompoundCurve.
-        // We will use a more careful approach to handle commas within parentheses.
-        $geometryPart = $matches[1];
-        $segments = [];
-        $parenCount = 0;
-        $currentSegment = '';
+        // remove spaces
+        $geometryPart = str_replace(['   ','  ','( ', ' )',', ', ' ,'], [' ',' ','(', ')',',', ','], $geometryPart);
 
-        // Iterate through the geometry part and properly extract the segments
-        for ($i = 0; $i < strlen($geometryPart); $i++) {
-            $char = $geometryPart[$i];
-            if ($char === '(') {
-                $parenCount++;
-            } elseif ($char === ')') {
-                $parenCount--;
-            }
-
-            // We only split the segments when the parentheses are balanced
-            if ($parenCount === 0 && $char === ',') {
-                // End of one segment, add it to the segments array
-                $segments[] = trim($currentSegment);
-                $currentSegment = '';
-            } else {
-                // Continue building the current segment
-                $currentSegment .= $char;
-            }
-        }
-
-        // Add the last segment
-        if (!empty($currentSegment)) {
-            $segments[] = trim($currentSegment);
-        }
+        // remove the first and last 1 parentheses
+        $geometryPart = substr($geometryPart, 1, -1);
 
         $polygons = [];
-        foreach ($segments as $polygonData)
-        {
-            $polygonData = trim($polygonData);
-
-            if ($polygonData[0] === '(') {
-                $polygonData = substr($polygonData, 1);
+        if(str_contains($geometryPart, ')),((')) {
+            $parts = explode(')),((', $geometryPart);
+            foreach ($parts as $part) {
+                $polygonString = '((' . trim($part, ' ()') . '))';
+                $polygons[] = PolygonZ::createFromGeoEWKTString("SRID=$srid;POLYGON Z$polygonString");
             }
-            if (substr($polygonData, -1) === ')') {
-                $polygonData = substr($polygonData, 0, -1);
-            }
-
-            $rings = [];
-            $ringsData = explode('),', $polygonData);
-            foreach ($ringsData as $ringData)
-            {
-                $ringData = trim($ringData);
-
-                if ($ringData[0] === '(') {
-                    $ringData = substr($ringData, 1);
-                }
-                if (substr($ringData, -1) === ')') {
-                    $ringData = substr($ringData, 0, -1);
-                }
-
-                $pointsData = explode(',', $ringData);
-                $points = [];
-
-                foreach ($pointsData as $pointData) {
-                    $coords = array_map('trim', explode(' ', $pointData));
-                    if (count($coords) !== 3) {
-                        throw new \InvalidArgumentException('Each point in the ring must have exactly 3 coordinates.');
-                    }
-
-                    $points[] = new PointZ((float) $coords[0], (float) $coords[1], (float) $coords[2], $srid);
-                }
-
-                // Create a LineStringZ for each ring (it may have multiple points)
-                $rings[] = new LineStringZ($points, $srid);
-            }
-
-            // Create a PolygonZ for each set of rings
-            $polygons[] = new PolygonZ($rings, $srid);
+        } else {
+            $polygons[] = PolygonZ::createFromGeoEWKTString("SRID=$srid;POLYGON Z$geometryPart");
         }
 
         return new MultiPolygonZ($polygons, $srid);

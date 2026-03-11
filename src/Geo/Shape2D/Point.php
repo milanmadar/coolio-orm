@@ -125,7 +125,7 @@ class Point extends AbstractShape2D
         ];
     }
 
-    public function __equals(Point $other): bool
+    public function equals(Point $other): bool
     {
         return (
             $this->x === $other->getX() &&

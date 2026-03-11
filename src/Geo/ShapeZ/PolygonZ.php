@@ -181,7 +181,7 @@ class PolygonZ extends AbstractShapeZ
         // make sure the rings are closed (first and last point must be the same, minimum 4 points)
         foreach ($lineStrings as $lineString) {
             $points = $lineString->getPoints();
-            if (count($points) < 4 || $points[0] != end($points)) {
+            if (count($points) < 4 || !$points[0]->equals(end($points))) {
                 throw new \InvalidArgumentException('All rings must be a closed LineStringZ (minimum 4 points, first and last point must be the same).');
             }
         }

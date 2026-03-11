@@ -75,6 +75,13 @@ class CompoundCurveZMTest extends TestCase
         $this->assertEquals(3, $secondSegment->getPoints()[2]->getX());
     }
 
+    public function testCreateFromEWKT2()
+    {
+        $ewkt = 'SRID=4326;COMPOUNDCURVE((2 0 0 99,3 1 0 99),CIRCULARSTRING(3 1 0 99,4 2 0 99,5 1 0 99),(5 1 0 99,6 0 0 99))';
+        $curve = CompoundCurveZM::createFromGeoEWKTString($ewkt);
+        $this->assertTrue(true);
+    }
+
     public function testSegmentContinuityThrows()
     {
         $this->expectException(\InvalidArgumentException::class);

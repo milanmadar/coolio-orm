@@ -144,7 +144,7 @@ class CompoundCurveZ extends AbstractShapeZ implements HasStartEndPointZInterfac
             $currentEndPoint = $currentSegment->getEndPointZ();
             $nextStartPoint = $nextSegment->getStartPointZ();
 
-            if ($currentEndPoint != $nextStartPoint) {
+            if (!$currentEndPoint->equals($nextStartPoint)) {
                 throw new \InvalidArgumentException("Segments are not continuous. End point of one segment does not match the start point of the next.");
             }
         }

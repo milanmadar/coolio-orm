@@ -62,11 +62,47 @@ class MultiPolygonZM extends AbstractShapeZM
         return new MultiPolygonZM($polygons);
     }
 
+    public static function createFromGeoEWKTString(string $ewktString): MultiPolygonZM
+    {
+        if (strpos($ewktString, ';MULTIPOLYGON') === false) {
+            throw new \InvalidArgumentException('Invalid EWKT string for MultiPolygonZM.');
+        }
+
+        // Extract SRID and geometry
+        [$sridPart, $geometryPart] = explode(';', $ewktString, 2);
+        if (strpos($sridPart, 'SRID=') !== 0) {
+            throw new \InvalidArgumentException('Invalid SRID part in EWKT.');
+        }
+        $srid = (int) substr($sridPart, 5);
+
+        // Remove leading "MULTIPOLYGON ZM" and trim
+        $geometryPart = trim((string)preg_replace('/^MULTIPOLYGON ?Z?M?\s*/i', '', $geometryPart));
+
+        // remove spaces
+        $geometryPart = str_replace(['   ','  ','( ', ' )',', ', ' ,'], [' ',' ','(', ')',',', ','], $geometryPart);
+
+        // remove the first and last 1 parentheses
+        $geometryPart = substr($geometryPart, 1, -1);
+
+        $polygons = [];
+        if(str_contains($geometryPart, ')),((')) {
+            $parts = explode(')),((', $geometryPart);
+            foreach ($parts as $part) {
+                $polygonString = '((' . trim($part, ' ()') . '))';
+                $polygons[] = PolygonZM::createFromGeoEWKTString("SRID=$srid;POLYGON ZM$polygonString");
+            }
+        } else {
+            $polygons[] = PolygonZM::createFromGeoEWKTString("SRID=$srid;POLYGON ZM$geometryPart");
+        }
+
+        return new MultiPolygonZM($polygons, $srid);
+    }
+
     /**
      * @param string $ewktString
      * @return MultiPolygonZM
      */
-    public static function createFromGeoEWKTString(string $ewktString): MultiPolygonZM
+    public static function BAKcreateFromGeoEWKTString(string $ewktString): MultiPolygonZM
     {
         if (strpos($ewktString, ';MULTIPOLYGON') === false) {
             throw new \InvalidArgumentException('Invalid EWKT string for MultiPolygonZM.');

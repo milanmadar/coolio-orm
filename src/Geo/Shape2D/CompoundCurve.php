@@ -164,7 +164,7 @@ class CompoundCurve extends AbstractShape2D implements HasStartEndPointInterface
             $currentEndPoint = $currentSegment->getEndPoint();
             $nextStartPoint = $nextSegment->getStartPoint();
 
-            if ($currentEndPoint != $nextStartPoint) {
+            if (!$currentEndPoint->equals($nextStartPoint)) {
                 throw new \InvalidArgumentException("Segments are not continuous. End point of one segment does not match the start point of the next.");
             }
         }

@@ -83,56 +83,56 @@ class GeoZMTest extends TestCase
         //
         // Create All Shapes
         //
-        $pointZ = new PointZM(6, 7, 8,4326);
-        $lineStringZ = new LineStringZM([
-            new PointZM(1, 1, 1), new PointZM(2, 2, 2), new PointZM(3, 3, 3), new PointZM(4, 4, 4)
+        $pointZM = new PointZM(6, 7, 8,99, 4326);
+        $lineStringZM = new LineStringZM([
+            new PointZM(1, 1, 1,99), new PointZM(2, 2, 2,99), new PointZM(3, 3, 3,99), new PointZM(4, 4, 4,99)
         ], 4326);
-        $multiPointZ = new MultiPointZM([
-            new PointZM(1, 1, 1), new PointZM(2, 2, 2), new PointZM(3, 3, 3), new PointZM(4, 4, 4)
+        $multiPointZM = new MultiPointZM([
+            new PointZM(1, 1, 1,99), new PointZM(2, 2, 2,99), new PointZM(3, 3, 3,99), new PointZM(4, 4, 4,99)
         ], 4326);
-        $polygonZ = new PolygonZM([
-            new LineStringZM([new PointZM(0, 0, 1), new PointZM(0, 5, 2), new PointZM(5, 5, 3), new PointZM(5, 0, 4), new PointZM(0, 0, 1)]),
-            new LineStringZM([new PointZM(1, 1, 1), new PointZM(1, 2, 2), new PointZM(2, 2,3 ), new PointZM(2, 1, 4), new PointZM(1, 1, 1)])
+        $polygonZM = new PolygonZM([
+            new LineStringZM([new PointZM(0, 0, 1,99), new PointZM(0, 5, 2,99), new PointZM(5, 5, 3,99), new PointZM(5, 0, 4,99), new PointZM(0, 0, 1,99)]),
+            new LineStringZM([new PointZM(1, 1, 1,99), new PointZM(1, 2, 2,99), new PointZM(2, 2,3,99), new PointZM(2, 1, 4,99), new PointZM(1, 1, 1,99)])
         ], 4326);
-        $multiLineStringZ = new MultiLineStringZM([
-            new LineStringZM([new PointZM(1, 1, 1), new PointZM(2, 2, 2), new PointZM(3, 3, 3)], 4326),
-            new LineStringZM([new PointZM(4, 4, 0), new PointZM(5, 5, 0)], 4326),
-            new LineStringZM([new PointZM(6, 6, 2), new PointZM(7, 7, 3), new PointZM(8, 8, 4)], 4326)
+        $multiLineStringZM = new MultiLineStringZM([
+            new LineStringZM([new PointZM(1, 1, 1,99), new PointZM(2, 2, 2,99), new PointZM(3, 3, 3,99)], 4326),
+            new LineStringZM([new PointZM(4, 4, 0,99), new PointZM(5, 5, 0,99)], 4326),
+            new LineStringZM([new PointZM(6, 6, 2,99), new PointZM(7, 7, 3,99), new PointZM(8, 8, 4,99)], 4326)
         ], 4326);
-        $multiPolygonZ = new MultiPolygonZM([
+        $multiPolygonZM = new MultiPolygonZM([
             new PolygonZM([
-                new LineStringZM([new PointZM(0, 0, 2.5), new PointZM(0, 5, 1), new PointZM(5, 5, 4), new PointZM(5, 0, 4), new PointZM(0, 0, 2.5),]),
-                new LineStringZM([new PointZM(1, 1, 2.5), new PointZM(1, 2, 1), new PointZM(2, 2, 4), new PointZM(2, 1, 4), new PointZM(1, 1, 2.5),])
+                new LineStringZM([new PointZM(0, 0, 2.5,90), new PointZM(0, 5, 1,91), new PointZM(5, 5, 4,92), new PointZM(5, 0, 4,93), new PointZM(0, 0, 2.5,94),]),
+                new LineStringZM([new PointZM(1, 1, 2.5,95), new PointZM(1, 2, 1,96), new PointZM(2, 2, 4,97), new PointZM(2, 1, 4,98), new PointZM(1, 1, 2.5,99),])
             ], 4326),
             new PolygonZM([
-                new LineStringZM([new PointZM(8, 8, 2.5), new PointZM(0, 5, 1), new PointZM(5, 5, 4), new PointZM(5, 0, 4), new PointZM(8, 8, 2.5),]),
-                new LineStringZM([new PointZM(9, 9, 2.5), new PointZM(1, 2, 1), new PointZM(2, 2, 4), new PointZM(2, 1, 4), new PointZM(9, 9, 2.5),])
+                new LineStringZM([new PointZM(8, 8, 2.5,80), new PointZM(0, 5, 1,81), new PointZM(5, 5, 4,82), new PointZM(5, 0, 4,83), new PointZM(8, 8, 2.5,84),]),
+                new LineStringZM([new PointZM(9, 9, 2.5,85), new PointZM(1, 2, 1,86), new PointZM(2, 2, 4,87), new PointZM(2, 1, 4,88), new PointZM(9, 9, 2.5,89),])
             ], 4326)
         ], 4326);
-        $geometryCollectionZ = new GeometryCollectionZM([
-            new PointZM(1, 1, 5, 4326),
-            new LineStringZM([new PointZM(2, 2, 5, 4326), new PointZM(3, 3, 5, 4326), new PointZM(4, 4, 5, 4326)], 4326),
+        $geometryCollectionZM = new GeometryCollectionZM([
+            new PointZM(1, 1, 5,99, 4326),
+            new LineStringZM([new PointZM(2, 2, 5,99, 4326), new PointZM(3, 3, 5,99, 4326), new PointZM(4, 4, 5,99, 4326)], 4326),
             new PolygonZM([
-                new LineStringZM([new PointZM(0, 0, 5, 4326), new PointZM(0, 5, 5, 4326), new PointZM(5, 5, 5, 4326), new PointZM(5, 0, 5, 4326), new PointZM(0, 0, 5, 4326),], 4326),
-                new LineStringZM([new PointZM(1, 1, 5, 4326), new PointZM(1, 2, 5, 4326), new PointZM(2, 2, 5, 4326), new PointZM(2, 1, 5, 4326), new PointZM(1, 1, 5, 4326),], 4326)
+                new LineStringZM([new PointZM(0, 0, 5,99, 4326), new PointZM(0, 5, 5,99, 4326), new PointZM(5, 5, 5,99, 4326), new PointZM(5, 0, 5,99, 4326), new PointZM(0, 0, 5,99, 4326),], 4326),
+                new LineStringZM([new PointZM(1, 1, 5,99, 4326), new PointZM(1, 2, 5,99, 4326), new PointZM(2, 2, 5,99, 4326), new PointZM(2, 1, 5,99, 4326), new PointZM(1, 1, 5,99, 4326),], 4326)
             ], 4326)
         ], 4326);
-        $circularStringZ = new CircularStringZM([
-            new PointZM(0, 0, 9), new PointZM(4, 0, 3), new PointZM(4, 4, 3), new PointZM(0, 4, 3), new PointZM(0, 0, 9)
+        $circularStringZM = new CircularStringZM([
+            new PointZM(0, 0, 9,99), new PointZM(4, 0, 3,99), new PointZM(4, 4, 3,99), new PointZM(0, 4, 3,99), new PointZM(0, 0, 9,99)
         ], 4326);
-        $compoundCurveZ = new CompoundCurveZM([
-            new LineStringZM([new PointZM(2, 0, 0), new PointZM(3, 1, 0)]),
-            new CircularStringZM([new PointZM(3, 1, 0), new PointZM(4, 2, 0), new PointZM(5, 1, 0)]),
-            new LineStringZM([new PointZM(5, 1, 0), new PointZM(6, 0, 0)]),
+        $compoundCurveZM = new CompoundCurveZM([
+            new LineStringZM([new PointZM(2, 0, 0,99), new PointZM(3, 1, 0,99)]),
+            new CircularStringZM([new PointZM(3, 1, 0,99), new PointZM(4, 2, 0,99), new PointZM(5, 1, 0,99)]),
+            new LineStringZM([new PointZM(5, 1, 0,99), new PointZM(6, 0, 0,99)]),
         ], 4326);
-        $curvePolygonZ = new CurvePolygonZM([
-            new CircularStringZM([new PointZM(0, 0, 2.3, 4326), new PointZM(6, 0, 2.3, 4326), new PointZM(6, 6, 2.3, 4326), new PointZM(0, 6, 2.3, 4326), new PointZM(0, 0, 2.3, 4326)], 4326),
-            new LineStringZM([new PointZM(2, 2, 2.3, 4326), new PointZM(3, 2, 2.3, 4326), new PointZM(3, 3, 2.3, 4326), new PointZM(2, 3, 2.3, 4326), new PointZM(2, 2, 2.3, 4326)], 4326),
-            new CircularStringZM([new PointZM(1, 1, 2.3, 4326), new PointZM(2, 1, 2.3, 4326), new PointZM(2, 2, 2.3, 4326), new PointZM(1, 2, 2.3, 4326), new PointZM(1, 1, 2.3, 4326)], 4326)
+        $curvePolygonZM = new CurvePolygonZM([
+            new CircularStringZM([new PointZM(0, 0, 2.3,99, 4326), new PointZM(6, 0, 2.3,99, 4326), new PointZM(6, 6, 2.3,99, 4326), new PointZM(0, 6, 2.3,99, 4326), new PointZM(0, 0, 2.3,99, 4326)], 4326),
+            new LineStringZM([new PointZM(2, 2, 2.3,99, 4326), new PointZM(3, 2, 2.3,99, 4326), new PointZM(3, 3, 2.3,99, 4326), new PointZM(2, 3, 2.3,99, 4326), new PointZM(2, 2, 2.3,99, 4326)], 4326),
+            new CircularStringZM([new PointZM(1, 1, 2.3,99, 4326), new PointZM(2, 1, 2.3,99, 4326), new PointZM(2, 2, 2.3,99, 4326), new PointZM(1, 2, 2.3,99, 4326), new PointZM(1, 1, 2.3,99, 4326)], 4326)
         ], 4326);
-        $multiCurveZ = new MultiCurveZM([
-            new CircularStringZM([new PointZM(0, 0, 8, 4326), new PointZM(1, 2, 8, 4326), new PointZM(2, 0, 8, 4326)], 4326),
-            new LineStringZM([new PointZM(3, 3, 8, 4326), new PointZM(4, 4, 8, 4326), new PointZM(5, 5, 8, 4326)], 4326)
+        $multiCurveZM = new MultiCurveZM([
+            new CircularStringZM([new PointZM(0, 0, 8,99, 4326), new PointZM(1, 2, 8,99, 4326), new PointZM(2, 0, 8,99, 4326)], 4326),
+            new LineStringZM([new PointZM(3, 3, 8,99, 4326), new PointZM(4, 4, 8,99, 4326), new PointZM(5, 5, 8,99, 4326)], 4326)
         ], 4326);
 
         //
@@ -140,17 +140,17 @@ class GeoZMTest extends TestCase
         //
         $mgr->createQueryBuilder()
             ->insert()
-            ->setGeom('pointzm_geom', $pointZ)
-            ->setGeom('linestringzm_geom', $lineStringZ)
-            ->setGeom('polygonzm_geom', $polygonZ)
-            ->setGeom('multipointzm_geom', $multiPointZ)
-            ->setGeom('multilinestringzm_geom', $multiLineStringZ)
-            ->setGeom('multipolygonzm_geom', $multiPolygonZ)
-            ->setGeom('geomcollectionzm_geom', $geometryCollectionZ)
-            ->setGeom('circularstringzm_geom', $circularStringZ)
-            ->setGeom('compoundcurvezm_geom', $compoundCurveZ)
-            ->setGeom('curvedpolygonzm_geom', $curvePolygonZ)
-            ->setGeom('multicurvezm_geom', $multiCurveZ)
+            ->setGeom('pointzm_geom', $pointZM)
+            ->setGeom('linestringzm_geom', $lineStringZM)
+            ->setGeom('polygonzm_geom', $polygonZM)
+            ->setGeom('multipointzm_geom', $multiPointZM)
+            ->setGeom('multilinestringzm_geom', $multiLineStringZM)
+            ->setGeom('multipolygonzm_geom', $multiPolygonZM)
+            ->setGeom('geomcollectionzm_geom', $geometryCollectionZM)
+            ->setGeom('circularstringzm_geom', $circularStringZM)
+            ->setGeom('compoundcurvezm_geom', $compoundCurveZM)
+            ->setGeom('curvepolygonzm_geom', $curvePolygonZM)
+            ->setGeom('multicurvezm_geom', $multiCurveZM)
             ->executeStatement()
         ;
         $this->assertEquals($oCnt+1, self::$dbHelper->countRows('geometryzm_test'));
@@ -160,18 +160,18 @@ class GeoZMTest extends TestCase
         //
         $mgr->_getEntityRepository()->clear();
         $ent = $mgr->findById(2);
-
-        $this->assertTrue($pointZ == $ent->getPointZGeom());
-        $this->assertTrue($lineStringZ == $ent->getLinestringZGeom());
-        $this->assertTrue($polygonZ == $ent->getPolygonZGeom());
-        $this->assertTrue($multiPointZ == $ent->getMultipointZGeom());
-        $this->assertTrue($multiLineStringZ == $ent->getMultilinestringZGeom());
-        $this->assertTrue($multiPolygonZ == $ent->getMultipolygonZGeom());
-        $this->assertTrue($geometryCollectionZ == $ent->getGeomcollectionZGeom());
-        $this->assertTrue($circularStringZ == $ent->getCircularstringZGeom());
-        $this->assertTrue($compoundCurveZ == $ent->getCompoundcurvezGeom());
-        $this->assertTrue($curvePolygonZ == $ent->getCurvepolygonzGeom());
-        $this->assertTrue($multiCurveZ == $ent->getMulticurvezGeom());
+$_AAA = $ent->getCurvepolygonZMGeom();
+        $this->assertTrue($pointZM == $ent->getPointZMGeom());
+        $this->assertTrue($lineStringZM == $ent->getLinestringZMGeom());
+        $this->assertTrue($polygonZM == $ent->getPolygonZMGeom());
+        $this->assertTrue($multiPointZM == $ent->getMultipointZMGeom());
+        $this->assertTrue($multiLineStringZM == $ent->getMultilinestringZMGeom());
+        $this->assertTrue($multiPolygonZM == $ent->getMultipolygonZMGeom());
+        $this->assertTrue($geometryCollectionZM == $ent->getGeomcollectionZMGeom());
+        $this->assertTrue($circularStringZM == $ent->getCircularstringZMGeom());
+        $this->assertTrue($compoundCurveZM == $ent->getCompoundcurveZMGeom());
+        $this->assertTrue($curvePolygonZM == $ent->getCurvepolygonZMGeom());
+        $this->assertTrue($multiCurveZM == $ent->getMulticurveZMGeom());
     }
 
     public function testInsert_asEntity()
@@ -183,70 +183,104 @@ class GeoZMTest extends TestCase
         //
         // Create All Shapes
         //
-        $pointZ = new PointZM(6, 7, 8,4326);
-        $lineStringZ = new LineStringZM([
-            new PointZM(1, 1, 1), new PointZM(2, 2, 2), new PointZM(3, 3, 3), new PointZM(4, 4, 4)
+        $pointZM = new PointZM(6, 7, 8, 100,4326);
+        $lineStringZM = new LineStringZM([
+            new PointZM(1, 1, 1, 100), new PointZM(2, 2, 2, 100), new PointZM(3, 3, 3, 100), new PointZM(4, 4, 4, 100)
         ], 4326);
-        $multiPointZ = new MultiPointZM([
-            new PointZM(1, 1, 1), new PointZM(2, 2, 2), new PointZM(3, 3, 3), new PointZM(4, 4, 4)
+        $multiPointZM = new MultiPointZM([
+            new PointZM(1, 1, 1, 100), new PointZM(2, 2, 2, 100), new PointZM(3, 3, 3, 100), new PointZM(4, 4, 4, 100)
         ], 4326);
-        $polygonZ = new PolygonZM([
-            new LineStringZM([new PointZM(0, 0, 1), new PointZM(0, 5, 2), new PointZM(5, 5, 3), new PointZM(5, 0, 4), new PointZM(0, 0, 1)]),
-            new LineStringZM([new PointZM(1, 1, 1), new PointZM(1, 2, 2), new PointZM(2, 2,3 ), new PointZM(2, 1, 4), new PointZM(1, 1, 1)])
+        $polygonZM = new PolygonZM([
+            new LineStringZM([
+                new PointZM(0, 0, 1, 100), new PointZM(0, 5, 2, 100), new PointZM(5, 5, 3, 100), new PointZM(5, 0, 4, 100), new PointZM(0, 0, 1, 100)
+            ]),
+            new LineStringZM([
+                new PointZM(1, 1, 1, 100), new PointZM(1, 2, 2, 100), new PointZM(2, 2, 3, 100), new PointZM(2, 1, 4, 100), new PointZM(1, 1, 1, 100)
+            ])
         ], 4326);
-        $multiLineStringZ = new MultiLineStringZM([
-            new LineStringZM([new PointZM(1, 1, 1), new PointZM(2, 2, 2), new PointZM(3, 3, 3)], 4326),
-            new LineStringZM([new PointZM(4, 4, 0), new PointZM(5, 5, 0)], 4326),
-            new LineStringZM([new PointZM(6, 6, 2), new PointZM(7, 7, 3), new PointZM(8, 8, 4)], 4326)
+        $multiLineStringZM = new MultiLineStringZM([
+            new LineStringZM([
+                new PointZM(1, 1, 1, 100), new PointZM(2, 2, 2, 100), new PointZM(3, 3, 3, 100)
+            ], 4326),
+            new LineStringZM([
+                new PointZM(4, 4, 0, 100), new PointZM(5, 5, 0, 100)
+            ], 4326),
+            new LineStringZM([
+                new PointZM(6, 6, 2, 100), new PointZM(7, 7, 3, 100), new PointZM(8, 8, 4, 100)
+            ], 4326)
         ], 4326);
-        $multiPolygonZ = new MultiPolygonZM([
+        $multiPolygonZM = new MultiPolygonZM([
             new PolygonZM([
-                new LineStringZM([new PointZM(0, 0, 2.5), new PointZM(0, 5, 1), new PointZM(5, 5, 4), new PointZM(5, 0, 4), new PointZM(0, 0, 2.5),]),
-                new LineStringZM([new PointZM(1, 1, 2.5), new PointZM(1, 2, 1), new PointZM(2, 2, 4), new PointZM(2, 1, 4), new PointZM(1, 1, 2.5),])
+                new LineStringZM([
+                    new PointZM(0, 0, 2.5, 100), new PointZM(0, 5, 1, 100), new PointZM(5, 5, 4, 100), new PointZM(5, 0, 4, 100), new PointZM(0, 0, 2.5, 100)
+                ]),
+                new LineStringZM([
+                    new PointZM(1, 1, 2.5, 100), new PointZM(1, 2, 1, 100), new PointZM(2, 2, 4, 100), new PointZM(2, 1, 4, 100), new PointZM(1, 1, 2.5, 100)
+                ])
             ], 4326),
             new PolygonZM([
-                new LineStringZM([new PointZM(8, 8, 2.5), new PointZM(0, 5, 1), new PointZM(5, 5, 4), new PointZM(5, 0, 4), new PointZM(8, 8, 2.5),]),
-                new LineStringZM([new PointZM(9, 9, 2.5), new PointZM(1, 2, 1), new PointZM(2, 2, 4), new PointZM(2, 1, 4), new PointZM(9, 9, 2.5),])
+                new LineStringZM([
+                    new PointZM(8, 8, 2.5, 100), new PointZM(0, 5, 1, 100), new PointZM(5, 5, 4, 100), new PointZM(5, 0, 4, 100), new PointZM(8, 8, 2.5, 100)
+                ]),
+                new LineStringZM([
+                    new PointZM(9, 9, 2.5, 100), new PointZM(1, 2, 1, 100), new PointZM(2, 2, 4, 100), new PointZM(2, 1, 4, 100), new PointZM(9, 9, 2.5, 100)
+                ])
             ], 4326)
         ], 4326);
-        $geometryCollectionZ = new GeometryCollectionZM([
-            new PointZM(1, 1, 5, 4326),
-            new LineStringZM([new PointZM(2, 2, 5, 4326), new PointZM(3, 3, 5, 4326), new PointZM(4, 4, 5, 4326)], 4326),
+        $geometryCollectionZM = new GeometryCollectionZM([
+            new PointZM(1, 1, 5, 100),
+            new LineStringZM([
+                new PointZM(2, 2, 5, 100), new PointZM(3, 3, 5, 100), new PointZM(4, 4, 5, 100)
+            ], 4326),
             new PolygonZM([
-                new LineStringZM([new PointZM(0, 0, 5, 4326), new PointZM(0, 5, 5, 4326), new PointZM(5, 5, 5, 4326), new PointZM(5, 0, 5, 4326), new PointZM(0, 0, 5, 4326),], 4326),
-                new LineStringZM([new PointZM(1, 1, 5, 4326), new PointZM(1, 2, 5, 4326), new PointZM(2, 2, 5, 4326), new PointZM(2, 1, 5, 4326), new PointZM(1, 1, 5, 4326),], 4326)
+                new LineStringZM([
+                    new PointZM(0, 0, 5, 100), new PointZM(0, 5, 5, 100), new PointZM(5, 5, 5, 100), new PointZM(5, 0, 5, 100), new PointZM(0, 0, 5, 100)
+                ], 4326),
+                new LineStringZM([
+                    new PointZM(1, 1, 5, 100), new PointZM(1, 2, 5, 100), new PointZM(2, 2, 5, 100), new PointZM(2, 1, 5, 100), new PointZM(1, 1, 5, 100)
+                ], 4326)
             ], 4326)
         ], 4326);
-        $circularStringZ = new CircularStringZM([
-            new PointZM(0, 0, 9), new PointZM(4, 0, 3), new PointZM(4, 4, 3), new PointZM(0, 4, 3), new PointZM(0, 0, 9)
+        $circularStringZM = new CircularStringZM([
+            new PointZM(0, 0, 9, 100), new PointZM(4, 0, 3, 100), new PointZM(4, 4, 3, 100), new PointZM(0, 4, 3, 100), new PointZM(0, 0, 9, 100)
         ], 4326);
-        $compoundCurveZ = new CompoundCurveZM([
-            new LineStringZM([new PointZM(2, 0, 0), new PointZM(3, 1, 0)]),
-            new CircularStringZM([new PointZM(3, 1, 0), new PointZM(4, 2, 0), new PointZM(5, 1, 0)]),
-            new LineStringZM([new PointZM(5, 1, 0), new PointZM(6, 0, 0)]),
+        $compoundCurveZM = new CompoundCurveZM([
+            new LineStringZM([new PointZM(2, 0, 0, 100), new PointZM(3, 1, 0, 100)]),
+            new CircularStringZM([new PointZM(3, 1, 0, 100), new PointZM(4, 2, 0, 100), new PointZM(5, 1, 0, 100)]),
+            new LineStringZM([new PointZM(5, 1, 0, 100), new PointZM(6, 0, 0, 100)])
         ], 4326);
-        $curvePolygonZ = new CurvePolygonZM([
-            new CircularStringZM([new PointZM(0, 0, 2.3, 4326), new PointZM(6, 0, 2.3, 4326), new PointZM(6, 6, 2.3, 4326), new PointZM(0, 6, 2.3, 4326), new PointZM(0, 0, 2.3, 4326)], 4326),
-            new LineStringZM([new PointZM(2, 2, 2.3, 4326), new PointZM(3, 2, 2.3, 4326), new PointZM(3, 3, 2.3, 4326), new PointZM(2, 3, 2.3, 4326), new PointZM(2, 2, 2.3, 4326)], 4326),
-            new CircularStringZM([new PointZM(1, 1, 2.3, 4326), new PointZM(2, 1, 2.3, 4326), new PointZM(2, 2, 2.3, 4326), new PointZM(1, 2, 2.3, 4326), new PointZM(1, 1, 2.3, 4326)], 4326)
+        $curvePolygonZM = new CurvePolygonZM([
+            new CircularStringZM([
+                new PointZM(0, 0, 2.3, 100), new PointZM(6, 0, 2.3, 100), new PointZM(6, 6, 2.3, 100), new PointZM(0, 6, 2.3, 100), new PointZM(0, 0, 2.3, 100)
+            ], 4326),
+            new LineStringZM([
+                new PointZM(2, 2, 2.3, 100), new PointZM(3, 2, 2.3, 100), new PointZM(3, 3, 2.3, 100), new PointZM(2, 3, 2.3, 100), new PointZM(2, 2, 2.3, 100)
+            ], 4326),
+            new CircularStringZM([
+                new PointZM(1, 1, 2.3, 100), new PointZM(2, 1, 2.3, 100), new PointZM(2, 2, 2.3, 100), new PointZM(1, 2, 2.3, 100), new PointZM(1, 1, 2.3, 100)
+            ], 4326)
         ], 4326);
-        $multiCurveZ = new MultiCurveZM([
-            new CircularStringZM([new PointZM(0, 0, 8, 4326), new PointZM(1, 2, 8, 4326), new PointZM(2, 0, 8, 4326)], 4326),
-            new LineStringZM([new PointZM(3, 3, 8, 4326), new PointZM(4, 4, 8, 4326), new PointZM(5, 5, 8, 4326)], 4326)
+        $multiCurveZM = new MultiCurveZM([
+            new CircularStringZM([
+                new PointZM(0, 0, 8, 100), new PointZM(1, 2, 8, 100), new PointZM(2, 0, 8, 100)
+            ], 4326),
+            new LineStringZM([
+                new PointZM(3, 3, 8, 100), new PointZM(4, 4, 8, 100), new PointZM(5, 5, 8, 100)
+            ], 4326)
         ], 4326);
 
         $newEnt = $mgr->createEntity()
-            ->setPointZGeom($pointZ)
-            ->setLinestringZGeom($lineStringZ)
-            ->setPolygonZGeom($polygonZ)
-            ->setMultipointZGeom($multiPointZ)
-            ->setMultilinestringZGeom($multiLineStringZ)
-            ->setMultipolygonZGeom($multiPolygonZ)
-            ->setGeomcollectionZGeom($geometryCollectionZ)
-            ->setCircularstringZGeom($circularStringZ)
-            ->setCompoundcurvezGeom($compoundCurveZ)
-            ->setCurvepolygonZGeom($curvePolygonZ)
-            ->setMulticurvezGeom($multiCurveZ)
+            ->setPointZMGeom($pointZM)
+            ->setLinestringZMGeom($lineStringZM)
+            ->setPolygonZMGeom($polygonZM)
+            ->setMultipointZMGeom($multiPointZM)
+            ->setMultilinestringZMGeom($multiLineStringZM)
+            ->setMultipolygonZMGeom($multiPolygonZM)
+            ->setGeomcollectionZMGeom($geometryCollectionZM)
+            ->setCircularstringZMGeom($circularStringZM)
+            ->setCompoundcurvezMGeom($compoundCurveZM)
+            ->setCurvepolygonZMGeom($curvePolygonZM)
+            ->setMulticurvezMGeom($multiCurveZM)
         ;
 
         //
@@ -261,16 +295,16 @@ class GeoZMTest extends TestCase
         //
         $ent = $mgr->findById(2);
 
-        $this->assertTrue($pointZ == $ent->getPointZGeom());
-        $this->assertTrue($lineStringZ == $ent->getLinestringZGeom());
-        $this->assertTrue($polygonZ == $ent->getPolygonZGeom());
-        $this->assertTrue($multiPointZ == $ent->getMultipointZGeom());
-        $this->assertTrue($multiLineStringZ == $ent->getMultilinestringZGeom());
-        $this->assertTrue($multiPolygonZ == $ent->getMultipolygonZGeom());
-        $this->assertTrue($geometryCollectionZ == $ent->getGeomcollectionZGeom());
-        $this->assertTrue($circularStringZ == $ent->getCircularstringZGeom());
-        $this->assertTrue($compoundCurveZ == $ent->getCompoundcurvezGeom());
-        $this->assertTrue($curvePolygonZ == $ent->getCurvepolygonzGeom());
-        $this->assertTrue($multiCurveZ == $ent->getMulticurvezGeom());
+        $this->assertTrue($pointZM == $ent->getPointZMGeom());
+        $this->assertTrue($lineStringZM == $ent->getLinestringZMGeom());
+        $this->assertTrue($polygonZM == $ent->getPolygonZMGeom());
+        $this->assertTrue($multiPointZM == $ent->getMultipointZMGeom());
+        $this->assertTrue($multiLineStringZM == $ent->getMultilinestringZMGeom());
+        $this->assertTrue($multiPolygonZM == $ent->getMultipolygonZMGeom());
+        $this->assertTrue($geometryCollectionZM == $ent->getGeomcollectionZMGeom());
+        $this->assertTrue($circularStringZM == $ent->getCircularstringZMGeom());
+        $this->assertTrue($compoundCurveZM == $ent->getCompoundcurveZMGeom());
+        $this->assertTrue($curvePolygonZM == $ent->getCurvepolygonZMGeom());
+        $this->assertTrue($multiCurveZM == $ent->getMulticurveZMGeom());
     }
 }

@@ -156,7 +156,7 @@ class PointZM extends AbstractShapeZM
         return [$this->x, $this->y, $this->z, $this->m];
     }
 
-    public function __equals(PointZM $other): bool
+    public function equals(PointZM $other): bool
     {
         return (
             $this->x === $other->getX() &&

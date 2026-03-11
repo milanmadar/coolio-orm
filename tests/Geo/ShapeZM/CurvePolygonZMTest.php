@@ -131,4 +131,11 @@ class CurvePolygonZMTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         new CurvePolygonZM([]);
     }
+
+    public function testImplicitLineStringEWKT()
+    {
+        $ewkt = 'SRID=4326;CURVEPOLYGON(CIRCULARSTRING(0 0 2.3 99,6 0 2.3 99,6 6 2.3 99,0 6 2.3 99,0 0 2.3 99),(2 2 2.3 99,3 2 2.3 99,3 3 2.3 99,2 3 2.3 99,2 2 2.3 99),CIRCULARSTRING(1 1 2.3 99,2 1 2.3 99,2 2 2.3 99,1 2 2.3 99,1 1 2.3 99))';
+        $curvePolygon = CurvePolygonZM::createFromGeoEWKTString($ewkt);
+        $this->assertCount(3, $curvePolygon->getBoundaries());
+    }
 }

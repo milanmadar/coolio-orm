@@ -164,6 +164,43 @@ class MultiPolygonZMTest extends TestCase
         $this->assertEquals(4326, $multiPolygon->getSRID());
     }
 
+    public function testCreateFromEWKTString_1Polygon()
+    {
+        $ewkt = 'SRID=4326;MULTIPOLYGON(((0 0 2.5 94,5 0 4 93,5 5 4 92,0 5 1 91,0 0 2.5 90),(1 1 2.5 95,1 2 1 96,2 2 4 97,2 1 4 98,1 1 2.5 99)))';
+        MultiPolygonZM::createFromGeoEWKTString($ewkt);
+        $this->assertTrue(true);
+    }
+
+    public function testCreateFromEWKTString_2Polygons()
+    {
+        $ewkt = 'SRID=4326;MULTIPOLYGON(((0 0 2.5 94,5 0 4 93,5 5 4 92,0 5 1 91,0 0 2.5 90),(1 1 2.5 95,1 2 1 96,2 2 4 97,2 1 4 98,1 1 2.5 99)),((8 8 2.5 80,0 5 1 81,5 5 4 82,5 0 4 83,8 8 2.5 84),(9 9 2.5 89,2 1 4 88,2 2 4 87,1 2 1 86,9 9 2.5 85)))';
+        MultiPolygonZM::createFromGeoEWKTString($ewkt);
+        $this->assertTrue(true);
+    }
+
+    public function testCreateFromEWKTString_3Polygons()
+    {
+        $ewkt = 'SRID=4326;MULTIPOLYGON(((0 0 2.5 94,5 0 4 93,5 5 4 92,0 5 1 91,0 0 2.5 90),(1 1 2.5 95,1 2 1 96,2 2 4 97,2 1 4 98,1 1 2.5 99)),((8 8 2.5 80,0 5 1 81,5 5 4 82,5 0 4 83,8 8 2.5 84),(9 9 2.5 89,2 1 4 88,2 2 4 87,1 2 1 86,9 9 2.5 85)),((0 0 2.5 94,5 0 4 93,5 5 4 92,0 5 1 91,0 0 2.5 90),(1 1 2.5 95,1 2 1 96,2 2 4 97,2 1 4 98,1 1 2.5 99)))';
+        MultiPolygonZM::createFromGeoEWKTString($ewkt);
+        $this->assertTrue(true);
+    }
+
+    public function testCreateFromEWKTString_Tricky()
+    {
+        $ewkt = 'SRID=4326;MULTIPOLYGON(((0 0 0 0,1 0 0 0,1 1 0 0,0 1 0 0,0 0 0 0),(0.2 0.2 0 0,0.8 0.2 0 0,0.8 0.8 0 0,0.2 0.8 0 0,0.2 0.2 0 0),(0.3 0.3 0 0,0.7 0.3 0 0,0.7 0.7 0 0,0.3 0.7 0 0,0.3 0.3 0 0)))';
+        $mp = MultiPolygonZM::createFromGeoEWKTString($ewkt);
+        $this->assertCount(1, $mp->getPolygons());
+        $this->assertCount(3, $mp->getPolygons()[0]->getLineStrings());
+    }
+
+    public function testCreateFromEWKTString_Tricky2()
+    {
+        $ewkt = "SRID=4326;MULTIPOLYGON(  ((0 0 0 0,1 0 0 0,1 1 0 0,0 1 0 0,0 0 0 0)),  ((2 2 0 0,3 2 0 0,3 3 0 0,2 3 0 0,2 2 0 0))  )";
+        $mp = MultiPolygonZM::createFromGeoEWKTString($ewkt);
+        $this->assertCount(2, $mp->getPolygons());
+        $this->assertCount(1, $mp->getPolygons()[0]->getLineStrings());
+    }
+
     public function testEmptyMultiPolygonZMThrows()
     {
         $this->expectException(\InvalidArgumentException::class);
