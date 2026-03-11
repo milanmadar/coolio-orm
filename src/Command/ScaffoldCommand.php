@@ -29,7 +29,7 @@ class ScaffoldCommand extends Command
         parent::__construct();
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('coolio-orm:scaffold');
         $this->setDescription('Scaffolds Entity and Manager classes from your database');
