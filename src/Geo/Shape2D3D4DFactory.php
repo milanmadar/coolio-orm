@@ -187,9 +187,6 @@ class Shape2D3D4DFactory
                     3 => ShapeZ\CompoundCurveZ::createFromGeoEWKTString($ewktString),
                     default => Shape2D\CompoundCurve::createFromGeoEWKTString($ewktString),
                 };
-//                return $is3D
-//                    ? ShapeZ\CompoundCurveZ::createFromGeoEWKTString($ewktString)
-//                    : Shape2D\CompoundCurve::createFromGeoEWKTString($ewktString);
 
             case 'CURVEPOLYGON':
                 return match($dims) {
@@ -197,19 +194,13 @@ class Shape2D3D4DFactory
                     3 => ShapeZ\CurvePolygonZ::createFromGeoEWKTString($ewktString),
                     default => Shape2D\CurvePolygon::createFromGeoEWKTString($ewktString),
                 };
-//                return $is3D
-//                    ? ShapeZ\CurvePolygonZ::createFromGeoEWKTString($ewktString)
-//                    : Shape2D\CurvePolygon::createFromGeoEWKTString($ewktString);
 
             case 'MULTICURVE':
                 return match($dims) {
-                    //4 => ShapeZM\MultiCurveZM::createFromGeoEWKTString($ewktString),
+                    4 => ShapeZM\MultiCurveZM::createFromGeoEWKTString($ewktString),
                     3 => ShapeZ\MultiCurveZ::createFromGeoEWKTString($ewktString),
                     default => Shape2D\MultiCurve::createFromGeoEWKTString($ewktString),
                 };
-//                return $is3D
-//                    ? ShapeZ\MultiCurveZ::createFromGeoEWKTString($ewktString)
-//                    : Shape2D\MultiCurve::createFromGeoEWKTString($ewktString);
 
             case 'MULTILINESTRING':
                 return match($dims) {
@@ -217,9 +208,6 @@ class Shape2D3D4DFactory
                     3 => ShapeZ\MultiLineStringZ::createFromGeoEWKTString($ewktString),
                     default => Shape2D\MultiLineString::createFromGeoEWKTString($ewktString),
                 };
-//                return $is3D
-//                    ? ShapeZ\MultiLineStringZ::createFromGeoEWKTString($ewktString)
-//                    : Shape2D\MultiLineString::createFromGeoEWKTString($ewktString);
 
             case 'GEOMETRYCOLLECTION':
                 return match($dims) {
@@ -227,9 +215,6 @@ class Shape2D3D4DFactory
                     3 => ShapeZ\GeometryCollectionZ::createFromGeoEWKTString($ewktString),
                     default => Shape2D\GeometryCollection::createFromGeoEWKTString($ewktString),
                 };
-//                return $is3D
-//                    ? ShapeZ\GeometryCollectionZ::createFromGeoEWKTString($ewktString)
-//                    : Shape2D\GeometryCollection::createFromGeoEWKTString($ewktString);
 
             case 'MULTIPOLYGON':
                 return match($dims) {
@@ -237,9 +222,6 @@ class Shape2D3D4DFactory
                     3 => ShapeZ\MultiPolygonZ::createFromGeoEWKTString($ewktString),
                     default => Shape2D\MultiPolygon::createFromGeoEWKTString($ewktString),
                 };
-//                return $is3D
-//                    ? ShapeZ\MultiPolygonZ::createFromGeoEWKTString($ewktString)
-//                    : Shape2D\MultiPolygon::createFromGeoEWKTString($ewktString);
 
             case 'POLYGON':
                 return match($dims) {
@@ -247,9 +229,6 @@ class Shape2D3D4DFactory
                     3 => ShapeZ\PolygonZ::createFromGeoEWKTString($ewktString),
                     default => Shape2D\Polygon::createFromGeoEWKTString($ewktString),
                 };
-//                return $is3D
-//                    ? ShapeZ\PolygonZ::createFromGeoEWKTString($ewktString)
-//                    : Shape2D\Polygon::createFromGeoEWKTString($ewktString);
 
             case 'LINESTRING':
                 return match($dims) {
@@ -257,9 +236,6 @@ class Shape2D3D4DFactory
                     3 => ShapeZ\LineStringZ::createFromGeoEWKTString($ewktString),
                     default => Shape2D\LineString::createFromGeoEWKTString($ewktString),
                 };
-//                return $is3D
-//                    ? ShapeZ\LineStringZ::createFromGeoEWKTString($ewktString)
-//                    : Shape2D\LineString::createFromGeoEWKTString($ewktString);
 
             case 'MULTIPOINT':
                 return match($dims) {
@@ -267,9 +243,6 @@ class Shape2D3D4DFactory
                     3 => ShapeZ\MultiPointZ::createFromGeoEWKTString($ewktString),
                     default => Shape2D\MultiPoint::createFromGeoEWKTString($ewktString),
                 };
-//                return $is3D
-//                    ? ShapeZ\MultiPointZ::createFromGeoEWKTString($ewktString)
-//                    : Shape2D\MultiPoint::createFromGeoEWKTString($ewktString);
 
             case 'POINT':
                 return match($dims) {
@@ -277,9 +250,6 @@ class Shape2D3D4DFactory
                     3 => ShapeZ\PointZ::createFromGeoEWKTString($ewktString),
                     default => Shape2D\Point::createFromGeoEWKTString($ewktString),
                 };
-//                return $is3D
-//                    ? ShapeZ\PointZ::createFromGeoEWKTString($ewktString)
-//                    : Shape2D\Point::createFromGeoEWKTString($ewktString);
 
             default:
                 throw new \InvalidArgumentException('Unsupported EWKT type: ' . $type);

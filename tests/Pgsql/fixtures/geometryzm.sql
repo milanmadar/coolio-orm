@@ -15,9 +15,8 @@ CREATE TABLE geometryzm_test (
   -- curve types
   circularstringzm_geom    geometry(CircularStringZM, 4326),
   compoundcurvezm_geom     geometry(CompoundCurveZM, 4326),
-  curvepolygonzm_geom      geometry(CurvePolygonZM, 4326)
---   ,
---   multicurvezm_geom        geometry(MultiCurveZM, 4326)
+  curvepolygonzm_geom      geometry(CurvePolygonZM, 4326),
+  multicurvezm_geom        geometry(MultiCurveZM, 4326)
 );
 
 INSERT INTO geometryzm_test (
@@ -30,9 +29,8 @@ INSERT INTO geometryzm_test (
     geomcollectionzm_geom,
     circularstringzm_geom,
     compoundcurvezm_geom,
-    curvepolygonzm_geom
---     ,
---     multicurvezm_geom
+    curvepolygonzm_geom,
+    multicurvezm_geom
 ) VALUES (
     ST_GeomFromEWKT('SRID=4326;POINT ZM(1 2 3 4)'),
     ST_GeomFromEWKT('SRID=4326;LINESTRING ZM(0 0 0 100, 1 1 1 100, 2 2 2 100)'),
@@ -43,7 +41,6 @@ INSERT INTO geometryzm_test (
     ST_GeomFromEWKT('SRID=4326;GEOMETRYCOLLECTION ZM(POINT ZM(1 2 3 100),LINESTRING ZM(0 0 0 100,1 1 1 100))'),
     ST_GeomFromEWKT('SRID=4326;CIRCULARSTRING ZM(0 0 0 100,1 1 1 100,2 0 0 100)'),
     ST_GeomFromEWKT('SRID=4326;COMPOUNDCURVE ZM((0 0 0 100,1 1 1 100),CIRCULARSTRING ZM(1 1 1 100,2 2 2 100,3 1 1 100))'),
-    ST_GeomFromEWKT('SRID=4326;CURVEPOLYGON ZM(CIRCULARSTRING ZM(0 0 0 100,2 2 2 100,4 0 0 100,5 2 2 100,0 0 0 100))')
---      ,
---      ST_GeomFromEWKT('SRID=4326;MULTICURVE ZM(CIRCULARSTRING ZM(0 0 0 100,1 1 1 100,2 0 0 100),LINESTRING ZM(2 0 0 100,3 1 1 100))')
+    ST_GeomFromEWKT('SRID=4326;CURVEPOLYGON ZM(CIRCULARSTRING ZM(0 0 0 100,2 2 2 100,4 0 0 100,5 2 2 100,0 0 0 100))'),
+     ST_GeomFromEWKT('SRID=4326;MULTICURVE ZM(CIRCULARSTRING ZM(0 0 0 100,1 1 1 100,2 0 0 100),LINESTRING ZM(2 0 0 100,3 1 1 100))')
  );

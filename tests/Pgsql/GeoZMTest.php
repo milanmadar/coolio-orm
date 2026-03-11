@@ -12,7 +12,7 @@ use Milanmadar\CoolioORM\Geo\ShapeZM\GeometryCollectionZM;
 use Milanmadar\CoolioORM\Geo\ShapeZM\CircularStringZM;
 use Milanmadar\CoolioORM\Geo\ShapeZM\CompoundCurveZM;
 use Milanmadar\CoolioORM\Geo\ShapeZM\CurvePolygonZM;
-//use Milanmadar\CoolioORM\Geo\ShapeZM\MultiCurveZM;
+use Milanmadar\CoolioORM\Geo\ShapeZM\MultiCurveZM;
 use Milanmadar\CoolioORM\ORM;
 use PHPUnit\Framework\TestCase;
 use tests\DbHelper;
@@ -54,7 +54,7 @@ class GeoZMTest extends TestCase
                 'circularstringzm_geom',
                 'compoundcurvezm_geom',
                 'curvepolygonzm_geom',
-                //'multicurvezm_geom'
+                'multicurvezm_geom'
             )
             ->andWhere('1=1')
             ->limit(0, 1)
@@ -71,6 +71,7 @@ class GeoZMTest extends TestCase
         $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\ShapeZM\CircularStringZM', $ent->getCircularStringZMGeom());
         $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\ShapeZM\CompoundCurveZM', $ent->getCompoundcurveZMGeom());
         $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\ShapeZM\CurvePolygonZM', $ent->getCurvepolygonZMGeom());
+        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\ShapeZM\MultiCurveZM', $ent->getMulticurveZMGeom());
     }
 
     public function testInsert_asObjects()
