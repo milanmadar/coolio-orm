@@ -10,7 +10,7 @@ use Milanmadar\CoolioORM\Geo\ShapeZM\MultiLineStringZM;
 use Milanmadar\CoolioORM\Geo\ShapeZM\MultiPolygonZM;
 use Milanmadar\CoolioORM\Geo\ShapeZM\GeometryCollectionZM;
 use Milanmadar\CoolioORM\Geo\ShapeZM\CircularStringZM;
-//use Milanmadar\CoolioORM\Geo\ShapeZM\CompoundCurveZM;
+use Milanmadar\CoolioORM\Geo\ShapeZM\CompoundCurveZM;
 //use Milanmadar\CoolioORM\Geo\ShapeZM\CurvePolygonZM;
 //use Milanmadar\CoolioORM\Geo\ShapeZM\MultiCurveZM;
 use Milanmadar\CoolioORM\ORM;
@@ -52,7 +52,8 @@ class GeoZMTest extends TestCase
                 'multipolygonzm_geom',
                 'geomcollectionzm_geom',
                 'circularstringzm_geom',
-                //'compoundcurvezm_geom', 'curvepolygonzm_geom', 'multicurvezm_geom'
+                'compoundcurvezm_geom',
+                //'curvepolygonzm_geom', 'multicurvezm_geom'
             )
             ->andWhere('1=1')
             ->limit(0, 1)
@@ -67,6 +68,7 @@ class GeoZMTest extends TestCase
         $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\ShapeZM\MultiPolygonZM', $ent->getMultipolygonZMGeom());
         $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\ShapeZM\GeometryCollectionZM', $ent->getGeomcollectionZMGeom());
         $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\ShapeZM\CircularStringZM', $ent->getCircularStringZMGeom());
+        $this->assertInstanceOf('\Milanmadar\CoolioORM\Geo\ShapeZM\CompoundCurveZM', $ent->getCompoundcurveZMGeom());
     }
 
     public function testInsert_asObjects()

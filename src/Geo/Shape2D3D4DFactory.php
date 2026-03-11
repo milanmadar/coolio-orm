@@ -183,7 +183,7 @@ class Shape2D3D4DFactory
 
             case 'COMPOUNDCURVE':
                 return match($dims) {
-                    //4 => ShapeZM\CompoundCurveZM::createFromGeoEWKTString($ewktString),
+                    4 => ShapeZM\CompoundCurveZM::createFromGeoEWKTString($ewktString),
                     3 => ShapeZ\CompoundCurveZ::createFromGeoEWKTString($ewktString),
                     default => Shape2D\CompoundCurve::createFromGeoEWKTString($ewktString),
                 };

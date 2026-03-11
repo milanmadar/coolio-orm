@@ -143,4 +143,14 @@ class LineStringZM extends AbstractShapeZM
 
         return new LineStringZM($points, $srid);
     }
+
+    public function getStartPointZM(): PointZM
+    {
+        return $this->points[0];
+    }
+
+    public function getEndPointZM(): PointZM
+    {
+        return $this->points[count($this->points) - 1];
+    }
 }
