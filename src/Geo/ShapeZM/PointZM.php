@@ -2,8 +2,6 @@
 
 namespace Milanmadar\CoolioORM\Geo\ShapeZM;
 
-use InvalidArgumentException;
-
 class PointZM extends AbstractShapeZM
 {
     private float $x;
@@ -35,7 +33,7 @@ class PointZM extends AbstractShapeZM
             !is_array($jsonData['coordinates']) ||
             count($jsonData['coordinates']) < 3
         ) {
-            throw new InvalidArgumentException('Invalid GeoJSON for PointZM');
+            throw new \InvalidArgumentException('Invalid GeoJSON for PointZM');
         }
 
         $coords = $jsonData['coordinates'];
@@ -54,19 +52,19 @@ class PointZM extends AbstractShapeZM
     {
         // Example: SRID=4326;POINT ZM(x y z m)
         if (strpos($ewktString, ';POINT') === false) {
-            throw new InvalidArgumentException('Invalid EWKT format for PointZM.');
+            throw new \InvalidArgumentException('Invalid EWKT format for PointZM.');
         }
 
         $ewktParts = explode(';', $ewktString, 2);
         if (count($ewktParts) != 2) {
-            throw new InvalidArgumentException('Invalid EWKT string, could not find SRID and geometry parts.');
+            throw new \InvalidArgumentException('Invalid EWKT string, could not find SRID and geometry parts.');
         }
 
         $sridPart = $ewktParts[0];
         $geometryPart = $ewktParts[1];
 
         if (strpos($sridPart, 'SRID=') !== 0) {
-            throw new InvalidArgumentException('Invalid SRID part in EWKT string.');
+            throw new \InvalidArgumentException('Invalid SRID part in EWKT string.');
         }
 
         $srid = (int) substr($sridPart, 5);
@@ -74,7 +72,7 @@ class PointZM extends AbstractShapeZM
         // Parse POINT ZM(x y z m)
         preg_match('/POINT ?Z?M?\(([-0-9\.]+) ([-0-9\.]+) ([-0-9\.]+) ([-0-9\.]+)\)/', $geometryPart, $matches);
         if (empty($matches)) {
-            throw new InvalidArgumentException('Invalid POINTZM format in EWKT.');
+            throw new \InvalidArgumentException('Invalid POINTZM format in EWKT.');
         }
 
         return new PointZM((float)$matches[1], (float)$matches[2], (float)$matches[3], (float)$matches[4], $srid);

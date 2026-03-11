@@ -2,8 +2,6 @@
 
 namespace Milanmadar\CoolioORM\Geo\ShapeZM;
 
-use InvalidArgumentException;
-
 class MultiLineStringZM extends AbstractShapeZM
 {
     /** @var array<LineStringZM> */
@@ -87,7 +85,7 @@ class MultiLineStringZM extends AbstractShapeZM
             !is_array($jsonData['coordinates']) ||
             empty($jsonData['coordinates'])
         ) {
-            throw new InvalidArgumentException('Invalid GeoJSON for MultiLineStringZM.');
+            throw new \InvalidArgumentException('Invalid GeoJSON for MultiLineStringZM.');
         }
 
         $lineStrings = [];
@@ -95,7 +93,7 @@ class MultiLineStringZM extends AbstractShapeZM
             $points = [];
             foreach ($lineCoords as $coords) {
                 if (count($coords) !== 4) {
-                    throw new InvalidArgumentException('Each point must have exactly 4 coordinates for ZM.');
+                    throw new \InvalidArgumentException('Each point must have exactly 4 coordinates for ZM.');
                 }
                 $points[] = new PointZM((float)$coords[0], (float)$coords[1], (float)$coords[2], (float)$coords[3], $srid);
             }
@@ -112,18 +110,18 @@ class MultiLineStringZM extends AbstractShapeZM
     public static function createFromGeoEWKTString(string $ewktString): MultiLineStringZM
     {
         if (strpos($ewktString, ';MULTILINESTRING') === false) {
-            throw new InvalidArgumentException('Invalid EWKT format for MultiLineStringZM.');
+            throw new \InvalidArgumentException('Invalid EWKT format for MultiLineStringZM.');
         }
 
         [$sridPart, $geometryPart] = explode(';', $ewktString, 2);
         if (strpos($sridPart, 'SRID=') !== 0) {
-            throw new InvalidArgumentException('Invalid SRID part in EWKT string.');
+            throw new \InvalidArgumentException('Invalid SRID part in EWKT string.');
         }
         $srid = (int) substr($sridPart, 5);
 
         preg_match('/MULTILINESTRING ?Z?M?\((.*)\)/', $geometryPart, $matches);
         if (empty($matches)) {
-            throw new InvalidArgumentException('Invalid MULTILINESTRING ZM format in EWKT.');
+            throw new \InvalidArgumentException('Invalid MULTILINESTRING ZM format in EWKT.');
         }
 
         $linesData = explode('),', $matches[1]);
@@ -136,7 +134,7 @@ class MultiLineStringZM extends AbstractShapeZM
             foreach ($pointDataArr as $pointData) {
                 $coords = array_map('trim', explode(' ', $pointData));
                 if (count($coords) !== 4) {
-                    throw new InvalidArgumentException('Each point must have exactly 4 coordinates for ZM.');
+                    throw new \InvalidArgumentException('Each point must have exactly 4 coordinates for ZM.');
                 }
                 $points[] = new PointZM((float)$coords[0], (float)$coords[1], (float)$coords[2], (float)$coords[3], $srid);
             }
@@ -148,19 +146,19 @@ class MultiLineStringZM extends AbstractShapeZM
 
     /**
      * @param array<LineStringZM> $lineStrings
-     * @throws InvalidArgumentException
+     * @throws \InvalidArgumentException
      */
     private function _validateLineStrings(array $lineStrings): void
     {
         if (empty($lineStrings)) {
-            throw new InvalidArgumentException('MultiLineStringZM must contain at least one LineStringZM.');
+            throw new \InvalidArgumentException('MultiLineStringZM must contain at least one LineStringZM.');
         }
         foreach ($lineStrings as $ls) {
             if (!($ls instanceof LineStringZM)) { /** @phpstan-ignore-line */
-                throw new InvalidArgumentException('All elements must be instances of LineStringZM.');
+                throw new \InvalidArgumentException('All elements must be instances of LineStringZM.');
             }
             if (count($ls->getPoints()) < 2) {
-                throw new InvalidArgumentException('Each LineStringZM must have at least 2 points.');
+                throw new \InvalidArgumentException('Each LineStringZM must have at least 2 points.');
             }
         }
     }

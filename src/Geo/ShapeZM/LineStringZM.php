@@ -2,10 +2,6 @@
 
 namespace Milanmadar\CoolioORM\Geo\ShapeZM;
 
-use Milanmadar\CoolioORM\Geo\ShapeZM\AbstractShapeZM;
-use Milanmadar\CoolioORM\Geo\ShapeZM\PointZM;
-use InvalidArgumentException;
-
 class LineStringZM extends AbstractShapeZM
 {
     /** @var PointZM[] */
@@ -18,12 +14,12 @@ class LineStringZM extends AbstractShapeZM
     public function __construct(array $points, int|null $srid = null)
     {
         if (empty($points)) {
-            throw new InvalidArgumentException('LineStringZM requires at least one PointZM.');
+            throw new \InvalidArgumentException('LineStringZM requires at least one PointZM.');
         }
 
         foreach ($points as $pt) {
             if (!$pt instanceof PointZM) { /** @phpstan-ignore-line */
-                throw new InvalidArgumentException('All elements must be PointZM instances.');
+                throw new \InvalidArgumentException('All elements must be PointZM instances.');
             }
         }
 
@@ -92,13 +88,13 @@ class LineStringZM extends AbstractShapeZM
             $jsonData['type'] !== 'LineString' ||
             !is_array($jsonData['coordinates'])
         ) {
-            throw new InvalidArgumentException('Invalid GeoJSON for LineStringZM');
+            throw new \InvalidArgumentException('Invalid GeoJSON for LineStringZM');
         }
 
         $points = [];
         foreach ($jsonData['coordinates'] as $coord) {
             if (!is_array($coord) || count($coord) !== 4) {
-                throw new InvalidArgumentException('Each coordinate must have 4 elements [X,Y,Z,M].');
+                throw new \InvalidArgumentException('Each coordinate must have 4 elements [X,Y,Z,M].');
             }
             $points[] = new PointZM($coord[0], $coord[1], $coord[2], $coord[3], $srid);
         }
@@ -113,12 +109,12 @@ class LineStringZM extends AbstractShapeZM
     public static function createFromGeoEWKTString(string $ewktString): LineStringZM
     {
         if (strpos($ewktString, 'LINESTRING') === false) {
-            throw new InvalidArgumentException('Invalid EWKT format for LineStringZM.');
+            throw new \InvalidArgumentException('Invalid EWKT format for LineStringZM.');
         }
 
         $ewktParts = explode(';', $ewktString, 2);
         if (count($ewktParts) != 2) {
-            throw new InvalidArgumentException('Invalid EWKT string: missing SRID or geometry.');
+            throw new \InvalidArgumentException('Invalid EWKT string: missing SRID or geometry.');
         }
 
         $srid = (int) substr($ewktParts[0], 5);
@@ -126,7 +122,7 @@ class LineStringZM extends AbstractShapeZM
 
         preg_match('/LINESTRING ?Z?M?\((.+)\)/', $geometryPart, $matches);
         if (empty($matches)) {
-            throw new InvalidArgumentException('Invalid LINESTRING ZM format in EWKT.');
+            throw new \InvalidArgumentException('Invalid LINESTRING ZM format in EWKT.');
         }
 
         $coordString = $matches[1];
@@ -136,7 +132,7 @@ class LineStringZM extends AbstractShapeZM
             /** @var array<float|int> $nums */
             $nums = preg_split('/\s+/', trim($pair));
             if (count($nums) !== 4) {
-                throw new InvalidArgumentException('Each coordinate must have 4 elements [X,Y,Z,M].');
+                throw new \InvalidArgumentException('Each coordinate must have 4 elements [X,Y,Z,M].');
             }
             $points[] = new PointZM((float)$nums[0], (float)$nums[1], (float)$nums[2], (float)$nums[3], $srid);
         }

@@ -87,6 +87,10 @@ class CompoundCurveZM extends AbstractShapeZM implements HasStartEndPointZMInter
         return new CompoundCurveZM($parsed, $srid);
     }
 
+    /**
+     * @param array<LineStringZM|CircularStringZM> $segments
+     * @param int|null $srid
+     */
     public function __construct(array $segments, ?int $srid = null)
     {
         $this->_validateSegments($segments);
@@ -105,11 +109,18 @@ class CompoundCurveZM extends AbstractShapeZM implements HasStartEndPointZMInter
         throw new \RuntimeException('GeoJSON does not support CompoundCurveZM.');
     }
 
+    /**
+     * @return array<LineStringZM|CircularStringZM>
+     */
     public function getSegments(): array
     {
         return $this->segments;
     }
 
+    /**
+     * @param array<LineStringZM|CircularStringZM> $segments
+     * @return $this
+     */
     public function setSegments(array $segments): CompoundCurveZM
     {
         $this->_validateSegments($segments);
@@ -117,6 +128,10 @@ class CompoundCurveZM extends AbstractShapeZM implements HasStartEndPointZMInter
         return $this;
     }
 
+    /**
+     * @param array<LineStringZM|CircularStringZM> $segments
+     * @return void
+     */
     private function _validateSegments(array $segments): void
     {
         if (count($segments) < 1) {

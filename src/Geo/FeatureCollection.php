@@ -2,7 +2,6 @@
 
 namespace Milanmadar\CoolioORM\Geo;
 
-use InvalidArgumentException;
 use Milanmadar\CoolioORM\Geo\Shape2D\AbstractShape2D;
 
 class FeatureCollection extends AbstractShape2D
@@ -23,11 +22,11 @@ class FeatureCollection extends AbstractShape2D
     public static function createFromGeoJSON(array $jsonData, int|null $srid = null): FeatureCollection
     {
         if (!isset($jsonData['type']) || $jsonData['type'] !== 'FeatureCollection') {
-            throw new InvalidArgumentException('Invalid GeoJSON: expected type FeatureCollection.');
+            throw new \InvalidArgumentException('Invalid GeoJSON: expected type FeatureCollection.');
         }
 
         if (!isset($jsonData['features']) || !is_array($jsonData['features'])) {
-            throw new InvalidArgumentException('Invalid GeoJSON: missing or invalid "features" array.');
+            throw new \InvalidArgumentException('Invalid GeoJSON: missing or invalid "features" array.');
         }
 
         $features = [];
@@ -53,7 +52,7 @@ class FeatureCollection extends AbstractShape2D
 
         foreach ($features as $feature) {
             if (!$feature instanceof Feature) { /** @phpstan-ignore-line */
-                throw new InvalidArgumentException('All elements must be instances of Feature.');
+                throw new \InvalidArgumentException('All elements must be instances of Feature.');
             }
         }
 

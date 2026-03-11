@@ -193,7 +193,7 @@ class Shape2D3D4DFactory
 
             case 'CURVEPOLYGON':
                 return match($dims) {
-                    //4 => ShapeZM\CurvePolygonZM::createFromGeoEWKTString($ewktString),
+                    4 => ShapeZM\CurvePolygonZM::createFromGeoEWKTString($ewktString),
                     3 => ShapeZ\CurvePolygonZ::createFromGeoEWKTString($ewktString),
                     default => Shape2D\CurvePolygon::createFromGeoEWKTString($ewktString),
                 };

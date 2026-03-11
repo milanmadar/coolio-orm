@@ -107,12 +107,12 @@ class Entity extends \Milanmadar\CoolioORM\Entity
 
     public function getCurvepolygonZMGeom(): ShapeZM\CurvePolygonZM
     {
-        return $this->_get('curvedpolygonzm_geom');
+        return $this->_get('curvepolygonzm_geom');
     }
 
     public function setCurvepolygonZMGeom(ShapeZM\CurvePolygonZM $val): self
     {
-        $this->_set('curvedpolygonzm_geom', $val);
+        $this->_set('curvepolygonzm_geom', $val);
         return $this;
     }
 
