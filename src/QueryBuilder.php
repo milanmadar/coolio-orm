@@ -460,11 +460,11 @@ class QueryBuilder extends DoctrineQueryBuilder
 
             $sql = $column.' '.$operator.' (:'.$paramName.')';
         }
-        elseif($value == 'NOT NULL' && ($operator == '=' || $operator == 'IS')) {
+        elseif($value === 'NOT NULL' && ($operator == '=' || $operator == 'IS')) {
             $sql = $column.' IS NOT NULL';
             $paramName = null;
         }
-        elseif(is_null($value) || $value == 'NULL') {
+        elseif(is_null($value) || $value === 'NULL') {
             if($operator == '=') $operator = 'IS';
             elseif($operator == '!=') $operator = 'IS NOT';
             $sql = $column.' '.$operator.' NULL';
@@ -739,6 +739,31 @@ class QueryBuilder extends DoctrineQueryBuilder
     }
 
     /**
+     * Add a Common Table Expression to be used for a select query.
+     *
+     * <code>
+     *     // WITH cte_name AS (SELECT id AS column1 FROM table_a)
+     *     $qb = $conn->createQueryBuilder()
+     *         ->with('cte_name', 'SELECT id AS column1 FROM table_a');
+     *
+     *     // WITH cte_name(column1) AS (SELECT id AS column1 FROM table_a)
+     *     $qb = $conn->createQueryBuilder()
+     *         ->with('cte_name', 'SELECT id AS column1 FROM table_a', ['column1']);
+     * </code>
+     *
+     * @param string        $name    The name of the CTE
+     * @param string[]|null $columns The optional columns list to select in the CTE.
+     *                               If not provided, the columns are inferred from the CTE.
+     *
+     * @return $this This QueryBuilder instance.
+     */
+    public function with(string $name, string|\Doctrine\DBAL\Query\QueryBuilder $part, ?array $columns = null): self
+    {
+        parent::with($name, $part, $columns);
+        return $this;
+    }
+
+    /**
      * @inheritDoc
      * @return $this
      */
@@ -961,7 +986,11 @@ class QueryBuilder extends DoctrineQueryBuilder
 
         // bool
         if(is_bool($value)) {
-            $value = (int)$value;
+            if($type == ParameterType::INTEGER) {
+                $value = (int)$value;
+            } elseif($this->isPostgres) {
+                $type = ParameterType::BOOLEAN;
+            }
         }
         elseif(is_array($value) && !empty($value) && is_bool(array_values($value)[0])) {
             $_values = [];
@@ -1497,6 +1526,8 @@ class QueryBuilder extends DoctrineQueryBuilder
             } else {
                 if (is_string($v)) {
                     $v = "'" . str_replace("'", "''", $v) . "'";
+                } elseif (is_bool($v)) {
+                    $v = $v ? 'true' : 'false';
                 }
                 $sql = str_replace(':'.$k, (string)$v, $sql);
             }

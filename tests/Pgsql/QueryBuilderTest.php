@@ -608,4 +608,122 @@ class QueryBuilderTest extends TestCase
             $sql
         );
     }
+
+    public function testBoolValues(): void
+    {
+        $mgr = self::$dbHelper->getManager(OrmTest\Manager::class);
+
+        $sql = $mgr->createQueryBuilder()
+            ->select('orm_other_id')
+            ->from('orm_test')
+            ->andWhereColumn('fld_bool', '=', true)
+            ->getSQLNamedParameters();
+        $this->assertEquals('SELECT orm_other_id FROM orm_test WHERE fld_bool = true', $sql);
+
+        $sql = $mgr->createQueryBuilder()
+            ->select('orm_other_id')
+            ->from('orm_test')
+            ->andWhereColumn('fld_bool', '=', false)
+            ->getSQLNamedParameters();
+        $this->assertEquals('SELECT orm_other_id FROM orm_test WHERE fld_bool = false', $sql);
+    }
+
+    public function testWithCTE1(): void
+    {
+        $expected =
+            "WITH summary_stats AS (" .
+                "SELECT " .
+                    "orm_other_id, ".
+                    "AVG(fld_decimal) as avg_val, " .
+                    "COUNT(*) as group_count " .
+                "FROM orm_test " .
+                "WHERE fld_bool = true " .
+                "GROUP BY orm_other_id" .
+            ") " .
+            "SELECT " .
+                "id, ".
+                "fld_varchar, " .
+                "fld_decimal, " .
+                "(SELECT avg_val FROM summary_stats WHERE orm_other_id = orm_test.orm_other_id) as peer_avg " .
+            "FROM orm_test " .
+            "WHERE orm_other_id IS NOT NULL";
+
+        $mgr = self::$dbHelper->getManager(OrmTest\Manager::class);
+
+        $cte1 = $mgr->createQueryBuilder()
+            ->select('orm_other_id', 'AVG(fld_decimal) as avg_val', 'COUNT(*) as group_count')
+            ->from('orm_test')
+            ->andWhereColumn('fld_bool', '=', true)
+            ->groupBy('orm_other_id');
+
+        $sql = $mgr->createQueryBuilder()
+            ->with('summary_stats',
+                $cte1->getSQLNamedParameters()
+            )
+            ->select('id', 'fld_varchar', 'fld_decimal')
+            ->addSelect('(SELECT avg_val FROM summary_stats WHERE orm_other_id = orm_test.orm_other_id) as peer_avg')
+            ->from('orm_test')
+            ->andWhereColumn('orm_other_id', '!=', null)
+            ->getSQLNamedParameters()
+            ;
+
+        $this->assertEquals($expected, $sql);
+    }
+
+    public function testWithCTE2(): void
+    {
+        $expected =
+            "WITH summary_stats AS (" .
+                "SELECT " .
+                    "orm_other_id, ".
+                    "AVG(fld_decimal) as avg_val, " .
+                    "COUNT(*) as group_count " .
+                "FROM orm_test " .
+                "WHERE fld_bool = true " .
+                "GROUP BY orm_other_id" .
+            "), " .
+            "top_tier_third AS (" .
+                "SELECT fk_to_this " .
+                "FROM orm_third " .
+                "WHERE id > 1" .
+            ") " .
+            "SELECT " .
+                "id, ".
+                "fld_varchar, " .
+                "fld_decimal, " .
+                "(SELECT avg_val FROM summary_stats WHERE orm_other_id = orm_test.orm_other_id) as peer_avg " .
+            "FROM orm_test " .
+            "WHERE orm_other_id IS NOT NULL";
+
+        $mgr = self::$dbHelper->getManager(OrmTest\Manager::class);
+
+        // Aggregating orm_test data independently
+        $cte1 = $mgr->createQueryBuilder()
+            ->select('orm_other_id', 'AVG(fld_decimal) as avg_val', 'COUNT(*) as group_count')
+            ->from('orm_test')
+            ->andWhereColumn('fld_bool', '=', true)
+            ->groupBy('orm_other_id');
+
+        // Isolating specific keys from orm_third
+        $cte2 = $mgr->createQueryBuilder()
+            ->select('fk_to_this')
+            ->from('orm_third')
+            ->andWhereColumn('id', '>', 1);
+
+        $sql = $mgr->createQueryBuilder()
+            ->with('summary_stats',
+                $cte1->getSQLNamedParameters()
+            )
+            ->with('top_tier_third',
+                $cte2->getSQLNamedParameters()
+            )
+            ->select('id', 'fld_varchar', 'fld_decimal')
+            ->addSelect('(SELECT avg_val FROM summary_stats WHERE orm_other_id = orm_test.orm_other_id) as peer_avg')
+            ->from('orm_test')
+            ->andWhereColumn('orm_other_id', '!=', null)
+            ->getSQLNamedParameters()
+        ;
+
+        $this->assertEquals($expected, $sql);
+    }
 }
