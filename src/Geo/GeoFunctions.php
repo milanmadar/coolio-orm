@@ -8,6 +8,11 @@ use Milanmadar\CoolioORM\Geo\Shape2D\MultiPolygon;
 use Milanmadar\CoolioORM\Geo\Shape2D\Polygon;
 use Milanmadar\CoolioORM\Geo\ShapeZ\AbstractShapeZ;
 use Milanmadar\CoolioORM\Geo\ShapeZ\LineStringZ;
+use Milanmadar\CoolioORM\Geo\ShapeZ\MultiPolygonZ;
+use Milanmadar\CoolioORM\Geo\ShapeZ\PolygonZ;
+use Milanmadar\CoolioORM\Geo\ShapeZM\AbstractShapeZM;
+use Milanmadar\CoolioORM\Geo\ShapeZM\MultiPolygonZM;
+use Milanmadar\CoolioORM\Geo\ShapeZM\PolygonZM;
 use Milanmadar\CoolioORM\Manager;
 
 class GeoFunctions
@@ -153,17 +158,18 @@ class GeoFunctions
 
     /**
      * https://postgis.net/docs/ST_3DIntersects.html
+     * Note: Input MUST be a projected SRID (e.g., UTM) for results in meters.
      * ```
      * ST_3DIntersects(
-     *   ST_GeomFromEWKT('SRID=4326;POINT(0 0 0)'),
-     *   ST_GeomFromEWKT('SRID=4326;LINESTRING ( 0 0 0, 2 2 2)')
+     *   ST_GeomFromEWKT('SRID=32633;POINT(0 0 0)'),
+     *   ST_GeomFromEWKT('SRID=32633;LINESTRING ( 0 0 0, 2 2 2)')
      * )
      * ```
-     * @param AbstractShapeZ|string $geomOrExpr1 Geometry Object (CoolioORM\Geo\Shape) OR column name OR the output of another ST_ function OR an expression (string are not safe from query injection)
-     * @param AbstractShapeZ|string $geomOrExpr2 Geometry Object (CoolioORM\Geo\Shape) OR column name OR the output of another ST_ function OR an expression (string are not safe from query injection)
+     * @param AbstractShapeZ|AbstractShapeZM|string $geomOrExpr1 Geometry Object (CoolioORM\Geo\Shape) OR column name OR the output of another ST_ function OR an expression (string are not safe from query injection)
+     * @param AbstractShapeZ|AbstractShapeZM|string $geomOrExpr2 Geometry Object (CoolioORM\Geo\Shape) OR column name OR the output of another ST_ function OR an expression (string are not safe from query injection)
      * @return string
      */
-    public static function ST_3DIntersects(AbstractShapeZ|string $geomOrExpr1, AbstractShapeZ|string $geomOrExpr2): string
+    public static function ST_3DIntersects(AbstractShapeZ|AbstractShapeZM|string $geomOrExpr1, AbstractShapeZ|AbstractShapeZM|string $geomOrExpr2): string
     {
         return sprintf(
             "ST_3DIntersects(%s, %s)",
@@ -506,19 +512,20 @@ class GeoFunctions
 
     /**
      * https://postgis.net/docs/ST_3DDWithin.html
+     * Note: Input MUST be a projected SRID (e.g., UTM) for results in meters.
      * ```
      * ST_3DDWithin(
-     *   ST_GeomFromEWKT('SRID=4326;POINT(0 0)'),
-     *   ST_GeomFromEWKT('SRID=4326;LINESTRING ( 0 0, 2 2 )'),
+     *   ST_GeomFromEWKT('SRID=32633;POINT(0 0 0)'),
+     *   ST_GeomFromEWKT('SRID=32633;LINESTRING (0 0 0, 2 2 2)'),
      *   2.5
      * )
      * ```
-     * @param AbstractShape|string $geomOrExpr1 Geometry Object (CoolioORM\Geo\Shape) OR column name OR the output of another ST_ function OR an expression (string are not safe from query injection)
-     * @param AbstractShape|string $geomOrExpr2 Geometry Object (CoolioORM\Geo\Shape) OR column name OR the output of another ST_ function OR an expression (string are not safe from query injection)
+     * @param AbstractShapeZ|AbstractShapeZM|string $geomOrExpr1 Geometry Object (CoolioORM\Geo\Shape) OR column name OR the output of another ST_ function OR an expression (string are not safe from query injection)
+     * @param AbstractShapeZ|AbstractShapeZM|string $geomOrExpr2 Geometry Object (CoolioORM\Geo\Shape) OR column name OR the output of another ST_ function OR an expression (string are not safe from query injection)
      * @param float|int $distance
      * @return string
      */
-    public static function ST_3DDWithin(AbstractShape|string $geomOrExpr1, AbstractShape|string $geomOrExpr2, float|int $distance): string
+    public static function ST_3DDWithin(AbstractShapeZ|AbstractShapeZM|string $geomOrExpr1, AbstractShapeZ|AbstractShapeZM|string $geomOrExpr2, float|int $distance): string
     {
         return sprintf(
             "ST_3DDWithin(%s, %s, %s)",
@@ -530,19 +537,20 @@ class GeoFunctions
 
     /**
      * https://postgis.net/docs/ST_3DDFullyWithin.html
+     * Note: Input MUST be a projected SRID (e.g., UTM) for results in meters.
      * ```
      * ST_3DDFullyWithin(
-     *   ST_GeomFromEWKT('SRID=4326;POINT(0 0)'),
-     *   ST_GeomFromEWKT('SRID=4326;LINESTRING ( 0 0, 2 2 )'),
+     *   ST_GeomFromEWKT('SRID=32633;POINT Z(0 0 0)'),
+     *   ST_GeomFromEWKT('SRID=32633;LINESTRING Z(0 0 0, 2 2 2)'),
      *   2.5
      * )
      * ```
-     * @param AbstractShape|string $geomOrExpr1 Geometry Object (CoolioORM\Geo\Shape) OR column name OR the output of another ST_ function OR an expression (string are not safe from query injection)
-     * @param AbstractShape|string $geomOrExpr2 Geometry Object (CoolioORM\Geo\Shape) OR column name OR the output of another ST_ function OR an expression (string are not safe from query injection)
+     * @param AbstractShapeZ|AbstractShapeZM|string $geomOrExpr1 Geometry Object (CoolioORM\Geo\Shape) OR column name OR the output of another ST_ function OR an expression (string are not safe from query injection)
+     * @param AbstractShapeZ|AbstractShapeZM|string $geomOrExpr2 Geometry Object (CoolioORM\Geo\Shape) OR column name OR the output of another ST_ function OR an expression (string are not safe from query injection)
      * @param float|int $distance
      * @return string
      */
-    public static function ST_3DDFullyWithin(AbstractShape|string $geomOrExpr1, AbstractShape|string $geomOrExpr2, float|int $distance): string
+    public static function ST_3DDFullyWithin(AbstractShapeZ|AbstractShapeZM|string $geomOrExpr1, AbstractShapeZ|AbstractShapeZM|string $geomOrExpr2, float|int $distance): string
     {
         return sprintf(
             "ST_3DDFullyWithin(%s, %s, %s)",
@@ -632,17 +640,18 @@ class GeoFunctions
 
     /**
      * https://postgis.net/docs/ST_Distance.html
+     * Note: Input MUST be a projected SRID (e.g., UTM) for results in meters.
      * ```
      * ST_3DDistance(
-     *   ST_GeomFromEWKT('SRID=4326;POINT(0 0)'),
-     *   ST_GeomFromEWKT('SRID=4326;LINESTRING ( 0 0, 2 2 )')
+     *   ST_GeomFromEWKT('SRID=32633;POINT Z(0 0 0)'),
+     *   ST_GeomFromEWKT('SRID=32633;LINESTRING Z(0 0 0, 2 2 2)')
      * )
      * ```
-     * @param AbstractShape|string $geomOrExpr1 Geometry Object (CoolioORM\Geo\Shape) OR column name OR the output of another ST_ function OR an expression (string are not safe from query injection)
-     * @param AbstractShape|string $geomOrExpr2 Geometry Object (CoolioORM\Geo\Shape) OR column name OR the output of another ST_ function OR an expression (string are not safe from query injection)
+     * @param AbstractShapeZ|AbstractShapeZM|string $geomOrExpr1 Geometry Object (CoolioORM\Geo\Shape) OR column name OR the output of another ST_ function OR an expression (string are not safe from query injection)
+     * @param AbstractShapeZ|AbstractShapeZM|string $geomOrExpr2 Geometry Object (CoolioORM\Geo\Shape) OR column name OR the output of another ST_ function OR an expression (string are not safe from query injection)
      * @return string
      */
-    public static function ST_3DDistance(AbstractShape|string $geomOrExpr1, AbstractShape|string $geomOrExpr2): string
+    public static function ST_3DDistance(AbstractShapeZ|AbstractShapeZM|string $geomOrExpr1, AbstractShapeZ|AbstractShapeZM|string $geomOrExpr2): string
     {
         return sprintf(
             "ST_3DDistance(%s, %s)",
@@ -666,12 +675,69 @@ class GeoFunctions
     public static function ST_Length(AbstractShape|string $geomOrExpr1, bool $use_spheroid = true): string
     {
         if($geomOrExpr1 instanceof Polygon || $geomOrExpr1 instanceof MultiPolygon) {
-            throw new \InvalidArgumentException('SGeoFunctions::ST_Length() does not support Polygon or MultiPolygon. Use ST_Perimeter for Polygons'); // @codeCoverageIgnore
+            //throw new \InvalidArgumentException('SGeoFunctions::ST_Length() does not support Polygon or MultiPolygon. Use ST_Perimeter for Polygons'); // @codeCoverageIgnore
+            return self::ST_Perimeter($geomOrExpr1, $use_spheroid);
         }
         return sprintf(
             "ST_Length(%s, %s)",
             is_string($geomOrExpr1) ? $geomOrExpr1 : self::ST_GeomFromEWKT_geom($geomOrExpr1),
             $use_spheroid ? 'true' : 'false'
+        );
+    }
+
+    /**
+     * https://postgis.net/docs/ST_3DLength.html
+     * Calculates the 3D length of a linear geometry (LineString, MultiLineString).
+     * Note: Input MUST be a projected SRID (e.g., UTM) for results in meters.
+     * Example output: ST_3DLength(ST_GeomFromEWKT('SRID=32633;LINESTRING ZM(0 0 0 0, 1 1 1 1)'))
+     * @param AbstractShapeZ|AbstractShapeZM|string $geomOrExpr1 Geometry Object OR column name OR ST_ function output
+     * @return string
+     */
+    public static function ST_3DLength(AbstractShapeZ|AbstractShapeZM|string $geomOrExpr1): string
+    {
+        if ($geomOrExpr1 instanceof PolygonZ  || $geomOrExpr1 instanceof MultiPolygonZ
+        ||  $geomOrExpr1 instanceof PolygonZM || $geomOrExpr1 instanceof MultiPolygonZM) {
+            // PostGIS 3D version of perimeter is still usually handled by ST_3DLength
+            // on the exterior ring, but for a general library, consistency is better.
+            //throw new \InvalidArgumentException('ST_3DLength() does not support Polygon/MultiPolygon. Use ST_3DPerimeter.');
+            return self::ST_3DPerimeter($geomOrExpr1);
+        }
+
+        return sprintf(
+            "ST_3DLength(%s)",
+            is_string($geomOrExpr1) ? $geomOrExpr1 : self::ST_GeomFromEWKT_geom($geomOrExpr1)
+        );
+    }
+
+    /**
+     * https://postgis.net/docs/ST_IsValid.html
+     * Returns true if the geometry is well-formed in 2D.
+     * ALSO CHECK ST_IsValidReason to know why ST_IsValid failed
+     *
+     * @param AbstractShape|string $geomOrExpr
+     * @return string
+     */
+    public static function ST_IsValid(AbstractShape|string $geomOrExpr): string
+    {
+        return sprintf(
+            "ST_IsValid(%s)",
+            is_string($geomOrExpr) ? $geomOrExpr : self::ST_GeomFromEWKT_geom($geomOrExpr)
+        );
+    }
+
+    /**
+     * https://postgis.net/docs/ST_IsValidReason.html
+     * Returns a text description of why a geometry is invalid.
+     * USE CASE: If ST_IsValid returns false, use this to see the reason
+     *
+     * @param AbstractShape|string $geomOrExpr
+     * @return string
+     */
+    public static function ST_IsValidReason(AbstractShape|string $geomOrExpr): string
+    {
+        return sprintf(
+            "ST_IsValidReason(%s)",
+            is_string($geomOrExpr) ? $geomOrExpr : self::ST_GeomFromEWKT_geom($geomOrExpr)
         );
     }
 
@@ -742,11 +808,156 @@ class GeoFunctions
         );
     }
 
+    /**
+     * Note: Input MUST be a projected SRID (e.g., UTM) for results in meters.
+     * Example output: ST_3DPerimeter(ST_GeomFromEWKT('SRID=32633;LINESTRING ZM(0 0 0 0, 1 1 1 1)'))
+     * @param AbstractShapeZ|AbstractShapeZM|string $geomOrExpr1
+     * @return string
+     */
+    public static function ST_3DPerimeter(AbstractShapeZ|AbstractShapeZM|string $geomOrExpr1): string
+    {
+        return sprintf(
+            "ST_3DPerimeter(%s)",
+            is_string($geomOrExpr1) ? $geomOrExpr1 : self::ST_GeomFromEWKT_geom($geomOrExpr1)
+        );
+    }
 
+    /**
+     * https://postgis.net/docs/ST_Simplify.html
+     * Returns a "simplified" version of the given geometry using the Douglas-Peucker algorithm.
+     * ALSO CHECK ST_SimplifyPreserveTopology()
+     *
+     * @param AbstractShape|string $geomOrExpr Geometry Object or Column
+     * @param float $tolerance The distance tolerance (in SRID units, e.g., meters). Points within this distance of the simplified line are removed.
+     * @param bool $preserveBoundary If true, prevents simplification of endpoints.
+     * @return string
+     */
+    public static function ST_Simplify(
+        AbstractShape|string $geomOrExpr,
+        float $tolerance,
+        bool $preserveBoundary = false
+    ): string {
+        return sprintf(
+            "ST_Simplify(%s, %f, %s)",
+            is_string($geomOrExpr) ? $geomOrExpr : self::ST_GeomFromEWKT_geom($geomOrExpr),
+            $tolerance,
+            $preserveBoundary ? 'true' : 'false'
+        );
+    }
 
-    //
-    ////// Geometry Processing
-    //
+    /**
+     * https://postgis.net/docs/ST_SimplifyPreserveTopology.html
+     * Returns a "simplified" version of the given geometry, ensuring that the simplification does not create invalid geometries (like self-intersections).
+     * USE CASE: Use this for high-density GPS tracks where switchbacks or tight loops are common, to avoid breaking your routing topology.
+     *
+     * @param AbstractShape|string $geomOrExpr Geometry Object or Column
+     * @param float $tolerance The distance tolerance in SRID units (e.g., meters).
+     * @return string
+     */
+    public static function ST_SimplifyPreserveTopology(AbstractShape|string $geomOrExpr, float $tolerance): string
+    {
+        return sprintf(
+            "ST_SimplifyPreserveTopology(%s, %f)",
+            is_string($geomOrExpr) ? $geomOrExpr : self::ST_GeomFromEWKT_geom($geomOrExpr),
+            $tolerance
+        );
+    }
+
+    /**
+     * https://postgis.net/docs/ST_SnapToGrid.html
+     * Snaps all points of the input geometry to a regular grid.
+     * @param AbstractShape|string $geomOrExpr
+     * @param float $sizeX  Grid size for X. If only this is provided, Y follows X.
+     * @param float|null $sizeY Optional. Grid size for Y.
+     * @param float|null $sizeZ Optional. Grid size for Z (Elevation).
+     * @param float|null $sizeM Optional. Grid size for M (Measure/Time). If you leave it out, internally it will use 0 which means (leave this out from snapping jusst preserve it)
+     * @return string
+     */
+    public static function ST_SnapToGrid(
+        AbstractShape|string $geomOrExpr,
+        float $sizeX,
+        ?float $sizeY = null,
+        ?float $sizeZ = null,
+        ?float $sizeM = null
+    ): string {
+        $geom = is_string($geomOrExpr) ? $geomOrExpr : self::ST_GeomFromEWKT_geom($geomOrExpr);
+
+        // Logic to handle PostGIS overloading
+        if ($sizeM !== null) {
+            return sprintf("ST_SnapToGrid(%s, %f, %f, %f, %f)", $geom, $sizeX, $sizeY ?? $sizeX, $sizeZ ?? 0, $sizeM);
+        }
+        if ($sizeZ !== null) {
+            return sprintf("ST_SnapToGrid(%s, %f, %f, %f, 0)", $geom, $sizeX, $sizeY ?? $sizeX, $sizeZ);
+        }
+        if ($sizeY !== null) {
+            return sprintf("ST_SnapToGrid(%s, %f, %f)", $geom, $sizeX, $sizeY);
+        }
+
+        return sprintf("ST_SnapToGrid(%s, %f)", $geom, $sizeX);
+    }
+
+    /**
+     * https://postgis.net/docs/ST_Snap.html
+     * Snaps the vertices and segments of the input geometry to the target geometry.
+     *
+     * @param AbstractShape|string $inputGeom The geometry you want to move.
+     * @param AbstractShape|string $targetGeom The "anchor" geometry to snap to.
+     * @param float $tolerance The snapping distance (in SRID units, e.g., meters).
+     * @return string
+     */
+    public static function ST_Snap(
+        AbstractShape|string $inputGeom,
+        AbstractShape|string $targetGeom,
+        float $tolerance
+    ): string {
+        return sprintf(
+            "ST_Snap(%s, %s, %f)",
+            is_string($inputGeom) ? $inputGeom : self::ST_GeomFromEWKT_geom($inputGeom),
+            is_string($targetGeom) ? $targetGeom : self::ST_GeomFromEWKT_geom($targetGeom),
+            $tolerance
+        );
+    }
+
+    /**
+     * https://postgis.net/docs/ST_LineMerge.html
+     * Merges a collection of linear geometries into a single LineString.
+     * @param AbstractShape|string $geomOrExpr A MultiLineString or GeometryCollection
+     * @param bool $directed Optional (PostGIS 3.1+). If true, only merges lines if their start/end points match in the correct direction.
+     * @return string
+     */
+    public static function ST_LineMerge(AbstractShape|string $geomOrExpr, bool $directed = false): string
+    {
+        $geom = is_string($geomOrExpr) ? $geomOrExpr : self::ST_GeomFromEWKT_geom($geomOrExpr);
+
+        // The 'directed' parameter was added in PostGIS 3.1
+        return sprintf("ST_LineMerge(%s, %s)", $geom, $directed ? 'true' : 'false');
+    }
+
+    /**
+     * https://postgis.net/docs/ST_Force3DZ.html
+     * Forces the geometry into XYZ (3D) format.
+     *  - If 2D (XY), Z becomes 0.
+     *  - If 4D (XYZM), M is discarded.
+     */
+    public static function ST_Force3DZ(AbstractShape|string $geomOrExpr): string
+    {
+        return sprintf("ST_Force3DZ(%s)",
+            is_string($geomOrExpr) ? $geomOrExpr : self::ST_GeomFromEWKT_geom($geomOrExpr)
+        );
+    }
+
+    /**
+     * https://postgis.net/docs/ST_Force4D.html
+     * Forces the geometry into XYZM (4D) format.
+     * USE CASE: Use this on your 'Z' network to add a dummy 'M'
+     * so it can be merged/unioned with ZM hiker tracks.
+     */
+    public static function ST_Force4D(AbstractShape|string $geomOrExpr): string
+    {
+        return sprintf("ST_Force4D(%s)",
+            is_string($geomOrExpr) ? $geomOrExpr : self::ST_GeomFromEWKT_geom($geomOrExpr)
+        );
+    }
 
     /**
      * https://postgis.net/docs/ST_Buffer.html
