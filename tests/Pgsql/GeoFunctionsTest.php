@@ -5,6 +5,8 @@ namespace Pgsql;
 use Milanmadar\CoolioORM\Geo\Shape2D3D4DFactory;
 use Milanmadar\CoolioORM\Geo\ShapeZ\LineStringZ;
 use Milanmadar\CoolioORM\Geo\ShapeZ\PointZ;
+use Milanmadar\CoolioORM\Geo\ShapeZM\LineStringZM;
+use Milanmadar\CoolioORM\Geo\ShapeZM\PointZM;
 use PHPUnit\Framework\TestCase;
 use Milanmadar\CoolioORM\ORM;
 use Milanmadar\CoolioORM\Geo\GeoFunctions;
@@ -605,8 +607,6 @@ class GeoFunctionsTest extends TestCase
             ->fetchOne();
         $this->assertNotNull($ent);
     }
-
-
 
     public function testST_Buffer()
     {

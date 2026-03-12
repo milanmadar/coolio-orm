@@ -823,6 +823,30 @@ class GeoFunctions
     }
 
     /**
+     * https://postgis.net/docs/ST_ZMax.html
+     * Returns the maximum Z coordinate of a geometry.
+     * * @param AbstractShape|string $geomOrExpr
+     * @return string
+     */
+    public static function ST_ZMax(AbstractShape|string $geomOrExpr): string
+    {
+        $geom = is_string($geomOrExpr) ? $geomOrExpr : self::ST_GeomFromEWKT_geom($geomOrExpr);
+        return sprintf("ST_ZMax(%s)", $geom);
+    }
+
+    /**
+     * https://postgis.net/docs/ST_ZMin.html
+     * Returns the minimum Z coordinate of a geometry.
+     * * @param AbstractShape|string $geomOrExpr
+     * @return string
+     */
+    public static function ST_ZMin(AbstractShape|string $geomOrExpr): string
+    {
+        $geom = is_string($geomOrExpr) ? $geomOrExpr : self::ST_GeomFromEWKT_geom($geomOrExpr);
+        return sprintf("ST_ZMin(%s)", $geom);
+    }
+
+    /**
      * https://postgis.net/docs/ST_Simplify.html
      * Returns a "simplified" version of the given geometry using the Douglas-Peucker algorithm.
      * ALSO CHECK ST_SimplifyPreserveTopology()
@@ -957,6 +981,20 @@ class GeoFunctions
         return sprintf("ST_Force4D(%s)",
             is_string($geomOrExpr) ? $geomOrExpr : self::ST_GeomFromEWKT_geom($geomOrExpr)
         );
+    }
+
+    /**
+     * https://postgis.net/docs/ST_Transform.html
+     * Returns a new geometry with its coordinates transformed to a different SRID.
+     * @param AbstractShape|string $geomOrExpr The geometry to transform.
+     * @param int $targetSrid The SRID of the coordinate system to transform to (e.g., 4326 or 32633).
+     * @return string
+     */
+    public static function ST_Transform(AbstractShape|string $geomOrExpr, int $targetSrid): string
+    {
+        $geom = is_string($geomOrExpr) ? $geomOrExpr : self::ST_GeomFromEWKT_geom($geomOrExpr);
+
+        return sprintf("ST_Transform(%s, %d)", $geom, $targetSrid);
     }
 
     /**

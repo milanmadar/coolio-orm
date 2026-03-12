@@ -829,7 +829,7 @@ class QueryBuilder extends DoctrineQueryBuilder
             $value = 'null';
         } else {
             if (!is_string($value)) {
-                throw new \InvalidArgumentException('QueryBuilder->setValue() 2nd param must be an SQL expression (goes into the query is it is), or NULL, or a named parameter and then call ->setParameter().'); // @codeCoverageIgnore
+                throw new \InvalidArgumentException('QueryBuilder->setValue() 2nd param must be an SQL expression (goes into the query as it is), or NULL, or a named parameter and then call ->setParameter().'); // @codeCoverageIgnore
             }
             if ($value == '?') {
                 throw new \InvalidArgumentException('QueryBuilder->setValue() 2nd param must be a named parameter, not a "?".'); // @codeCoverageIgnore

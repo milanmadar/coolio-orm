@@ -3,6 +3,7 @@
 namespace Milanmadar\CoolioORM\Command;
 
 use Milanmadar\CoolioORM\ORM;
+use Milanmadar\CoolioORM\Geo\AbstractShape;
 use Milanmadar\CoolioORM\Geo\Shape2D;
 use Milanmadar\CoolioORM\Geo\ShapeZ;
 use Milanmadar\CoolioORM\Geo\ShapeZM;
@@ -385,6 +386,10 @@ class ScaffoldCommand extends Command
                     } elseif(str_contains($nativeColType, '(multicurvez,')) {
                         $geoShapeType = ShapeZ\MultiCurveZ::class;
                         $colType = 'geometry_curved';
+                    } elseif(str_contains($nativeColType, '(geometryz,')
+                    || str_contains($nativeColType, '(geometryz)')
+                    || $nativeColType == 'geometryz') {
+                        $geoShapeType = ShapeZ\AbstractShapeZ::class;
                     }
 
                     // 4d
@@ -414,6 +419,17 @@ class ScaffoldCommand extends Command
                     } elseif(str_contains($nativeColType, '(multicurvezm,')) {
                         $geoShapeType = ShapeZM\MultiCurveZM::class;
                         $colType = 'geometry_curved';
+                    } elseif(str_contains($nativeColType, '(geometryzm,')
+                    || str_contains($nativeColType, '(geometryzm)')
+                    || $nativeColType == 'geometryzm') {
+                        $geoShapeType = ShapeZM\AbstractShapeZM::class;
+                    }
+
+                    // general
+                    elseif(str_contains($nativeColType, '(geometry,')
+                    || str_contains($nativeColType, '(geometry)')
+                    || $nativeColType == 'geometry') {
+                        $geoShapeType = AbstractShape::class;
                     }
 
                     else {
