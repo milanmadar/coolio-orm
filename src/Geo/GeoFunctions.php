@@ -837,7 +837,7 @@ class GeoFunctions
     /**
      * https://postgis.net/docs/ST_ZMin.html
      * Returns the minimum Z coordinate of a geometry.
-     * * @param AbstractShape|string $geomOrExpr
+     * @param AbstractShape|string $geomOrExpr
      * @return string
      */
     public static function ST_ZMin(AbstractShape|string $geomOrExpr): string
@@ -849,7 +849,7 @@ class GeoFunctions
     /**
      * https://postgis.net/docs/ST_Simplify.html
      * Returns a "simplified" version of the given geometry using the Douglas-Peucker algorithm.
-     * ALSO CHECK ST_SimplifyPreserveTopology()
+     * ALSO CHECK ST_SimplifyVW() and ST_SimplifyPreserveTopology()
      *
      * @param AbstractShape|string $geomOrExpr Geometry Object or Column
      * @param float $tolerance The distance tolerance (in SRID units, e.g., meters). Points within this distance of the simplified line are removed.
@@ -866,6 +866,26 @@ class GeoFunctions
             is_string($geomOrExpr) ? $geomOrExpr : self::ST_GeomFromEWKT_geom($geomOrExpr),
             $tolerance,
             $preserveBoundary ? 'true' : 'false'
+        );
+    }
+
+    /**
+     * https://postgis.net/docs/ST_SimplifyVW.html
+     * Returns a "simplified" version of the given geometry using the Visvalingam-Whyatt algorithm.
+     * This is generally better for preserving the "character" of curves (like ski carves) compared to Douglas-Peucker.
+     *
+     * @param AbstractShape|string $geomOrExpr Geometry Object or Column
+     * @param float $tolerance Area tolerance (in square units of the SRID, e.g., square meters).
+     * @return string
+     */
+    public static function ST_SimplifyVW(
+        AbstractShape|string $geomOrExpr,
+        float $tolerance
+    ): string {
+        return sprintf(
+            "ST_SimplifyVW(%s, %f)",
+            is_string($geomOrExpr) ? $geomOrExpr : self::ST_GeomFromEWKT_geom($geomOrExpr),
+            $tolerance
         );
     }
 
