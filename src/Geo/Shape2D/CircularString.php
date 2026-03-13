@@ -73,6 +73,11 @@ class CircularString extends AbstractShape2D implements HasStartEndPointInterfac
      */
     public function __construct(array $points, int|null $srid = null)
     {
+        if(empty($points)) {
+            throw new \InvalidArgumentException('CircularString must have at least 3 points.');
+        }
+
+        if(!isset($srid)) $srid = $points[0]->getSrid();
         $this->_validatePoints($points);
         parent::__construct($srid);
         $this->points = $points;

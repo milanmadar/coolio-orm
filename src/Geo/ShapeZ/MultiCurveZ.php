@@ -76,6 +76,10 @@ class MultiCurveZ extends AbstractShapeZ
      */
     public function __construct(array $curves, int|null $srid = null)
     {
+        if(empty($curves)) {
+            throw new \InvalidArgumentException('Curves array cannot be empty for MultiCurveZ.');
+        }
+        if(!isset($srid)) $srid = $curves[0]->getSrid();
         parent::__construct($srid);
         $this->curves = $curves;
     }

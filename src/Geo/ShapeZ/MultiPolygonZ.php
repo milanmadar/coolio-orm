@@ -93,6 +93,7 @@ class MultiPolygonZ extends AbstractShapeZ
             throw new \InvalidArgumentException('MultiPolygonZ must contain at least one PolygonZ.');
         }
 
+        if(!isset($srid)) $srid = $polygons[0]->getSrid();
         parent::__construct($srid);
         $this->polygons = $polygons;
     }

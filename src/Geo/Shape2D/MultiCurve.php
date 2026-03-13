@@ -81,6 +81,10 @@ class MultiCurve extends AbstractShape2D
      */
     public function __construct(array $curves, int|null $srid = null)
     {
+        if(empty($curves)) {
+            throw new \InvalidArgumentException('MultiCurve must have at least one curve.');
+        }
+        if(!isset($srid)) $srid = $curves[0]->getSrid();
         parent::__construct($srid);
         $this->curves = $curves;
     }

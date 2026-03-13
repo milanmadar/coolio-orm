@@ -48,13 +48,8 @@ class FeatureCollection extends AbstractShape2D
      */
     public function __construct(array $features, int|null $srid = null)
     {
+        if(!isset($srid)) $srid = empty($features) ? null : $features[0]->getSrid();
         parent::__construct($srid);
-
-        foreach ($features as $feature) {
-            if (!$feature instanceof Feature) { /** @phpstan-ignore-line */
-                throw new \InvalidArgumentException('All elements must be instances of Feature.');
-            }
-        }
 
         $this->features = $features;
     }

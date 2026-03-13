@@ -105,6 +105,10 @@ class CompoundCurve extends AbstractShape2D implements HasStartEndPointInterface
      */
     public function __construct(array $segments, int|null $srid = null)
     {
+        if(empty($segments)) {
+            throw new \InvalidArgumentException('CompoundCurve must have at least one segment.');
+        }
+        if(!isset($srid)) $srid = $segments[0]->getSrid();
         $this->_validateSegments($segments);
         parent::__construct($srid);
         $this->segments = $segments;

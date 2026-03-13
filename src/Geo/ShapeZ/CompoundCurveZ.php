@@ -94,6 +94,10 @@ class CompoundCurveZ extends AbstractShapeZ implements HasStartEndPointZInterfac
      */
     public function __construct(array $segments, int|null $srid = null)
     {
+        if(empty($segments)) {
+            throw new \InvalidArgumentException('Segments array cannot be empty for CompoundCurveZ.');
+        }
+        if(!isset($srid)) $srid = $segments[0]->getSrid();
         $this->_validateSegments($segments);
         parent::__construct($srid);
         $this->segments = $segments;

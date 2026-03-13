@@ -110,6 +110,10 @@ class PolygonZ extends AbstractShapeZ
      */
     public function __construct(array $lineStrings, int|null $srid = null)
     {
+        if(empty($lineStrings)) {
+            throw new \InvalidArgumentException('A PolygonZ must have at least one LineStringZ.');
+        }
+        if(!isset($srid)) $srid = $lineStrings[0]->getSrid();
         $this->_validateRings($lineStrings);
         parent::__construct($srid);
         $this->lineStrings = $lineStrings;

@@ -19,6 +19,7 @@ class GeometryCollectionZM extends AbstractShapeZM
             throw new \InvalidArgumentException('GeometryCollectionZM must have at least one geometry.');
         }
 
+        if(!isset($srid)) $srid = $geometries[0]->getSrid();
         parent::__construct($srid);
         $this->geometries = $geometries;
     }

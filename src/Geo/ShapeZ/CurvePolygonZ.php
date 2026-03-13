@@ -75,6 +75,10 @@ class CurvePolygonZ extends AbstractShapeZ
      */
     public function __construct(array $boundaries, int|null $srid = null)
     {
+        if(empty($boundaries)) {
+            throw new \InvalidArgumentException('CurvePolygonZ must have at least one boundary.');
+        }
+        if(!isset($srid)) $srid = $boundaries[0]->getSrid();
         parent::__construct($srid);
         $this->boundaries = $boundaries;
     }

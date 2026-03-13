@@ -63,6 +63,7 @@ class Feature extends AbstractShape2D
      */
     public function __construct(AbstractShape $geometry, ?array $properties = null, string|int|float|null $id = null, int|null $srid = null)
     {
+        if(!isset($srid)) $srid = $geometry->getSrid();
         parent::__construct($srid);
         $this->geometry = $geometry;
         $this->properties = $properties;

@@ -17,6 +17,7 @@ class MultiPolygonZM extends AbstractShapeZM
             throw new \InvalidArgumentException('MultiPolygonZM must contain at least one PolygonZM.');
         }
 
+        if(!isset($srid)) $srid = $polygons[0]->getSrid();
         parent::__construct($srid);
         $this->polygons = $polygons;
     }

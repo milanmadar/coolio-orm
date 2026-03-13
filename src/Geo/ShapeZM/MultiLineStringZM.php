@@ -13,6 +13,10 @@ class MultiLineStringZM extends AbstractShapeZM
      */
     public function __construct(array $lineStrings, int|null $srid = null)
     {
+        if(empty($lineStrings)) {
+            throw new \InvalidArgumentException('MultiLineStringZM must contain at least one LineStringZM.');
+        }
+        if(!isset($srid)) $srid = $lineStrings[0]->getSrid();
         $this->_validateLineStrings($lineStrings);
         parent::__construct($srid);
         $this->lineStrings = $lineStrings;
@@ -154,9 +158,6 @@ class MultiLineStringZM extends AbstractShapeZM
             throw new \InvalidArgumentException('MultiLineStringZM must contain at least one LineStringZM.');
         }
         foreach ($lineStrings as $ls) {
-            if (!($ls instanceof LineStringZM)) { /** @phpstan-ignore-line */
-                throw new \InvalidArgumentException('All elements must be instances of LineStringZM.');
-            }
             if (count($ls->getPoints()) < 2) {
                 throw new \InvalidArgumentException('Each LineStringZM must have at least 2 points.');
             }

@@ -17,6 +17,7 @@ class MultiPointZM extends AbstractShapeZM
             throw new \InvalidArgumentException('A MultiPointZM must contain at least one PointZM.');
         }
 
+        if(!isset($srid)) $srid = $points[0]->getSrid();
         parent::__construct($srid);
         $this->points = $points;
     }

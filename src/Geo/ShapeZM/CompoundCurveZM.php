@@ -93,6 +93,10 @@ class CompoundCurveZM extends AbstractShapeZM implements HasStartEndPointZMInter
      */
     public function __construct(array $segments, ?int $srid = null)
     {
+        if(empty($segments)) {
+            throw new \InvalidArgumentException("CompoundCurveZM requires at least one segment.");
+        }
+        if(!isset($srid)) $srid = $segments[0]->getSrid();
         $this->_validateSegments($segments);
         parent::__construct($srid);
         $this->segments = $segments;

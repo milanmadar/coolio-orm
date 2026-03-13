@@ -17,12 +17,7 @@ class LineStringZM extends AbstractShapeZM
             throw new \InvalidArgumentException('LineStringZM requires at least one PointZM.');
         }
 
-        foreach ($points as $pt) {
-            if (!$pt instanceof PointZM) { /** @phpstan-ignore-line */
-                throw new \InvalidArgumentException('All elements must be PointZM instances.');
-            }
-        }
-
+        if(!isset($srid)) $srid = $points[0]->getSrid();
         parent::__construct($srid);
         $this->points = $points;
     }

@@ -95,6 +95,7 @@ class MultiPointZ extends AbstractShapeZ
             throw new \InvalidArgumentException('MultiPointZ must contain at least one PointZ.');
         }
 
+        if(!isset($srid)) $srid = $points[0]->getSrid();
         parent::__construct($srid);
         $this->points = $points;
     }

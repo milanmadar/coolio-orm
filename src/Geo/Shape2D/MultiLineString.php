@@ -120,6 +120,7 @@ class MultiLineString extends AbstractShape2D
             throw new \InvalidArgumentException('MultiLineString must contain at least one LineString.');
         }
 
+        if(!isset($srid)) $srid = $lineStrings[0]->getSrid();
         parent::__construct($srid);
         $this->lineStrings = $lineStrings;
     }

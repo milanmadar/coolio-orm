@@ -121,6 +121,7 @@ class MultiLineStringZ extends AbstractShapeZ
             throw new \InvalidArgumentException('MultiLineStringZ must contain at least one LineStringZ.');
         }
 
+        if(!isset($srid)) $srid = $lineStrings[0]->getSrid();
         parent::__construct($srid);
         $this->lineStrings = $lineStrings;
     }

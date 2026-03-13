@@ -450,7 +450,7 @@ class GeoFunctionsTest extends TestCase
 
         $expr = GeoFunctions::ST_DFullyWithin(
             'point_geom',
-            new LineString([new Point(1, 1, 1), new Point(2, 1, 1), new Point(2, 2, 1), new Point(1, 1, 1)]),
+            new LineString([new Point(1, 1), new Point(2, 1), new Point(2, 2), new Point(1, 1)]),
             5
         );
 
@@ -475,7 +475,7 @@ class GeoFunctionsTest extends TestCase
 
         $expr = GeoFunctions::ST_DWithin(
             'point_geom',
-            new LineString([new Point(1, 1, 1), new Point(2, 1, 1), new Point(2, 2, 1), new Point(1, 1, 1)]),
+            new LineString([new Point(1, 1), new Point(2, 1), new Point(2, 2), new Point(1, 1)]),
             5
         );
 
@@ -500,7 +500,7 @@ class GeoFunctionsTest extends TestCase
 
         $expr = GeoFunctions::ST_Distance(
             'point_geom',
-            new LineString([new Point(1, 1, 1), new Point(2, 1, 1), new Point(2, 2, 1), new Point(1, 1, 1)]),
+            new LineString([new Point(1, 1, 4326), new Point(2, 1, 4326), new Point(2, 2, 4326), new Point(1, 1, 4326)]),
             false
         );
 

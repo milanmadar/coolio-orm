@@ -84,13 +84,17 @@ class LineStringZ extends AbstractShapeZ implements HasStartEndPointZInterface
     }
 
     /**
-     * @param array<PointZ> $coordinates
+     * @param array<PointZ> $points
      * @param int|null $srid Optional SRID, defaults to the value in $_ENV['GEO_DEFAULT_SRID']
      */
-    public function __construct(array $coordinates, int|null $srid = null)
+    public function __construct(array $points, int|null $srid = null)
     {
+        if(empty($points)) {
+            throw new \InvalidArgumentException("LineStringZ must have at least two points.");
+        }
+        if(!isset($srid)) $srid = $points[0]->getSrid();
         parent::__construct($srid);
-        $this->points = $coordinates;
+        $this->points = $points;
     }
 
     /**

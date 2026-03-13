@@ -94,6 +94,7 @@ class MultiPoint extends AbstractShape2D
             throw new \InvalidArgumentException('MultiPoint must contain at least one Point.');
         }
 
+        if(!isset($srid)) $srid = $points[0]->getSrid();
         parent::__construct($srid);
         $this->points = $points;
     }

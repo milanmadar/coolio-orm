@@ -92,10 +92,11 @@ class MultiCurveZM extends AbstractShapeZM
      */
     public function __construct(array $curves, int|null $srid = null)
     {
-        parent::__construct($srid);
         if(empty($curves)) {
             throw new \InvalidArgumentException('MultiCurveZM must contain at least one curve.');
         }
+        if(!isset($srid)) $srid = $curves[0]->getSrid();
+        parent::__construct($srid);
         $this->curves = $curves;
     }
 

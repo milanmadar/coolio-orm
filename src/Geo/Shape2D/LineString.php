@@ -93,6 +93,10 @@ class LineString extends AbstractShape2D implements HasStartEndPointInterface
      */
     public function __construct(array $points, int|null $srid = null)
     {
+        if(empty($points)) {
+            throw new \InvalidArgumentException('LineString must have at least 2 points.');
+        }
+        if(!isset($srid)) $srid = $points[0]->getSrid();
         parent::__construct($srid);
         if(count($points) < 2) {
             throw new \InvalidArgumentException("A LineString must have at least two points.");

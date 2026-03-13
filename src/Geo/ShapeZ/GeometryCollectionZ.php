@@ -117,6 +117,10 @@ class GeometryCollectionZ extends AbstractShapeZ
      */
     public function __construct(array $geometries, int|null $srid = null)
     {
+        if(empty($geometries)) {
+            throw new \InvalidArgumentException('GeometryCollectionZ must contain at least one geometry.');
+        }
+        if(!isset($srid)) $srid = $geometries[0]->getSrid();
         parent::__construct($srid);
         $this->geometries = $geometries;
     }

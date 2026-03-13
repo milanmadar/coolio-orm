@@ -166,6 +166,7 @@ class MultiPolygon extends AbstractShape2D
             throw new \InvalidArgumentException('MultiPolygon must contain at least one Polygon.');
         }
 
+        if(!isset($srid)) $srid = $polygons[0]->getSrid();
         parent::__construct($srid);
         $this->polygons = $polygons;
     }

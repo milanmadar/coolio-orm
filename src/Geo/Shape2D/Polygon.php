@@ -108,6 +108,10 @@ class Polygon extends AbstractShape2D
      */
     public function __construct(array $lineStrings, int|null $srid = null)
     {
+        if(empty($lineStrings)) {
+            throw new \InvalidArgumentException('A Polygon must have at least one LineString.');
+        }
+        if(!isset($srid)) $srid = $lineStrings[0]->getSrid();
         $this->_validateRings($lineStrings);
         parent::__construct($srid);
         $this->lineStrings = $lineStrings;

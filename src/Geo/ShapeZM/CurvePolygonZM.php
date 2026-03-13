@@ -90,10 +90,11 @@ class CurvePolygonZM extends AbstractShapeZM
      */
     public function __construct(array $boundaries, int|null $srid = null)
     {
-        parent::__construct($srid);
         if(empty($boundaries)) {
             throw new \InvalidArgumentException('CurvePolygonZM must have at least one boundary.');
         }
+        if(!isset($srid)) $srid = $boundaries[0]->getSrid();
+        parent::__construct($srid);
         $this->boundaries = $boundaries;
     }
 

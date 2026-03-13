@@ -86,6 +86,10 @@ class CurvePolygon extends AbstractShape2D
      */
     public function __construct(array $boundaries, int|null $srid = null)
     {
+        if(empty($boundaries)) {
+            throw new \InvalidArgumentException('A CurvePolygon must have at least one boundary (LineString or CircularString).');
+        }
+        if(!isset($srid)) $srid = $boundaries[0]->getSrid();
         $this->_validateRings($boundaries);
         parent::__construct($srid);
         $this->boundaries = $boundaries;

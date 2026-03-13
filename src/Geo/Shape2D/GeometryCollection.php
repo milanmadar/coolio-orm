@@ -117,6 +117,10 @@ class GeometryCollection extends AbstractShape2D
      */
     public function __construct(array $geometries, int|null $srid = null)
     {
+        if(empty($geometries)) {
+            throw new \InvalidArgumentException("A GeometryCollection must contain at least one geometry.");
+        }
+        if(!isset($srid)) $srid = $geometries[0]->getSrid();
         parent::__construct($srid);
         $this->geometries = $geometries;
     }
