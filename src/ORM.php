@@ -4,13 +4,16 @@ namespace Milanmadar\CoolioORM;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
+use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Tools\DsnParser;
 use Doctrine\DBAL\Types\Type;
 use Milanmadar\CoolioORM\DoctrineDBALType\CiTextType;
+use Milanmadar\CoolioORM\Geo\AbstractShape;
 use Milanmadar\CoolioORM\Geo\DoctrineDBALType\GeometryType;
 use Milanmadar\CoolioORM\Geo\DoctrineDBALType\TopoGeometryType;
 use Milanmadar\CoolioORM\DoctrineDBALType\TextArrayType;
 use Milanmadar\CoolioORM\DoctrineDBALType\TextArrayBracketsType;
+use Milanmadar\CoolioORM\Geo\GeoFunctions;
 
 class ORM
 {
@@ -206,6 +209,73 @@ class ORM
             $class = substr($class, 0, -6).'Manager';
             $this->entityManager($class)->bulkInsert($entities); /* @phpstan-ignore-line */
         }
+    }
+
+    /**
+     * @param Connection|string $db $_ENV['DB_DEFAULT'] OR $this->getDbByUrl( $_ENV['DB_DEFAULT'] ) OR $someMgr->getDb()
+     * @param string $functionName
+     * @param array $args
+     * @return array<string, mixed> The result of the function call, as an associative array with key 'res' (the alias in the SQL query)
+     */
+//    public function callFunction2(Connection|string $db, string $functionName, array $args = []): mixed
+//    {
+//        if(is_string($db)) {
+//            $db = $this->getDbByUrl($db);
+//        }
+//
+//        $qb = new QueryBuilder($this, $db);
+//
+//        $i = 0;
+//        $argPlaceholders = [];
+//        $geoPlaceholders = [];
+//        foreach($args as $arg) {
+//            $agrName = ':arg'.(++$i);
+//            $argPlaceholders[] = $agrName;
+//            if($arg instanceof AbstractShape) {
+//                $geoPlaceholders[$agrName] = $arg;
+//            } else {
+//                $qb->setParameter($agrName, $arg);
+//            }
+//        }
+//
+//        $qb->select($functionName.'('.implode(', ', $argPlaceholders).') as res');
+//        $sql = $qb->getSQLNamedParameters();
+//
+//        foreach($geoPlaceholders as $placeholder => $shape) {
+//            $sql = str_replace($placeholder, GeoFunctions::ST_GeomFromEWKT_geom($shape), $sql);
+//        }
+//
+//        return $db->executeQuery($sql)->fetchAssociative();
+//    }
+
+    /**
+     * @param Connection|string $db $_ENV['DB_DEFAULT'] OR $this->getDbByUrl( $_ENV['DB_DEFAULT'] ) OR $someMgr->getDb()
+     * @param string $functionName
+     * @param array<int, mixed> $args
+     * @return array<string, mixed> The result of the function call, as an associative array with key 'res' (the alias in the SQL query)
+     */
+    public function callFunction(Connection|string $db, string $functionName, array $args = []): mixed
+    {
+        if(is_string($db)) {
+            $db = $this->getDbByUrl($db);
+        }
+
+        $qb = new QueryBuilder($this, $db);
+
+        $i = 0;
+        $argPlaceholders = [];
+        foreach($args as $arg) {
+            if($arg instanceof AbstractShape) {
+                $argPlaceholders[] = $arg->ST_GeomFromEWKT();
+            } else {
+                $agrName = ':arg'.(++$i);
+                $argPlaceholders[] = $agrName;
+                $qb->setParameter($agrName, $arg);
+            }
+        }
+
+        $qb->select('*')->from($functionName.'('.implode(', ', $argPlaceholders).')');
+        return $qb->fetchAllAssociative()[0];
     }
 
 }
