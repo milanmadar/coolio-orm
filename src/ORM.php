@@ -254,7 +254,7 @@ class ORM
      * @param array<int, mixed> $args
      * @return array<string, mixed> The result of the function call, as an associative array with key 'res' (the alias in the SQL query)
      */
-    public function callFunction(Connection|string $db, string $functionName, array $args = []): mixed
+    public function callFunction(Connection|string $db, string $functionName, array $args = []): array
     {
         if(is_string($db)) {
             $db = $this->getDbByUrl($db);
