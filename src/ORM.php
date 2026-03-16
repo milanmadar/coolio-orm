@@ -252,9 +252,9 @@ class ORM
      * @param Connection|string $db $_ENV['DB_DEFAULT'] OR $this->getDbByUrl( $_ENV['DB_DEFAULT'] ) OR $someMgr->getDb()
      * @param string $functionName
      * @param array<int, mixed> $args
-     * @return array<string, mixed> The result of the function call, as an associative array with key 'res' (the alias in the SQL query)
+     * @return mixed The result of the function call
      */
-    public function callFunction(Connection|string $db, string $functionName, array $args = []): array
+    public function callFunction(Connection|string $db, string $functionName, array $args = []): mixed
     {
         if(is_string($db)) {
             $db = $this->getDbByUrl($db);
@@ -274,8 +274,15 @@ class ORM
             }
         }
 
-        $qb->select('*')->from($functionName.'('.implode(', ', $argPlaceholders).')');
-        return $qb->fetchAllAssociative()[0];
+        $qb->select('*')->from($functionName.'('.implode(', ', $argPlaceholders).') as res');
+
+        $res = $qb->fetchAllAssociative()[0];
+
+        if(array_key_exists('res', $res) && count($res) == 1) {
+            return $res['res'];
+        }
+
+        return $res;
     }
 
 }

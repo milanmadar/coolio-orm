@@ -32,3 +32,19 @@ BEGIN
     RETURN NEXT;
 END;
 $$;
+
+--
+
+DROP FUNCTION IF EXISTS orm_test_function_retInt;
+CREATE OR REPLACE FUNCTION orm_test_function_retInt(
+    p_int        INT,
+    p_text       TEXT,
+    p_bool       BOOLEAN,
+    p_float      DOUBLE PRECISION,
+    p_geom_point GEOMETRY(Point, 4326)
+)
+RETURNS INT AS $$
+BEGIN
+    RETURN 100;
+END;
+$$ LANGUAGE plpgsql;

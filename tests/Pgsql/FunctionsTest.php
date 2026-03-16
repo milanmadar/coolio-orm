@@ -25,7 +25,7 @@ class FunctionsTest extends TestCase
         self::$dbHelper->resetTo('Pgsql/fixtures/functions.sql');
     }
 
-    public function testCall()
+    public function testCallReturnTable()
     {
         $params = [
             1,
@@ -44,6 +44,21 @@ class FunctionsTest extends TestCase
             'out_float' => 5.0,
             'out_geom_point' => 'SRID=4326;POINT(4 5)'
         ], $res);
+    }
+
+    public function testCallReturnInt()
+    {
+        $params = [
+            1,
+            'abc',
+            true,
+            2.5,
+            new Point(3, 4)
+        ];
+
+        $res = ORM::instance()->callFunction($_ENV['DB_POSTGRES_DB1'], 'orm_test_function_retInt', $params);
+
+        $this->assertEquals(100, $res);
     }
 
 }
