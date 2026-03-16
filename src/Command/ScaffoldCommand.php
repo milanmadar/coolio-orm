@@ -474,6 +474,8 @@ class ScaffoldCommand extends Command
                     $defValSrc = 'time()';
                 } elseif(strtoupper(trim($colDefVal)) == 'CURRENT_TIMESTAMP'  || strtoupper(trim($colDefVal)) == 'NOW()' ) {
                     $defValSrc = 'new \DateTimeImmutable()';
+                } elseif($colType == 'boolean') {
+                    $defValSrc = $colDefVal ? 'true' : 'false';
                 } else {
                     $defValSrc = $colDefVal;
                 }
