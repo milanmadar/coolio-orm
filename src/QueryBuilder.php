@@ -470,7 +470,13 @@ class QueryBuilder extends DoctrineQueryBuilder
             $sql = $column.' '.$operator.' NULL';
             $paramName = null;
         }
-        else {
+        elseif(is_bool($value) && $this->isPostgres) {
+            // a very similar code is in correctWhereColumnParams() method
+            // becuase DBAL+Posgres has a bug that even if i say ParameterType::BOOLEAN
+            // when the value is false, it still write empty string
+            $sql = $column.' '.$operator.' '.($value ? 'true' : 'false');
+            $paramName = null;
+        } else {
             $sql = $column.' '.$operator.' :'.$paramName;
         }
 
@@ -989,6 +995,9 @@ class QueryBuilder extends DoctrineQueryBuilder
             if($type == ParameterType::INTEGER) {
                 $value = (int)$value;
             } elseif($this->isPostgres) {
+                // a very similar code is in correctWhereColumnParams() method
+                // becuase DBAL+Posgres has a bug that even if i say ParameterType::BOOLEAN
+                // when the value is false, it still write empty string
                 $type = ParameterType::BOOLEAN;
             }
         }

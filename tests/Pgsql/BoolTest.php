@@ -41,6 +41,30 @@ class BoolTest extends TestCase
         $this->assertFalse($ent1->getFldBool());
     }
 
+    public function testGetWhereTrue()
+    {
+        $mgr = self::$dbHelper->getManager(OrmTest\Manager::class);
+
+        /** @var OrmTest\Entity $ent1 */
+        $ent1 = $mgr
+            ->createQueryBuilder()
+            ->andWhereColumn('fld_bool', '=', true)
+            ->fetchOneEntity();
+        $this->assertInstanceOf('\tests\Model\OrmTest\Entity', $ent1);
+    }
+
+    public function testGetWhereFalse()
+    {
+        $mgr = self::$dbHelper->getManager(OrmTest\Manager::class);
+
+        /** @var OrmTest\Entity $ent1 */
+        $ent1 = $mgr
+            ->createQueryBuilder()
+            ->andWhereColumn('fld_bool', '=', false)
+            ->fetchOneEntity();
+        $this->assertInstanceOf('\tests\Model\OrmTest\Entity', $ent1);
+    }
+
     public function testCreate()
     {
         $mgr = self::$dbHelper->getManager(OrmTest\Manager::class);
