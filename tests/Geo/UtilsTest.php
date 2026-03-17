@@ -11,7 +11,7 @@ class UtilsTest extends TestCase
     {
         $wgsLat = 47.50886240725931;
         $wgsLon = 19.097313859607482;
-        $regionalSrid = Utils::getUtmSridFromWGS($wgsLat, $wgsLon);
+        $regionalSrid = Utils::getUtmSridFromWGS($wgsLon, $wgsLat);
         $this->assertEquals(32634, $regionalSrid);
     }
 }

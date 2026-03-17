@@ -6,11 +6,11 @@ class Utils
 {
     /**
      * Automatically calculates the correct UTM SRID for a WGS84 coordinate.
-     * * @param float $lat WGS84 Latitude
      * @param float $lon WGS84 Longitude
+     * @param float $lat WGS84 Latitude
      * @return int The appropriate EPSG SRID (326XX for North, 327XX for South)
      */
-    public static function getUtmSridFromWGS(float $lat, float $lon): int
+    public static function getUtmSridFromWGS(float $lon, float $lat): int
     {
         if ($lat < -90 || $lat > 90) {
             // swap them
