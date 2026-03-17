@@ -568,7 +568,9 @@ class ScaffoldCommand extends Command
                     $_ = str_replace('Milanmadar\CoolioORM\Geo\\', '', (string)$geoShapeType);
                     $paramType = $_;
                     $docParamType = $_;
-                    if(str_contains($_, 'ShapeZ')) {
+                    if(str_contains($_, 'ShapeZM')) {
+                        $this->addUses('Milanmadar\CoolioORM\Geo\ShapeZM');
+                    } elseif(str_contains($_, 'ShapeZ')) {
                         $this->addUses('Milanmadar\CoolioORM\Geo\ShapeZ');
                     } else {
                         $this->addUses('Milanmadar\CoolioORM\Geo\Shape2D');
