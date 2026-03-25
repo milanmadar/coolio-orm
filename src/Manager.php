@@ -570,6 +570,14 @@ abstract class Manager
         $ent->_commit();
     }
 
+    public function pgSyncSequence(): void
+    {
+        if($this->dbType == 'pg') {
+            $sql = "SELECT setval('".$this->getDbTable()."_id_seq', COALESCE((SELECT MAX(id) FROM ".$this->getDbTable()."), 0), true)";
+            $this->db->executeStatement($sql);
+        }
+    }
+
     /**
      * @param array<Entity> $entities
      * @return void
