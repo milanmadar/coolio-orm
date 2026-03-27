@@ -1029,6 +1029,7 @@ abstract class Manager
                         }
                         $types[$p] = ParameterType::STRING;
                         break;
+                    case 'geography':
                     case 'geometry':
                     case 'geometry_curved':
                     case 'topogeometry':
@@ -1089,7 +1090,7 @@ abstract class Manager
                         'date', 'time', 'datetime', 'datetime2', 'smalldatetime', 'datetimeoffset', 'timestamp', 'timestamp_tz', 'timestamp_micro', 'timestamp_tz_micro' => new \DateTimeImmutable($v),
                         //'geometry' => Geo\Shape2D3DFactory::createFromGeoJSONString($v, $data[$k.'_srid'] ?? null),
                         //'geometry_curved', 'topogeometry' => Geo\Shape2D3DFactory::createFromGeoEWKTString($v),
-                        'geometry' , 'geometry_curved', 'topogeometry' => Geo\Shape2D3D4DFactory::createFromGeoEWKTString($v),
+                        'geography' , 'geometry' , 'geometry_curved', 'topogeometry' => Geo\Shape2D3D4DFactory::createFromGeoEWKTString($v),
                         default => Type::getType($this->fieldTypes[$k])->convertToPHPValue($v, $this->db->getDatabasePlatform()),
                     };
                 }

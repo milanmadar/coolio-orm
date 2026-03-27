@@ -92,7 +92,10 @@ class ScaffoldCommand extends Command
         } while(empty($tableColumns));
 
         // PostgreSQL: We need the schema
-        $IS_POSTGIS = str_contains($_ENV[$dbSelect], 'pgsql') && $db->getDatabasePlatform()->hasDoctrineTypeMappingFor('geometry');
+        $IS_POSTGIS = (
+            str_contains($_ENV[$dbSelect], 'pgsql')
+            && ($db->getDatabasePlatform()->hasDoctrineTypeMappingFor('geometry') || $db->getDatabasePlatform()->hasDoctrineTypeMappingFor('geography'))
+        );
         $POSTGIS_SCHEMA = null;
         if($IS_POSTGIS) {
             // if the table name has a dot, then thats the schema name
@@ -326,7 +329,7 @@ class ScaffoldCommand extends Command
                     $mgrTopogeoFldTypes .= "            'tolerance'  => ".$tolerance."\n";
                     $mgrTopogeoFldTypes .= "        ],";
                 }
-                elseif(str_starts_with($nativeColType, 'geometry'))
+                elseif(str_starts_with($nativeColType, 'geometry') || str_starts_with($nativeColType, 'geography'))
                 {
                     $colType = 'geometry';
 
@@ -388,7 +391,10 @@ class ScaffoldCommand extends Command
                         $colType = 'geometry_curved';
                     } elseif(str_contains($nativeColType, '(geometryz,')
                     || str_contains($nativeColType, '(geometryz)')
-                    || $nativeColType == 'geometryz') {
+                    || $nativeColType == 'geometryz'
+                    || str_contains($nativeColType, '(geographyz,')
+                    || str_contains($nativeColType, '(geographyz)')
+                    || $nativeColType == 'geographyz') {
                         $geoShapeType = ShapeZ\AbstractShapeZ::class;
                     }
 
@@ -421,14 +427,20 @@ class ScaffoldCommand extends Command
                         $colType = 'geometry_curved';
                     } elseif(str_contains($nativeColType, '(geometryzm,')
                     || str_contains($nativeColType, '(geometryzm)')
-                    || $nativeColType == 'geometryzm') {
+                    || $nativeColType == 'geometryzm'
+                    || str_contains($nativeColType, '(geographyzm,')
+                    || str_contains($nativeColType, '(geographyzm)')
+                    || $nativeColType == 'geographyzm') {
                         $geoShapeType = ShapeZM\AbstractShapeZM::class;
                     }
 
                     // general
                     elseif(str_contains($nativeColType, '(geometry,')
                     || str_contains($nativeColType, '(geometry)')
-                    || $nativeColType == 'geometry') {
+                    || $nativeColType == 'geometry'
+                    || str_contains($nativeColType, '(geography,')
+                    || str_contains($nativeColType, '(geography)')
+                    || $nativeColType == 'geography') {
                         $geoShapeType = AbstractShape::class;
                     }
 
@@ -562,6 +574,7 @@ class ScaffoldCommand extends Command
                     $paramType = 'string';
                     $docParamType = 'string';
                     break;
+                case 'geography':
                 case 'geometry':
                 case 'geometry_curved':
                 case 'topogeometry':

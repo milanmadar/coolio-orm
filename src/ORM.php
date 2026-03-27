@@ -4,16 +4,15 @@ namespace Milanmadar\CoolioORM;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
-use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Tools\DsnParser;
 use Doctrine\DBAL\Types\Type;
 use Milanmadar\CoolioORM\DoctrineDBALType\CiTextType;
 use Milanmadar\CoolioORM\Geo\AbstractShape;
+use Milanmadar\CoolioORM\Geo\DoctrineDBALType\GeographyType;
 use Milanmadar\CoolioORM\Geo\DoctrineDBALType\GeometryType;
 use Milanmadar\CoolioORM\Geo\DoctrineDBALType\TopoGeometryType;
 use Milanmadar\CoolioORM\DoctrineDBALType\TextArrayType;
 use Milanmadar\CoolioORM\DoctrineDBALType\TextArrayBracketsType;
-use Milanmadar\CoolioORM\Geo\GeoFunctions;
 
 class ORM
 {
@@ -62,6 +61,7 @@ class ORM
     public function __construct()
     {
         if(!self::$staticTypeAdded) {
+            Type::addType('geography', GeographyType::class);
             Type::addType('geometry', GeometryType::class);
             Type::addType('topogeometry', TopoGeometryType::class);
             Type::addType('_text', TextArrayType::class);
@@ -89,6 +89,7 @@ class ORM
             $connectionParams = (new DsnParser())->parse($connUrl);
             $this->doctrineConnectionsByUrl[$connUrl] = DriverManager::getConnection($connectionParams);
             if(!self::$staticTypeMapped && str_contains($connUrl, 'pgsql')) {
+                $this->doctrineConnectionsByUrl[$connUrl]->getDatabasePlatform()->registerDoctrineTypeMapping('geography', GeographyType::NAME);
                 $this->doctrineConnectionsByUrl[$connUrl]->getDatabasePlatform()->registerDoctrineTypeMapping('geometry', GeometryType::NAME);
                 $this->doctrineConnectionsByUrl[$connUrl]->getDatabasePlatform()->registerDoctrineTypeMapping('topogeometry', TopoGeometryType::NAME);
                 $this->doctrineConnectionsByUrl[$connUrl]->getDatabasePlatform()->registerDoctrineTypeMapping('_text', TextArrayType::NAME);

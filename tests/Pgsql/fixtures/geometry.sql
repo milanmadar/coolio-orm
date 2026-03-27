@@ -1,7 +1,6 @@
 CREATE EXTENSION IF NOT EXISTS postgis;
 
 DROP TABLE IF EXISTS geometry_test;
-
 CREATE TABLE geometry_test (
    id SERIAL PRIMARY KEY,
    point_geom             geometry(Point, 4326),
@@ -66,4 +65,19 @@ VALUES (
            )',
            4326
    )
+);
+
+DROP TABLE IF EXISTS geography_test;
+CREATE TABLE geography_test (
+    id SERIAL PRIMARY KEY,
+    point_geom      geography(Point, 4326),
+    linestring_geom geography(LineString, 4326)
+);
+INSERT INTO geography_test (
+    point_geom,
+    linestring_geom
+)
+VALUES (
+   ST_GeomFromEWKT('SRID=4326;POINT(1 2)'),
+   ST_GeomFromEWKT('SRID=4326;LINESTRING(0 0, 3 3, 5 1)')
 );
