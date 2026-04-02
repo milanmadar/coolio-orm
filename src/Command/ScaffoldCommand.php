@@ -331,7 +331,9 @@ class ScaffoldCommand extends Command
                 }
                 elseif(str_starts_with($nativeColType, 'geometry') || str_starts_with($nativeColType, 'geography'))
                 {
-                    $colType = 'geometry';
+                    $colType = str_starts_with($nativeColType, 'geography')
+                        ? 'geography'
+                        : 'geometry';
 
                     // 2d
                     if(str_contains($nativeColType, '(point,')) {
