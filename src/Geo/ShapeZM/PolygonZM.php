@@ -156,6 +156,68 @@ class PolygonZM extends AbstractShapeZM
     }
 
     /**
+     * Calculates the geometric centroid (center of mass) of the Polygon.
+     * For simplicity and standard 2D representation, this uses the exterior ring.
+     * @return PointZM
+     */
+    public function getCenterPoint(): PointZM
+    {
+        $exteriorRing = $this->getLineStrings()[0]->getPoints();
+        $n = count($exteriorRing);
+
+        // take the M from the middle
+        $middleM = $exteriorRing[(int)($n/2)]->getM();
+
+        $area = 0.0;
+        $cx = 0.0;
+        $cy = 0.0;
+        $czSum = 0.0;
+
+        for ($i = 0; $i < $n - 1; $i++) {
+            $p1 = $exteriorRing[$i];
+            $p2 = $exteriorRing[$i + 1];
+
+            $x1 = $p1->getX(); $y1 = $p1->getY();
+            $x2 = $p2->getX(); $y2 = $p2->getY();
+
+            // 2D Centroid Math (Shoelace)
+            $crossProduct = ($x1 * $y2) - ($x2 * $y1);
+            $area += $crossProduct;
+            $cx += ($x1 + $x2) * $crossProduct;
+            $cy += ($y1 + $y2) * $crossProduct;
+
+            // 3D Elevation Math (Arithmetic Mean of Vertices)
+            // We sum the Z of the current point (excluding the closing point later)
+            $czSum += $p1->getZ();
+        }
+
+        $area *= 0.5;
+
+        // Fallback for zero-area (e.g., vertical polygons or lines)
+        if (abs($area) < 1e-9) {
+            $minX = $minY = $minZ = PHP_FLOAT_MAX;
+            $maxX = $maxY = $maxZ = -PHP_FLOAT_MAX;
+            foreach ($exteriorRing as $p) {
+                $minX = min($minX, $p->getX()); $maxX = max($maxX, $p->getX());
+                $minY = min($minY, $p->getY()); $maxY = max($maxY, $p->getY());
+                $minZ = min($minZ, $p->getZ()); $maxZ = max($maxZ, $p->getZ());
+            }
+            return new PointZM(
+                ($minX + $maxX) / 2,
+                ($minY + $maxY) / 2,
+                ($minZ + $maxZ) / 2,
+                $middleM
+            );
+        }
+
+        $finalX = $cx / (6.0 * $area);
+        $finalY = $cy / (6.0 * $area);
+        $finalZ = $czSum / ($n - 1); // Average elevation of unique vertices
+
+        return new PointZM($finalX, $finalY, $finalZ, $middleM);
+    }
+
+    /**
      * Validates rings: closed, minimum 4 points, winding order.
      * @param array<LineStringZM> $lineStrings
      * @throws \InvalidArgumentException

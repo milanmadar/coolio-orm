@@ -149,4 +149,24 @@ class PolygonZTest extends TestCase
         $this->assertEquals($jsonData, $polygonZ->toGeoJSON());
     }
 
+    public function testGetCenterPointZWithSlopedSquare(): void
+    {
+        // A 1x1 square tilted from Z=100 to Z=200
+        $points = [
+            new PointZ(0, 0, 100),
+            new PointZ(1, 0, 100),
+            new PointZ(1, 1, 200),
+            new PointZ(0, 1, 200),
+            new PointZ(0, 0, 100),
+        ];
+
+        $poly = new PolygonZ([new LineStringZ($points)]);
+        $center = $poly->getCenterPoint();
+
+        $this->assertEquals(0.5, $center->getX());
+        $this->assertEquals(0.5, $center->getY());
+        // (100 + 100 + 200 + 200) / 4 = 150
+        $this->assertEquals(150.0, $center->getZ());
+    }
+
 }

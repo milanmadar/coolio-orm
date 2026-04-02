@@ -188,6 +188,77 @@ class PolygonTest extends TestCase
     }
 
     /**
+     * Tests the centroid of a simple unit square.
+     * This bypasses any resort logic and tests the math of the Polygon class directly.
+     */
+    public function testGetCenterPointWithUnitSquare(): void
+    {
+        // 1. Define a 1x1 square
+        // The Polygon constructor will handle the winding order (CCW)
+        // because of your _validateRings logic.
+        $points = [
+            new Point(0.0, 0.0),
+            new Point(1.0, 0.0),
+            new Point(1.0, 1.0),
+            new Point(0.0, 1.0),
+            new Point(0.0, 0.0),
+        ];
+
+        $outerRing = new LineString($points);
+        $polygon = new Polygon([$outerRing]);
+
+        // 2. Calculate the center
+        $center = $polygon->getCenterPoint();
+
+        // 3. Assertions
+        // For a square with corners (0,0) and (1,1), the center is (0.5, 0.5)
+        $this->assertEquals(0.5, $center->getX(), 'The X coordinate of the centroid should be 0.5');
+        $this->assertEquals(0.5, $center->getY(), 'The Y coordinate of the centroid should be 0.5');
+    }
+
+    /**
+     * Tests a Right Triangle
+     * Centroid of a triangle is (x1+x2+x3)/3, (y1+y2+y3)/3
+     */
+    public function testGetCenterPointWithTriangle(): void
+    {
+        $points = [
+            new Point(0.0, 0.0),
+            new Point(3.0, 0.0),
+            new Point(0.0, 3.0),
+            new Point(0.0, 0.0),
+        ];
+
+        $polygon = new Polygon([new LineString($points)]);
+        $center = $polygon->getCenterPoint();
+
+        // (0+3+0)/3 = 1.0
+        $this->assertEquals(1.0, $center->getX());
+        $this->assertEquals(1.0, $center->getY());
+    }
+
+    /**
+     * Test the fallback for a degenerate polygon (zero area)
+     */
+    public function testGetCenterPointWithDegeneratePolygon(): void
+    {
+        // A "polygon" where all points are on a single line (Area = 0)
+        $points = [
+            new Point(0.0, 0.0),
+            new Point(2.0, 0.0),
+            new Point(1.0, 0.0),
+            new Point(0.0, 0.0),
+        ];
+
+        $polygon = new Polygon([new LineString($points)]);
+        $center = $polygon->getCenterPoint();
+
+        // Should fallback to bounding box center: (minX+maxX)/2 = (0+2)/2 = 1.0
+        $this->assertEquals(1.0, $center->getX());
+        $this->assertEquals(0.0, $center->getY());
+    }
+
+    /**
      * Helper to call the private _isCCW method of Polygon.
      */
     private function _callPrivateIsCCW(array $points): bool

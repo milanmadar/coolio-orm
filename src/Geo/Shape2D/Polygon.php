@@ -137,6 +137,63 @@ class Polygon extends AbstractShape2D
     }
 
     /**
+     * Calculates the geometric centroid (center of mass) of the Polygon.
+     * For simplicity and standard 2D representation, this uses the exterior ring.
+     * * @return Point
+     */
+    public function getCenterPoint(): Point
+    {
+        $exteriorRing = $this->lineStrings[0]->getPoints();
+        $n = count($exteriorRing);
+
+        $area = 0.0;
+        $cx = 0.0;
+        $cy = 0.0;
+
+        // Loop through points to calculate Area and Centroid components
+        for ($i = 0; $i < $n - 1; $i++) {
+            $p1 = $exteriorRing[$i];
+            $p2 = $exteriorRing[$i + 1];
+
+            $x1 = $p1->getX();
+            $y1 = $p1->getY();
+            $x2 = $p2->getX();
+            $y2 = $p2->getY();
+
+            // Standard shoelace formula term: (x_i * y_{i+1} - x_{i+1} * y_i)
+            $crossProduct = ($x1 * $y2) - ($x2 * $y1);
+
+            $area += $crossProduct;
+            $cx += ($x1 + $x2) * $crossProduct;
+            $cy += ($y1 + $y2) * $crossProduct;
+        }
+
+        $area *= 0.5;
+
+        // Fallback: If the polygon is mathematically degenerate (area of 0),
+        // fallback to the bounding box center.
+        if (abs($area) < 1e-9) {
+            $minX = $minY = PHP_FLOAT_MAX;
+            $maxX = $maxY = -PHP_FLOAT_MAX;
+
+            foreach ($exteriorRing as $p) {
+                $minX = min($minX, $p->getX());
+                $maxX = max($maxX, $p->getX());
+                $minY = min($minY, $p->getY());
+                $maxY = max($maxY, $p->getY());
+            }
+
+            return new Point(($minX + $maxX) / 2.0, ($minY + $maxY) / 2.0);
+        }
+
+        // Finalize centroid coordinates
+        $cx = $cx / (6.0 * $area);
+        $cy = $cy / (6.0 * $area);
+
+        return new Point($cx, $cy);
+    }
+
+    /**
      * @return string
      */
     public function toWKT(): string
