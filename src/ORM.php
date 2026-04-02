@@ -32,7 +32,9 @@ class ORM
     private static ?ORM $instance;
 
     private static bool $staticTypeAdded = false;
-    private static bool $staticTypeMapped = false;
+
+    /** @var array<string, true> */
+    private static array $staticTypeMapped = [];
 
     /**
      * Singleton, using the same as Symfony service container
@@ -88,7 +90,7 @@ class ORM
         if(!isset($this->doctrineConnectionsByUrl[$connUrl])) {
             $connectionParams = (new DsnParser())->parse($connUrl);
             $this->doctrineConnectionsByUrl[$connUrl] = DriverManager::getConnection($connectionParams);
-            if(!self::$staticTypeMapped && str_contains($connUrl, 'pgsql')) {
+            if(!isset(self::$staticTypeMapped[$connUrl]) && str_contains($connUrl, 'pgsql')) {
                 $this->doctrineConnectionsByUrl[$connUrl]->getDatabasePlatform()->registerDoctrineTypeMapping('geography', GeographyType::NAME);
                 $this->doctrineConnectionsByUrl[$connUrl]->getDatabasePlatform()->registerDoctrineTypeMapping('geometry', GeometryType::NAME);
                 $this->doctrineConnectionsByUrl[$connUrl]->getDatabasePlatform()->registerDoctrineTypeMapping('topogeometry', TopoGeometryType::NAME);
@@ -96,7 +98,7 @@ class ORM
                 $this->doctrineConnectionsByUrl[$connUrl]->getDatabasePlatform()->registerDoctrineTypeMapping('text[]', TextArrayBracketsType::NAME);
                 $this->doctrineConnectionsByUrl[$connUrl]->getDatabasePlatform()->registerDoctrineTypeMapping('citext', CiTextType::NAME);
                 //$this->doctrineConnectionsByUrl[$connUrl]->getDatabasePlatform()->registerDoctrineTypeMapping('geometry', 'string');
-                self::$staticTypeMapped = true;
+                self::$staticTypeMapped[$connUrl] = true;
             }
 //            /** @var \PDO $pdoConn */
 //            $pdoConn = $this->dbsByConnUrl[$connUrl]->getWrappedConnection()->getWrappedConnection(); @ php stan-ig nore-li ne
