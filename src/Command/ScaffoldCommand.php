@@ -42,7 +42,12 @@ class ScaffoldCommand extends Command
 
         //
         // find the templates
-        $templatesDir = __DIR__.'../../scaffold_templates';
+        foreach(['vendor/milanmadar/coolio-orm/scaffold_templates', 'scaffold_templates', '../../scaffold_templates'] as $dir) {
+            if(is_dir(getcwd().'/'.$dir)) {
+                $templatesDir = getcwd().'/'.$dir;
+                break;
+            }
+        }
         if(empty($templatesDir)) {
             $io->error('ERROR: No scaffold templates found. Please run "composer install" to install the package.');
             return Command::FAILURE;
