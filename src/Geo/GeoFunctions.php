@@ -49,7 +49,7 @@ class GeoFunctions
     }
 
     /**
-     * @param AbstractShape $geom
+     * @param AbstractShape|string $geom
      * @param string $topologyName
      * @param int $topologyLayerId
      * @param float $tolerance
@@ -58,7 +58,7 @@ class GeoFunctions
      * @return string
      */
     public static function toTopoGeom_param(
-        AbstractShape $geom,
+        AbstractShape|string $geom,
         string        $topologyName,
         int           $topologyLayerId,
         float         $tolerance,
@@ -66,7 +66,9 @@ class GeoFunctions
         array         &$paramTypesWilleBe
     ): string
     {
-        $geomFromEWKT = self::ST_GeomFromEWKT_param($geom, $paramsWillBe, $paramTypesWilleBe);
+        $geomFromEWKT = ($geom instanceof AbstractShape)
+            ? self::ST_GeomFromEWKT_param($geom, $paramsWillBe, $paramTypesWilleBe)
+            : $geom;
 
         $p1 = 'toTopoGeomPm' . ++self::$parameterIndex;
         $paramsWillBe[$p1] = $topologyName;
@@ -83,14 +85,23 @@ class GeoFunctions
         return "toTopoGeom({$geomFromEWKT}, :{$p1}, :{$p2}, :{$p3})";
     }
 
+    /**
+     * @param AbstractShape|string $geom
+     * @param string $topologyName
+     * @param int $topologyLayerId
+     * @param float|null $tolerance
+     * @return string
+     */
     public static function toTopoGeom_geom(
-        AbstractShape $geom,
+        AbstractShape|string $geom,
         string        $topologyName,
         int           $topologyLayerId,
         float|null    $tolerance
     ): string
     {
-        $geomFromEWKT = self::ST_GeomFromEWKT_geom($geom);
+        $geomFromEWKT = ($geom instanceof AbstractShape)
+            ? self::ST_GeomFromEWKT_geom($geom)
+            : $geom;
         return "toTopoGeom({$geomFromEWKT}, '{$topologyName}', {$topologyLayerId}, {$tolerance})";
     }
 
@@ -103,13 +114,13 @@ class GeoFunctions
      *   0.001                                -- tolerance for snapping and validation
      * )
      * ```
-     * @param AbstractShape $geom
+     * @param AbstractShape|string $geom
      * @param string $column
      * @param Manager $manager
      * @return string
      */
     public static function toTopoGeom_geom_mgr(
-        AbstractShape $geom,
+        AbstractShape|string $geom,
         string        $column,
         Manager       $manager
     ): string
@@ -122,19 +133,19 @@ class GeoFunctions
     }
 
     /**
-     * @param AbstractShape $geom
+     * @param AbstractShape|string $geom
      * @param array<mixed> $paramValuesWillBe
      * @param array<mixed> $paramTypesWilleBe
      * @return string
      */
     public static function ST_GeomFromEWKT_param(
-        AbstractShape $geom,
+        AbstractShape|string $geom,
         array         &$paramValuesWillBe,
         array         &$paramTypesWilleBe
     ): string
     {
         $p1 = 'GeomFromEWKTpm' . ++self::$parameterIndex;
-        $paramValuesWillBe[$p1] = $geom->toEWKT();
+        $paramValuesWillBe[$p1] = ($geom instanceof AbstractShape) ? $geom->toEWKT() : $geom;
         $paramTypesWilleBe[$p1] = ParameterType::STRING;
 
         return "ST_GeomFromEWKT(:{$p1})";
@@ -142,12 +153,47 @@ class GeoFunctions
 
     /**
      * ST_GeomFromEWKT('SRID=4326;POINT(1 2)')
-     * @param AbstractShape $geom
+     * @param AbstractShape|string $geom
      * @return string
      */
-    public static function ST_GeomFromEWKT_geom(AbstractShape $geom): string
+    public static function ST_GeomFromEWKT_geom(AbstractShape|string $geom): string
     {
-        return "ST_GeomFromEWKT('{$geom->toEWKT()}')";
+        return "ST_GeomFromEWKT('"
+            . (($geom instanceof AbstractShape) ? $geom->toEWKT() : $geom)
+            ."')";
+    }
+
+    /**
+     * MUST BE ALREADY SRID=4326
+     * @param AbstractShape|string $geom
+     * @param array<mixed> $paramValuesWillBe
+     * @param array<mixed> $paramTypesWilleBe
+     * @return string
+     */
+    public static function ST_GeogFromText_param(
+        AbstractShape|string $geom,
+        array         &$paramValuesWillBe,
+        array         &$paramTypesWilleBe
+    ): string
+    {
+        $p1 = 'GeogFromTextpm' . ++self::$parameterIndex;
+        $paramValuesWillBe[$p1] = ($geom instanceof AbstractShape) ? $geom->toEWKT() : $geom;
+        $paramTypesWilleBe[$p1] = ParameterType::STRING;
+
+        return "ST_GeogFromText(:{$p1})";
+    }
+
+    /**
+     * MUST BE ALREADY SRID=4326<br>
+     * ST_GeogFromText('SRID=4326;POINT(1 2)')
+     * @param AbstractShape|string $geom
+     * @return string
+     */
+    public static function ST_GeogFromText_geom(AbstractShape|string $geom): string
+    {
+        return "ST_GeogFromText('"
+            . (($geom instanceof AbstractShape) ? $geom->toEWKT() : $geom)
+            ."')";
     }
 
 

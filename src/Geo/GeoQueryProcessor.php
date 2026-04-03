@@ -89,7 +89,10 @@ class GeoQueryProcessor
                 } else {
                     $cols[] = $c;
                 }*/
-                if($managerFieldTypes[$c] == 'geometry' || $managerFieldTypes[$c] == 'geometry_curved' || $managerFieldTypes[$c] == 'topogeometry') {
+                if($managerFieldTypes[$c] == 'geometry'
+                || $managerFieldTypes[$c] == 'geography'
+                || $managerFieldTypes[$c] == 'geometry_curved'
+                || $managerFieldTypes[$c] == 'topogeometry') {
                     $cols[] = "ST_AsEWKT({$c}) AS {$c}";
                 } else {
                     $cols[] = $c;

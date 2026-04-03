@@ -215,7 +215,9 @@ abstract class Manager
                 $this->hasGeoFields = true;
             } else {
                 foreach($this->getFieldTypes() as $fld=>$type) {
-                    if(str_starts_with($type, 'geometry') || str_starts_with($type, 'topogeo')) {
+                    if(str_starts_with($type, 'geometry')
+                    || str_starts_with($type, 'topogeo')
+                    || str_starts_with($type, 'geography')) {
                         $this->hasGeoFields = true;
                         break;
                     }
