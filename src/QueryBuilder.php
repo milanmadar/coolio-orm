@@ -32,6 +32,8 @@ class QueryBuilder extends DoctrineQueryBuilder
     private bool $isPostgres;
     private bool $isFromSet;
     private bool $isSelectSet;
+    /** @var array<string,string> key and values will be used in str_replace() */
+    private array $postgresJoinRemovedSchemaInTableNameAlias;
 
     public function __construct(ORM $orm, Connection $db, ?Manager $entityMgr = null)
     {
@@ -47,6 +49,7 @@ class QueryBuilder extends DoctrineQueryBuilder
         $this->isPostgres = str_contains(get_class($this->db->getDatabasePlatform()), 'PostgreSQL');
         $this->isFromSet = false;
         $this->isSelectSet = false;
+        $this->postgresJoinRemovedSchemaInTableNameAlias = [];
     }
 
     /**
@@ -91,7 +94,7 @@ class QueryBuilder extends DoctrineQueryBuilder
         // transform geometries
         if($this->isPostgres && isset($this->entityMgr) && $expressions[0] == '*' &&  $this->entityMgr->_hasGeoFields()) {
             $expressions = $this->entityMgr->getFields();
-            $_exps = GeoQueryProcessor::SELECTgeometryToPostGISformat($this->entityMgr->getFieldTypes(), $expressions);
+            $_exps = GeoQueryProcessor::SELECTgeometryToPostGISformat($this->entityMgr->getDefaultDbTable(), $this->entityMgr->getFieldTypes(), $expressions);
         }
 
         $this->type = self::TYPE_SELECT;
@@ -164,14 +167,36 @@ class QueryBuilder extends DoctrineQueryBuilder
             }
         }
 
-        //  only the last part after the dot can be the alias
-        $thisAlias = ($this->isPostgres && str_contains($thisTable, '.'))
-            ? substr($thisTable, strrpos($thisTable, '.')+1)
-            : $thisTable;
-        //  only the last part after the dot can be the alias
-        $otherAlias = ($this->isPostgres && str_contains($otherTable, '.'))
-            ? substr($otherTable, strrpos($otherTable, '.')+1)
-            : $otherTable;
+        $thisAlias = $thisTable;
+        $otherAlias = $otherTable;
+
+        // Postgres table names come with the schema. That needs to be removed, because:
+        // 1. Doctrine DBAL join() must have an alias
+        // 2. Postgres can't include "public.tablename" as an alias (onl simply "tablename" is ok)
+        // And then in all WHERE, ORDER, SELECT and other parts we must replace all "public.tablename" to simple "tablesname" (so to the alias)
+        if($this->isPostgres) {
+            $this->postgresJoinRemovedSchemaInTableNameAlias = [];
+            if(str_contains($thisTable, '.')) {
+                $parts = explode('.', $thisTable);
+                $thisAlias = $parts[1];
+                if(!empty($condition)) {
+                    $condition = str_replace($thisTable.'.', $thisAlias.'.', $condition);
+                }
+                // in where, order, etc, we will replace "public.tablename" to just "tablename"
+                // read the comment above `if($this->isPostgres)` to know why
+                $this->postgresJoinRemovedSchemaInTableNameAlias[$thisTable.'.'] = $thisAlias.'.';
+            }
+            if(str_contains($otherTable, '.')) {
+                $parts = explode('.', $otherTable);
+                $otherAlias = $parts[1];
+                if(!empty($condition)) {
+                    $condition = str_replace($otherTable . '.', $otherAlias . '.', $condition);
+                }
+                // in where, order, etc, we will replace "public.tablename" to just "tablename"
+                // read the comment above `if($this->isPostgres)` to know why
+                $this->postgresJoinRemovedSchemaInTableNameAlias[$otherTable.'.'] = $otherAlias.'.';
+            }
+        }
 
         $this->from($thisTable, $thisAlias);
         return $this->join($thisAlias, $otherTable, $otherAlias, $condition);
@@ -207,14 +232,36 @@ class QueryBuilder extends DoctrineQueryBuilder
             }
         }
 
-        //  only the last part after the dot can be the alias
-        $thisAlias = ($this->isPostgres && str_contains($thisTable, '.'))
-            ? substr($thisTable, strrpos($thisTable, '.')+1)
-            : $thisTable;
-        //  only the last part after the dot can be the alias
-        $otherAlias = ($this->isPostgres && str_contains($otherTable, '.'))
-            ? substr($otherTable, strrpos($otherTable, '.')+1)
-            : $otherTable;
+        $thisAlias = $thisTable;
+        $otherAlias = $otherTable;
+
+        // Postgres table names come with the schema. That needs to be removed, because:
+        // 1. Doctrine DBAL join() must have an alias
+        // 2. Postgres can't include "public.tablename" as an alias (onl simply "tablename" is ok)
+        // And then in all WHERE, ORDER, SELECT and other parts we must replace all "public.tablename" to simple "tablesname" (so to the alias)
+        if($this->isPostgres) {
+            $this->postgresJoinRemovedSchemaInTableNameAlias = [];
+            if(str_contains($thisTable, '.')) {
+                $parts = explode('.', $thisTable);
+                $thisAlias = $parts[1];
+                if(!empty($condition)) {
+                    $condition = str_replace($thisTable . '.', $thisAlias . '.', $condition);
+                }
+                // in where, order, etc, we will replace "public.tablename" to just "tablename"
+                // read the comment above `if($this->isPostgres)` to know why
+                $this->postgresJoinRemovedSchemaInTableNameAlias[$thisTable.'.'] = $thisAlias.'.';
+            }
+            if(str_contains($otherTable, '.')) {
+                $parts = explode('.', $otherTable);
+                $otherAlias = $parts[1];
+                if(!empty($condition)) {
+                    $condition = str_replace($otherTable . '.', $otherAlias . '.', $condition);
+                }
+                // in where, order, etc, we will replace "public.tablename" to just "tablename"
+                // read the comment above `if($this->isPostgres)` to know why
+                $this->postgresJoinRemovedSchemaInTableNameAlias[$otherTable.'.'] = $otherAlias.'.';
+            }
+        }
 
         $this->from($thisTable, $thisAlias);
         return $this->innerJoin($thisTable, $otherTable, $otherAlias, $condition);
@@ -250,14 +297,36 @@ class QueryBuilder extends DoctrineQueryBuilder
             }
         }
 
-        //  only the last part after the dot can be the alias
-        $thisAlias = ($this->isPostgres && str_contains($thisTable, '.'))
-            ? substr($thisTable, strrpos($thisTable, '.')+1)
-            : $thisTable;
-        //  only the last part after the dot can be the alias
-        $otherAlias = ($this->isPostgres && str_contains($otherTable, '.'))
-            ? substr($otherTable, strrpos($otherTable, '.')+1)
-            : $otherTable;
+        $thisAlias = $thisTable;
+        $otherAlias = $otherTable;
+
+        // Postgres table names come with the schema. That needs to be removed, because:
+        // 1. Doctrine DBAL join() must have an alias
+        // 2. Postgres can't include "public.tablename" as an alias (onl simply "tablename" is ok)
+        // And then in all WHERE, ORDER, SELECT and other parts we must replace all "public.tablename" to simple "tablesname" (so to the alias)
+        if($this->isPostgres) {
+            $this->postgresJoinRemovedSchemaInTableNameAlias = [];
+            if(str_contains($thisTable, '.')) {
+                $parts = explode('.', $thisTable);
+                $thisAlias = $parts[1];
+                if(!empty($condition)) {
+                    $condition = str_replace($thisTable . '.', $thisAlias . '.', $condition);
+                }
+                // in where, order, etc, we will replace "public.tablename" to just "tablename"
+                // read the comment above `if($this->isPostgres)` to know why
+                $this->postgresJoinRemovedSchemaInTableNameAlias[$thisTable.'.'] = $thisAlias.'.';
+            }
+            if(str_contains($otherTable, '.')) {
+                $parts = explode('.', $otherTable);
+                $otherAlias = $parts[1];
+                if(!empty($condition)) {
+                    $condition = str_replace($otherTable . '.', $otherAlias . '.', $condition);
+                }
+                // in where, order, etc, we will replace "public.tablename" to just "tablename"
+                // read the comment above `if($this->isPostgres)` to know why
+                $this->postgresJoinRemovedSchemaInTableNameAlias[$otherTable.'.'] = $otherAlias.'.';
+            }
+        }
 
         $this->from($thisTable, $thisAlias);
         return $this->leftJoin($thisTable, $otherTable, $otherAlias, $condition);
@@ -293,14 +362,36 @@ class QueryBuilder extends DoctrineQueryBuilder
             }
         }
 
-        //  only the last part after the dot can be the alias
-        $thisAlias = ($this->isPostgres && str_contains($thisTable, '.'))
-            ? substr($thisTable, strrpos($thisTable, '.')+1)
-            : $thisTable;
-        //  only the last part after the dot can be the alias
-        $otherAlias = ($this->isPostgres && str_contains($otherTable, '.'))
-            ? substr($otherTable, strrpos($otherTable, '.')+1)
-            : $otherTable;
+        $thisAlias = $thisTable;
+        $otherAlias = $otherTable;
+
+        // Postgres table names come with the schema. That needs to be removed, because:
+        // 1. Doctrine DBAL join() must have an alias
+        // 2. Postgres can't include "public.tablename" as an alias (onl simply "tablename" is ok)
+        // And then in all WHERE, ORDER, SELECT and other parts we must replace all "public.tablename" to simple "tablesname" (so to the alias)
+        if($this->isPostgres) {
+            $this->postgresJoinRemovedSchemaInTableNameAlias = [];
+            if(str_contains($thisTable, '.')) {
+                $parts = explode('.', $thisTable);
+                $thisAlias = $parts[1];
+                if(!empty($condition)) {
+                    $condition = str_replace($thisTable . '.', $thisAlias . '.', $condition);
+                }
+                // in where, order, etc, we will replace "public.tablename" to just "tablename"
+                // read the comment above `if($this->isPostgres)` to know why
+                $this->postgresJoinRemovedSchemaInTableNameAlias[$thisTable.'.'] = $thisAlias.'.';
+            }
+            if(str_contains($otherTable, '.')) {
+                $parts = explode('.', $otherTable);
+                $otherAlias = $parts[1];
+                if(!empty($condition)) {
+                    $condition = str_replace($otherTable . '.', $otherAlias . '.', $condition);
+                }
+                // in where, order, etc, we will replace "public.tablename" to just "tablename"
+                // read the comment above `if($this->isPostgres)` to know why
+                $this->postgresJoinRemovedSchemaInTableNameAlias[$otherTable.'.'] = $otherAlias.'.';
+            }
+        }
 
         $this->from($thisTable, $thisAlias);
         return $this->rightJoin($thisTable, $otherTable, $otherAlias, $condition);
@@ -320,6 +411,10 @@ class QueryBuilder extends DoctrineQueryBuilder
      */
     private function correctWhereColumnParams(string $column, string $operator, mixed $value): array
     {
+        foreach($this->postgresJoinRemovedSchemaInTableNameAlias as $withSchema=>$withoutSchema) {
+            $column = str_replace($withSchema, $withoutSchema, $column);
+        }
+
         if($value instanceof AbstractShape) {
             [$sqlPart, $paramValues, $paramTypes] = Geo\GeoQueryProcessor::geoFunction_sqlPart_andParams(
                 $this->entityMgr,
@@ -922,6 +1017,10 @@ class QueryBuilder extends DoctrineQueryBuilder
      */
     public function orderBy(string $sort, ?string $order = null): self
     {
+        foreach($this->postgresJoinRemovedSchemaInTableNameAlias as $withSchema=>$withoutSchema) {
+            $sort = str_replace($withSchema, $withoutSchema, $sort);
+        }
+
         //if(!isset($order)) $order = 'ASC';
         $this->orderBys = [ [$sort, $order] ];
         parent::orderBy($sort, $order);
@@ -934,6 +1033,10 @@ class QueryBuilder extends DoctrineQueryBuilder
      */
     public function addOrderBy(string $sort, ?string $order = null): self
     {
+        foreach($this->postgresJoinRemovedSchemaInTableNameAlias as $withSchema=>$withoutSchema) {
+            $sort = str_replace($withSchema, $withoutSchema, $sort);
+        }
+
         //if(!isset($order)) $order = 'ASC';
         $this->orderBys[] = [$sort, $order];
         parent::addOrderBy($sort, $order);

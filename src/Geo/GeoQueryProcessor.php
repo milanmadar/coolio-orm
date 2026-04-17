@@ -57,7 +57,7 @@ class GeoQueryProcessor
                 $columns = $mgr->getFields();
             }
 
-            $_cols = self::SELECTgeometryToPostGISformat($mgr->getFieldTypes(), $columns);
+            $_cols = self::SELECTgeometryToPostGISformat($mgr->getDefaultDbTable(), $mgr->getFieldTypes(), $columns);
 
             $processedSelect = implode(", ", array_map(fn($c) => $c, $_cols));
 
@@ -72,15 +72,25 @@ class GeoQueryProcessor
     /**
      * Converts geometry fields to PostGIS format for a SELECT SQL queries. Leaves other fields as they were
      *
+     * @param string $managerTable
      * @param array<string, string> $managerFieldTypes $manager->getFieldTypes()
      * @param array<string> $fieldsInTheSQLstring
      * @return array<string> The formatted fields, geometries transformed to 'ST_As...` for PostGIS.
      */
-    public static function SELECTgeometryToPostGISformat(array $managerFieldTypes, array $fieldsInTheSQLstring): array
+    public static function SELECTgeometryToPostGISformat(string $managerTable, array $managerFieldTypes, array $fieldsInTheSQLstring): array
     {
         $cols = [];
         foreach($fieldsInTheSQLstring as $c) {
-            if(isset($managerFieldTypes[$c])) {
+            if(isset($managerFieldTypes[$c]))
+            {
+                $addTableName = !str_contains($c, '.');
+                if($addTableName) {
+                    // postgres managers have "public."... in their table name and thats not allowed
+                    if(str_contains($managerTable, '.')) {
+                        $managerTable = substr($managerTable, strrpos($managerTable, '.') + 1);
+                    }
+                }
+
                 /*if($managerFieldTypes[$c] == 'geometry') {
                     $cols[] = "ST_AsGeoJSON({$c}) AS {$c}";
                     $cols[] = "ST_SRID({$c}) AS {$c}_srid";
@@ -92,10 +102,17 @@ class GeoQueryProcessor
                 if($managerFieldTypes[$c] == 'geometry'
                 || $managerFieldTypes[$c] == 'geography'
                 || $managerFieldTypes[$c] == 'geometry_curved'
-                || $managerFieldTypes[$c] == 'topogeometry') {
-                    $cols[] = "ST_AsEWKT({$c}) AS {$c}";
-                } else {
-                    $cols[] = $c;
+                || $managerFieldTypes[$c] == 'topogeometry'
+                ) {
+                    $colInEWKT = $addTableName
+                        ? $managerTable.'.'.$c
+                        : $c;
+                    $cols[] = "ST_AsEWKT({$colInEWKT}) AS {$c}";
+                }
+                else {
+                    $cols[] = $addTableName
+                        ? $managerTable.'.'.$c
+                        : $c;
                 }
             } else {
                 $cols[] = $c;

@@ -84,7 +84,7 @@ class GeographyTest extends TestCase
         $mgr->clearRepository(false);
 
         //$expect = "SELECT id, ST_AsGeoJSON(point_geom) AS point_geom, ST_SRID(point_geom) AS point_geom_srid, ST_AsGeoJSON(linestring_geom) AS linestring_geom, ST_SRID(linestring_geom) AS linestring_geom_srid, ST_AsGeoJSON(polygon_geom) AS polygon_geom, ST_SRID(polygon_geom) AS polygon_geom_srid, ST_AsGeoJSON(multipoint_geom) AS multipoint_geom, ST_SRID(multipoint_geom) AS multipoint_geom_srid, ST_AsGeoJSON(multilinestring_geom) AS multilinestring_geom, ST_SRID(multilinestring_geom) AS multilinestring_geom_srid, ST_AsGeoJSON(multipolygon_geom) AS multipolygon_geom, ST_SRID(multipolygon_geom) AS multipolygon_geom_srid, ST_AsGeoJSON(geomcollection_geom) AS geomcollection_geom, ST_SRID(geomcollection_geom) AS geomcollection_geom_srid, ST_AsEWKT(circularstring_geom) AS circularstring_geom, ST_AsEWKT(compoundcurve_geom) AS compoundcurve_geom, ST_AsEWKT(curvedpolygon_geom) AS curvedpolygon_geom, ST_AsEWKT(multicurve_geom) AS multicurve_geom FROM public.geometry_test WHERE 1=1 LIMIT 1";
-        $expect = "SELECT id, ST_AsEWKT(point_geom) AS point_geom, ST_AsEWKT(linestring_geom) AS linestring_geom FROM public.geography_test WHERE 1=1 LIMIT 1";
+        $expect = "SELECT geography_test.id, ST_AsEWKT(geography_test.point_geom) AS point_geom, ST_AsEWKT(geography_test.linestring_geom) AS linestring_geom FROM public.geography_test WHERE 1=1 LIMIT 1";
         $sql = $mgr->createQueryBuilder()
             ->andWhere('1=1')
             ->limit(0, 1)

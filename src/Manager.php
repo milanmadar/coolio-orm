@@ -244,6 +244,9 @@ abstract class Manager
      */
     public function getTopoGeometryFieldInfo_column(string $column): array|null
     {
+        if(str_contains($column, '.')) {
+            $column = substr($column, strrpos($column, '.')+1);
+        }
         return $this->getTopoGeometryFieldInfo()[$column] ?? null;
     }
 
