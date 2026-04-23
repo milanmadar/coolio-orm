@@ -31,7 +31,7 @@ class GeoQueryProcessor
         }
         else // regular geometry or geography
         {
-            $type = $mgr->getFieldTypes()[$column] ?? 'geometry';
+            $type = $mgr?->getFieldTypes()[$column] ?? 'geometry';
             if($type === 'geography') {
                 $sqlPart = GeoFunctions::ST_GeogFromText_param(
                     $shape,
