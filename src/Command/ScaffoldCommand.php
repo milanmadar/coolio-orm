@@ -480,7 +480,7 @@ class ScaffoldCommand extends Command
             }
 
             // default values
-            if(!is_null($colDefVal) && $colType != 'geometry' && $colType != 'geometry_curved' && $colType != 'topogeometry')
+            if(!is_null($colDefVal) && $colType != 'geography' && $colType != 'geometry' && $colType != 'geometry_curved' && $colType != 'topogeometry')
             {
                 if($colType == 'string' || $colType == 'text' || $colType == 'character' || $colType == 'char' || $colType == 'varchar') {
                     $defValSrc = "'".str_replace("'", "\\'", $colDefVal)."'";

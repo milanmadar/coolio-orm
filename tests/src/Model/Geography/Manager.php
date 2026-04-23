@@ -49,8 +49,8 @@ class Manager extends CoolioORM\Manager
      */
     public function getFieldTypes(): array { return [
         'id' => 'integer',
-        'point_geom' => 'geometry',
-        'linestring_geom' => 'geometry',
+        'point_geom' => 'geography',
+        'linestring_geom' => 'geography',
     ]; }
 
     /**

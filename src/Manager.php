@@ -1035,6 +1035,15 @@ abstract class Manager
                         $types[$p] = ParameterType::STRING;
                         break;
                     case 'geography':
+                        [$geo_sqlPart, $geo_paramValues, $geo_paramTypes] = Geo\GeoQueryProcessor::geoFunction_sqlPart_andParams(
+                            $this,
+                            $colName,
+                            $val
+                        );
+                        $placeholders[] = $geo_sqlPart;
+                        $values = array_merge($values, $geo_paramValues);
+                        $types = array_merge($types, $geo_paramTypes);
+                        break;
                     case 'geometry':
                     case 'geometry_curved':
                     case 'topogeometry':

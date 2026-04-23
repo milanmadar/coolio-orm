@@ -29,13 +29,24 @@ class GeoQueryProcessor
                 $paramTypes
             );
         }
-        else // regular geometry
+        else // regular geometry or geography
         {
-            $sqlPart = GeoFunctions::ST_GeomFromEWKT_param(
-                $shape,
-                $paramValues,
-                $paramTypes
-            );
+            $type = $mgr->getFieldTypes()[$column] ?? 'geometry';
+            if($type === 'geography') {
+                $sqlPart = GeoFunctions::ST_GeogFromText_param(
+                    $shape,
+                    $paramValues,
+                    $paramTypes
+                );
+            }
+            // geometry
+            else {
+                $sqlPart = GeoFunctions::ST_GeomFromEWKT_param(
+                    $shape,
+                    $paramValues,
+                    $paramTypes
+                );
+            }
         }
 
         return [$sqlPart, $paramValues, $paramTypes];
