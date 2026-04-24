@@ -35,6 +35,7 @@ class ORM
 
     /** @var array<string, true> */
     private static array $staticTypeMapped = [];
+    protected bool $useEntityRepository;
 
     /**
      * Singleton, using the same as Symfony service container
@@ -75,6 +76,19 @@ class ORM
         $this->doctrineConnectionsByUrl = [];
         $this->statementRepositories = [];
         $this->entityManagers = [];
+        $this->useEntityRepository = true;
+    }
+
+    /**
+     * Should it use the EntityRepository (kinda like an Entity Cache)<br>
+     * IMPORTANT: It only affects those Manager that were not yet created. Any that was already created will remain as they were.
+     * @param bool $useOrNot
+     * @return $this
+     */
+    public function setUseEntityRepositryDefault(bool $useOrNot): self
+    {
+        $this->useEntityRepository = $useOrNot;
+        return $this;
     }
 
     /**
@@ -128,6 +142,7 @@ class ORM
 
         if(!isset($this->entityManagers[$k])) {
             $this->entityManagers[$k] = new $mgrClassName( $this, $db, $this->getEntityRepository() );
+            $this->entityManagers[$k]->setUseEntityRepositry($this->useEntityRepository);
         }
 
         /** @var T of Milanmadar\CoolioORM\Manager */
