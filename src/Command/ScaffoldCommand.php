@@ -566,6 +566,7 @@ class ScaffoldCommand extends Command
                 case 'varchar':
                 case 'char':
                 case 'character':
+                case 'ltree':
                     $colType = 'string';
                     $paramType = 'string';
                     $docParamType = 'string';
