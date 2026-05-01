@@ -38,6 +38,9 @@ class ORM
     private static array $staticTypeMapped = [];
     protected bool $useEntityRepository;
 
+    /** @var array<string, int> tracks transaction nesting depth per connection URL */
+    private array $transactionLevels;
+
     /**
      * Singleton, using the same as Symfony service container
      * @return ORM
@@ -79,6 +82,60 @@ class ORM
         $this->statementRepositories = [];
         $this->entityManagers = [];
         $this->useEntityRepository = true;
+        $this->transactionLevels = [];
+    }
+
+    /**
+     * @param string $connUrl
+     * @param Connection $db
+     * @return void
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function beginTransaction(string $connUrl, Connection $db): void
+    {
+        $level = $this->transactionLevels[$connUrl] ?? 0;
+        if ($level === 0) {
+            $db->beginTransaction();
+        }
+        $this->transactionLevels[$connUrl] = $level + 1;
+    }
+
+    /**
+     * @param string $connUrl
+     * @param Connection $db
+     * @return void
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function commitTransaction(string $connUrl, Connection $db): void
+    {
+        $level = $this->transactionLevels[$connUrl] ?? 0;
+        if ($level > 0) {
+            $this->transactionLevels[$connUrl]--;
+            if ($this->transactionLevels[$connUrl] === 0) {
+                $db->commit();
+            }
+        }
+    }
+
+    /**
+     * @param string $connUrl
+     * @param Connection $db
+     * @return void
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function rollbackTransaction(string $connUrl, Connection $db): void
+    {
+        $level = $this->transactionLevels[$connUrl] ?? 0;
+        if ($level > 0) {
+            $db->rollBack();
+            // Reset counter because the whole transaction chain for this DB is dead
+            $this->transactionLevels[$connUrl] = 0;
+        }
+    }
+
+    public function isInTransaction(string $connUrl): bool
+    {
+        return ($this->transactionLevels[$connUrl] ?? 0) > 0;
     }
 
     /**

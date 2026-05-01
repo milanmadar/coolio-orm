@@ -68,11 +68,17 @@ class EntityRelation
             }
         }
 
+        $isSameDbRow = isset($refEnt)
+            && $ownerEnt->hasId()
+            && $refEnt->getId() === $ownerEnt->getId()
+            && get_class($refEnt) === get_class($ownerEnt);
+
         // Set it (update it)
         $this->refEnt = $refEnt;
 
         // When the related item changes its referenced field, we wanna update our foreign key field
-        if(isset($refEnt) && $refEnt !== $ownerEnt) {
+        if(isset($refEnt) && !$isSameDbRow) // Only subscribe if it's NOT the same db row
+        {
             if($this->refFld == 'id') {
                 $refEnt->eventSubscribe(Event\EntityEventTypeEnum::ID_CHANGED, $ownerEnt, '_relationOnEntityIdChanged', $this->fld);
             } else {
@@ -118,4 +124,10 @@ class EntityRelation
         }
     }
 
+    public function __clone()
+    {
+        // We must clear the reference entity on a clone.
+        // Why? Because the new owner entity hasn't subscribed to the events of the refEnt yet.
+        $this->refEnt = null;
+    }
 }

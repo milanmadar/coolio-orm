@@ -589,4 +589,20 @@ class ManagerDbTest extends TestCase
         $this->assertInstanceOf('\tests\Model\OrmTest\Entity', $ent1);
         $this->assertEquals(3254, $ent1->getFldInt());
     }
+
+    public function testLastInsertId()
+    {
+        $mgr = self::$dbHelper->getManager(OrmTest\Manager::class);
+
+        $mgr->getDb()->executeStatement(
+            "ALTER SEQUENCE orm_test_id_seq RENAME TO manual_seq"
+        );
+
+        $ent1 = $mgr->createEntity()
+            ->setFldChar(null)
+            ->setFldFloat(null);
+        $mgr->save($ent1);
+
+        $this->assertGreaterThan(0, $ent1->getId());
+    }
 }

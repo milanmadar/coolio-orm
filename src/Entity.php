@@ -10,7 +10,7 @@ abstract class Entity implements Event\AnnouncerInterface
 
     /**
      * Set to true when the Entity is deleted ($this->_delete())
-     * It will clead all its data and it will no longer be possible to set/get any data on it<br>
+     * It will clear all its data and it will no longer be possible to set/get any data on it<br>
      * $entity->isDeleted() will return true after this
      * @var bool
      */
@@ -296,6 +296,7 @@ abstract class Entity implements Event\AnnouncerInterface
             $this->_isDeletedCommited = true;
         }
 
+//        $this->_dataOrigi = $this->deepCopy($this->_data); // SLOW!
         $this->_dataOrigi = $this->_data;
         $this->_changedDataKeys = [];
 
@@ -642,4 +643,46 @@ abstract class Entity implements Event\AnnouncerInterface
         }
     }
 
+    /**
+     * @param mixed $value
+     * @return mixed
+     */
+    private function deepCopy(mixed $value): mixed
+    {
+        if (is_array($value)) {
+            $copy = [];
+            foreach ($value as $k => $v) {
+                $copy[$k] = $this->deepCopy($v);
+            }
+            return $copy;
+        }
+
+        if (is_object($value)) {
+            return clone $value;
+        }
+
+        return $value;
+    }
+
+    public function __clone()
+    {
+        // deep copy the main data arrays
+        $this->_data = $this->deepCopy($this->_data);
+
+        // the clone should usually start 'clean' relative to its own creation
+        $this->_dataOrigi = $this->_data;
+        $this->_changedDataKeys = [];
+
+        // clone related entities
+        foreach ($this->_relatedEntities as $fieldName => $relation) {
+            $this->_relatedEntities[$fieldName] = clone $relation;
+
+            // re-link the relation if the data exists
+            $val = $this->_get($fieldName);
+            if (isset($val)) {
+                // subscribe the clone to the related entity events correctly
+                $this->_relatedEntities[$fieldName]->getRefEntity($this);
+            }
+        }
+    }
 }

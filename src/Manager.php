@@ -29,8 +29,6 @@ abstract class Manager
     /** @var string pg, my, ms */
     private string $dbType;
 
-    private bool $isInTransaction;
-
     private bool $hasGeoFields;
 
     /**
@@ -47,7 +45,6 @@ abstract class Manager
         $this->useEntityRepository = true;
         $this->fieldTypes = $this->getFieldTypes();
         $this->dbTable = $this->getDefaultDbTable();
-        $this->isInTransaction = false;
     }
 
     /**
@@ -57,10 +54,7 @@ abstract class Manager
      */
     public function beginTransaction(): self
     {
-        if(!$this->isInTransaction) {
-            $this->db->beginTransaction();
-            $this->isInTransaction = true;
-        }
+        $this->orm->beginTransaction($this->dbConnUrl, $this->db);
         return $this;
     }
 
@@ -71,10 +65,7 @@ abstract class Manager
      */
     public function commitTransaction(): self
     {
-        if($this->isInTransaction) {
-            $this->db->commit();
-            $this->isInTransaction = false;
-        }
+        $this->orm->commitTransaction($this->dbConnUrl, $this->db);
         return $this;
     }
 
@@ -85,15 +76,20 @@ abstract class Manager
      */
     public function rollbackTransaction(): self
     {
-        if($this->isInTransaction) {
-            $this->db->rollBack();
-            $this->isInTransaction = false;
-        }
+        $this->orm->rollbackTransaction($this->dbConnUrl, $this->db);
         return $this;
     }
 
     /**
-     * The manager will use this database. Typecally an environment variable like $_ENV['DB_CONNECTION_URL']
+     * @return bool
+     */
+    public function isInTransaction(): bool
+    {
+        return $this->orm->isInTransaction($this->dbConnUrl);
+    }
+
+    /**
+     * The manager will use this database. Typically, an environment variable like $_ENV['DB_CONNECTION_URL']
      * @return string
      */
     abstract public static function getDbDefaultConnectionUrl(): string;
@@ -551,11 +547,11 @@ abstract class Manager
             if($forceInsert) {
                 $ent->_setForceInsertOnNextSave(false);
             } else {
-                if($this->dbType == 'pg') {
-                    $ent->setId($this->db->getNativeConnection()->lastInsertId($this->getDbTable().'_id_seq')); /* @phpstan-ignore-line */
-                } else {
+//                if($this->dbType == 'pg') {
+//                    $ent->setId($this->db->getNativeConnection()->lastInsertId($this->getDbTable().'_id_seq')); /* @phpstan-ignore-line */
+//                } else {
                     $ent->setId(intval($this->db->lastInsertId()));
-                }
+//                }
             }
         }
         // UPDATE
