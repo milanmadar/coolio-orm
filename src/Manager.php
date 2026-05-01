@@ -548,7 +548,7 @@ abstract class Manager
                 $ent->_setForceInsertOnNextSave(false);
             } else {
 //                if($this->dbType == 'pg') {
-//                    $ent->setId($this->db->getNativeConnection()->lastInsertId($this->getDbTable().'_id_seq')); /* @phpstan-ignore-line */
+//                    $ent->setId($this->db->getNativeConnection()->lastInsertId($this->getDbTable().'_id_seq')); /* phpstan-ignore-line */
 //                } else {
                     $ent->setId(intval($this->db->lastInsertId()));
 //                }

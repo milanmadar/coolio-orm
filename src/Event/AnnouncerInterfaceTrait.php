@@ -5,7 +5,7 @@ namespace Milanmadar\CoolioORM\Event;
 trait AnnouncerInterfaceTrait
 {
     /**
-     * @var array<string, array<int, array{0: \WeakReference, 1: string, 2: mixed}>>
+     * @var array<string, array<int, array{0: \WeakReference<object>, 1: string, 2: mixed}>>
      */
     protected array $eventSubscribers = [];
 
