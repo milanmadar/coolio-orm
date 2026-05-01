@@ -9,13 +9,13 @@ class EntityRepository
 
     /**
      * The spl_object_id() of the Entities
-     * @var array<string, array<int, array{0:Entity, 1:int|null}>>
+     * @var array<string, array<int, array{0:\WeakReference<Entity>, 1:int|null}>>
      */
     private array $splIds;
 
     /**
      * The database 'id' fields of the Entities
-     * @var array<string, array<int, array{0:Entity, 1:int}>>
+     * @var array<string, array<int, array{0:\WeakReference<Entity>, 1:int}>>
      */
     private array $dbIds;
 
@@ -28,6 +28,12 @@ class EntityRepository
     /** @var int How many are stored currently */
     private int $currentEntityCount;
 
+    /** @var array<string, array<int, Entity>> real cache, holding strong references to the Entities */
+    private array $hotCache = [];
+    /** @var array<string, int> Tracking sizes per table to avoid count() */
+    private array $hotCacheCounts = [];
+    private int $hotCacheLimit = 100;
+
     /**
      * Entity EntityRepository constructor.
      */
@@ -36,6 +42,39 @@ class EntityRepository
         ++self::$_Testing_Instance_Counter_;
         $this->maxEntityCount = $_ENV['COOLIO_ORM_ENTITY_REPO_MAX_ITEMS'] ?? 10000;
         $this->clear();
+    }
+
+    /**
+     * @param Entity $ent
+     * @param string $dbTable
+     * @return void
+     */
+    private function touchHotCache(Entity $ent, string $dbTable): void
+    {
+        $splId = spl_object_id($ent);
+
+        if (!isset($this->hotCache[$dbTable])) {
+            $this->hotCache[$dbTable] = [];
+            $this->hotCacheCounts[$dbTable] = 0;
+        }
+
+        if (!isset($this->hotCache[$dbTable][$splId])) {
+            ++$this->hotCacheCounts[$dbTable];
+        } else {
+            // we will re-add it in the next line, this is how we
+            // move the Entity to the end of the array (most recently used)
+            unset($this->hotCache[$dbTable][$splId]);
+        }
+
+        // move the Entity to the end of the array (most recently used)
+        $this->hotCache[$dbTable][$splId] = $ent;
+
+        // prune some old one
+        if ($this->hotCacheCounts[$dbTable] > $this->hotCacheLimit) {
+            $howMany = (int)($this->hotCacheLimit * 0.2);
+            $this->hotCache[$dbTable] = array_slice($this->hotCache[$dbTable], $howMany, null, true);
+            $this->hotCacheCounts[$dbTable] = count($this->hotCache[$dbTable]);
+        }
     }
 
     /**
@@ -66,41 +105,27 @@ class EntityRepository
      */
     public function add(Entity $ent, string $dbTable): void
     {
-        // Repo is full
-        if($this->currentEntityCount >= $this->maxEntityCount)
-        {
-            // clear all tables
+        // Repo is full, clear all tables
+        if($this->currentEntityCount >= $this->maxEntityCount) {
             $this->clear();
-
-            /*// find the largest table
-            $_max = 0;
-            $_maxTable = '';
-            $_tables = array_keys($this->splIds);
-            foreach($_tables as $_table) {
-                $_cnt = count($this->splIds[$_table]);
-                if($_cnt > $_max) {
-                    $_maxTable = $_table;
-                    $_max = $_cnt;
-                }
-            }
-
-            // cleare the largest table
-            $this->clear($_maxTable);*/
         }
 
         $splId = spl_object_id($ent);
 
-        // Create splId storate for this dbTable
+        // Create splId storage for this dbTable
         if(!isset($this->splIds[$dbTable])) {
             $this->splIds[$dbTable] = [];
         } elseif(isset($this->splIds[$dbTable][$splId])) {
             throw new \LogicException("splId (".$splId.") already in EntityRepository");
         }
 
-        // Create dbId storate for this dbTable
+        // Create dbId storage for this dbTable
         if(!isset($this->dbIds[$dbTable])) {
             $this->dbIds[$dbTable] = [];
         }
+
+        // We store a WeakReference instead of the $ent itself
+        $weakRef = \WeakReference::create($ent);
 
         // Add to dbIds: The db 'id' comes differently for deleted Entities
         /** @var int|null $dbId */
@@ -108,13 +133,16 @@ class EntityRepository
         if(isset($dbId)) {
             //assert( !isset($this->dbIds[$dbTable][$dbId]), new \LogicException($dbTable.".id=".$dbId." already exists") );
             if (isset($this->dbIds[$dbTable][$dbId])) throw new \LogicException($dbTable.".id=".$dbId." already exists");
-            $this->dbIds[$dbTable][$dbId] = [$ent, $splId];
+            $this->dbIds[$dbTable][$dbId] = [$weakRef, $splId];
         }
 
         // Add to splIds
-        $this->splIds[$dbTable][$splId] = [$ent, $dbId];
+        $this->splIds[$dbTable][$splId] = [$weakRef, $dbId];
 
-        // Scribe to important events
+        // Add this Entity to hotcache
+        $this->touchHotCache($ent, $dbTable);
+
+        // Subscribe to important events
         $ent->eventSubscribe( Event\EntityEventTypeEnum::ID_CHANGED, $this, 'onEntityIdChanged' );
         $ent->eventSubscribe( Event\EntityEventTypeEnum::DESTRUCT, $this, 'onEntityDestruct' );
         // Remember the dbTable of this splId (used in onEntityIdChanged() and onEntityDestruct())
@@ -142,6 +170,10 @@ class EntityRepository
             // Remove from splId
             unset($this->splIds[$dbTable][$splId]);
             unset($this->splIdToDbTable[$splId]);
+            if (isset($this->hotCache[$dbTable][$splId])) {
+                unset($this->hotCache[$dbTable][$splId]);
+                --$this->hotCacheCounts[$dbTable];
+            }
 
             --$this->currentEntityCount;
         }
@@ -169,7 +201,21 @@ class EntityRepository
      */
     public function getByDbId(int $dbId, string $dbTable): ?Entity
     {
-        return $this->dbIds[$dbTable][$dbId][0] ?? null;
+        $weakRef = $this->dbIds[$dbTable][$dbId][0] ?? null;
+        if (!$weakRef) return null;
+
+        $ent = $weakRef->get();
+
+        // the entity died, clean up our stale array keys
+        if ($ent === null) {
+            unset($this->dbIds[$dbTable][$dbId]);
+            return null;
+        }
+
+        // Keep this Entity in hotcache
+        $this->touchHotCache($ent, $dbTable);
+
+        return $ent;
     }
 
     /**
@@ -178,27 +224,26 @@ class EntityRepository
      */
     public function clear(?string $dbTable = null): void
     {
-        if(isset($dbTable))
-        {
-            if(!empty($this->splIds[$dbTable]))
-            {
-                $count = count($this->splIds[$dbTable]);
-
+        if(isset($dbTable)) {
+            if(!empty($this->splIds[$dbTable])) {
                 foreach($this->splIds[$dbTable] as $splId=>$_)  {
                     unset($this->splIdToDbTable[$splId]);
                 }
                 unset($this->splIds[$dbTable]);
                 unset($this->dbIds[$dbTable]);
+
+                unset($this->hotCache[$dbTable]);
+                unset($this->hotCacheCounts[$dbTable]);
             }
-        }
-        else
-        {
+        } else {
             $this->splIds = [];
             $this->dbIds = [];
             $this->splIdToDbTable = [];
+            $this->hotCache = [];
+            $this->hotCacheCounts = [];
         }
 
-        $this->currentEntityCount = 0;
+        $this->currentEntityCount = count($this->splIdToDbTable);
     }
 
     /**
@@ -240,7 +285,8 @@ class EntityRepository
                     unset($this->dbIds[$dbTable][$storedOldDbId]);
 
                     // Add the new dbIds info
-                    $this->dbIds[$dbTable][$evArgNewId] = [$ent, $splId];
+                    $weakRef = $this->splIds[$dbTable][$splId][0];
+                    $this->dbIds[$dbTable][$evArgNewId] = [$weakRef, $splId];
                 }
                 else // (123 -> null) There was an old id, and there's no a new id
                 {
@@ -252,17 +298,22 @@ class EntityRepository
             {
                 // Make sure this new db id is free in the Repo's dbIds
                 //assert(!isset($this->dbIds[$dbTable][$evArgNewId]), throw new \LogicException('id('null->'.$evArgNewId.') New db id slot should be free in $this->dbIds["'.$dbTable.'"]['.$evArgNewId.'], but its not (old id didnt exist)'));
-                if(isset($this->dbIds[$dbTable][$evArgNewId])) throw new \LogicException('id(null->'.$evArgNewId.') New db id slot should be free in $this->dbIds["'.$dbTable.'"]['.$evArgNewId.'], but its not (old id didnt exist). The Entity data there looks like this: '.print_r($this->dbIds[$dbTable][$evArgNewId][0]->_getData(), true));
+                if(isset($this->dbIds[$dbTable][$evArgNewId])) {
+                    $debugMsgEntityData = $this->dbIds[$dbTable][$evArgNewId][0]->get()?->_getData() ?? 'Entity already GCd';
+                    throw new \LogicException('id(null->'.$evArgNewId.') New db id slot should be free in $this->dbIds["'.$dbTable.'"]['.$evArgNewId.'], but its not (old id didnt exist). The Entity data there looks like this: '.print_r($debugMsgEntityData, true));
+                }
 
                 // Add the new dbIds info
+                $weakRef = $this->splIds[$dbTable][$splId][0];
                 /** @var int $evArgNewId */
-                $this->dbIds[$dbTable][$evArgNewId] = [$ent, $splId];
+                $this->dbIds[$dbTable][$evArgNewId] = [$weakRef, $splId];
             }
 
             // Change splIds arr
             $this->splIds[$dbTable][$splId][1] = $evArgNewId;
 
-            $this->currentEntityCount = count($this->splIdToDbTable);
+            // no need cuz in add() in increment, in del() i decrement
+            //$this->currentEntityCount = count($this->splIdToDbTable);
         }
     }
 

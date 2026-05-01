@@ -38,7 +38,7 @@ class ORM
     private static array $staticTypeMapped = [];
     protected bool $useEntityRepository;
 
-    /** @var array<string, 'pg'|'my'|'ms'> is it postgres, mysql, etc */
+    /** @var array<string, 'pg'|'my'|'ms'|'or'> is it postgres, mysql, etc */
     private array $dbTypes;
 
     /** @var array<string, int> tracks transaction nesting depth per connection URL */
@@ -91,7 +91,7 @@ class ORM
 
     /**
      * @param string $connUrl
-     * @return 'pg'|'my'|'ms'
+     * @return 'pg'|'my'|'ms'|'or'
      */
     public function _getDbType(string $connUrl): string
     {

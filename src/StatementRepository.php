@@ -29,11 +29,18 @@ class StatementRepository
      */
     public function get(string $sql): Statement
     {
+        // if the conn was reset, our cache is junk
+        if (!$this->db->isConnected()) {
+            $this->clear();
+        }
         if(!isset($this->statements[$sql])) {
             // dont go unlimited
             if(++$this->statementsCount >= 40) {
-                $this->statements = [];
-                $this->statementsCount = 1;
+                // throw away oldest
+                array_shift($this->statements);
+                --$this->statementsCount;
+                // or nuke
+                $this->clear();
             }
             $this->statements[$sql] = $this->db->prepare($sql);
         }
@@ -46,6 +53,7 @@ class StatementRepository
     public function clear(): void
     {
         $this->statements = [];
+        $this->statementsCount =0;
     }
 
     /**
