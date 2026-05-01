@@ -357,15 +357,7 @@ abstract class Manager
             $this->clearRepository(true);
         }
         $this->dbConnUrl = Utils::getDbConnUrl($this->db);
-
-        if(str_contains($this->dbConnUrl, 'pgsql')) {
-            $this->dbType = 'pg';
-        } elseif(str_contains($this->dbConnUrl, 'sqlsrv')) {
-            $this->dbType = 'ms';
-        } else {
-            $this->dbType = 'my';
-        }
-
+        $this->dbType = $this->orm->_getDbType($this->dbConnUrl);
         return $this;
     }
 

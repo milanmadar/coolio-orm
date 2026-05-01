@@ -38,6 +38,9 @@ class ORM
     private static array $staticTypeMapped = [];
     protected bool $useEntityRepository;
 
+    /** @var array<string, 'pg'|'my'|'ms'> is it postgres, mysql, etc */
+    private array $dbTypes;
+
     /** @var array<string, int> tracks transaction nesting depth per connection URL */
     private array $transactionLevels;
 
@@ -82,7 +85,26 @@ class ORM
         $this->statementRepositories = [];
         $this->entityManagers = [];
         $this->useEntityRepository = true;
+        $this->dbTypes = [];
         $this->transactionLevels = [];
+    }
+
+    /**
+     * @param string $connUrl
+     * @return 'pg'|'my'|'ms'
+     */
+    public function _getDbType(string $connUrl): string
+    {
+        if(!isset($this->dbTypes[$connUrl])) {
+            if(str_contains($connUrl, 'pgsql')) {
+                $this->dbTypes[$connUrl] = 'pg';
+            } elseif(str_contains($connUrl, 'sqlsrv')) {
+                $this->dbTypes[$connUrl] = 'ms';
+            } else {
+                $this->dbTypes[$connUrl] = 'my';
+            }
+        }
+        return $this->dbTypes[$connUrl];
     }
 
     /**
@@ -96,6 +118,14 @@ class ORM
         $level = $this->transactionLevels[$connUrl] ?? 0;
         if ($level === 0) {
             $db->beginTransaction();
+        } else {
+            $savepointName = "coolio_sp_{$level}";
+            $sql = match($this->_getDbType($connUrl)) {
+                'pg', 'my' => "SAVEPOINT $savepointName",
+                'ms'       => "SAVE TRANSACTION $savepointName",
+                default    => throw new \Exception("Unsupported DB for nesting")
+            };
+            $db->executeStatement($sql);
         }
         $this->transactionLevels[$connUrl] = $level + 1;
     }
@@ -109,10 +139,21 @@ class ORM
     public function commitTransaction(string $connUrl, Connection $db): void
     {
         $level = $this->transactionLevels[$connUrl] ?? 0;
-        if ($level > 0) {
-            $this->transactionLevels[$connUrl]--;
-            if ($this->transactionLevels[$connUrl] === 0) {
-                $db->commit();
+
+        if($level < 1) {
+            return;
+        }
+
+        $newLevel = $level - 1;
+        $this->transactionLevels[$connUrl] = $newLevel;
+
+        if ($newLevel === 0) {
+            $db->commit();
+        } else {
+            // MS SQL Server doesn't really 'release' savepoints like PG/MySQL
+            if ($this->_getDbType($connUrl) !== 'ms') {
+                $savepointName = "coolio_sp_{$newLevel}";
+                $db->executeStatement("RELEASE SAVEPOINT $savepointName");
             }
         }
     }
@@ -126,13 +167,31 @@ class ORM
     public function rollbackTransaction(string $connUrl, Connection $db): void
     {
         $level = $this->transactionLevels[$connUrl] ?? 0;
-        if ($level > 0) {
+
+        if($level < 1) {
+            return;
+        }
+
+        $newLevel = $level - 1;
+        $this->transactionLevels[$connUrl] = $newLevel;
+
+        if ($newLevel === 0) {
             $db->rollBack();
-            // Reset counter because the whole transaction chain for this DB is dead
-            $this->transactionLevels[$connUrl] = 0;
+        } else {
+            $savepointName = "coolio_sp_{$newLevel}";
+            $sql = match($this->_getDbType($connUrl)) {
+                'pg', 'my' => "ROLLBACK TO SAVEPOINT $savepointName",
+                'ms'       => "ROLLBACK TRANSACTION $savepointName",
+                default    => throw new \Exception("Unsupported DB for nesting")
+            };
+            $db->executeStatement($sql);
         }
     }
 
+    /**
+     * @param string $connUrl
+     * @return bool
+     */
     public function isInTransaction(string $connUrl): bool
     {
         return ($this->transactionLevels[$connUrl] ?? 0) > 0;
