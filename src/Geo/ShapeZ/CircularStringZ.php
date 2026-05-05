@@ -125,6 +125,15 @@ class CircularStringZ extends AbstractShapeZ implements HasStartEndPointZInterfa
     }
 
     /**
+     * @return $this
+     */
+    public function reverse(): self
+    {
+        $this->points = array_reverse($this->points);
+        return $this;
+    }
+
+    /**
      * @param array<PointZ> $points
      * @throws \InvalidArgumentException
      */

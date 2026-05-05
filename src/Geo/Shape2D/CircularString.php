@@ -123,6 +123,15 @@ class CircularString extends AbstractShape2D implements HasStartEndPointInterfac
     }
 
     /**
+     * @return $this
+     */
+    public function reverse(): self
+    {
+        $this->points = array_reverse($this->points);
+        return $this;
+    }
+
+    /**
      * @param array<Point> $points
      * @throws \InvalidArgumentException
      */

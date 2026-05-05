@@ -95,6 +95,15 @@ class CircularStringZM extends AbstractShapeZM implements HasStartEndPointZMInte
     }
 
     /**
+     * @return $this
+     */
+    public function reverse(): self
+    {
+        $this->points = array_reverse($this->points);
+        return $this;
+    }
+
+    /**
      * @param array<PointZM> $points
      * @throws \InvalidArgumentException
      */

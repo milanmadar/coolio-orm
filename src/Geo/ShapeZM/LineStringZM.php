@@ -41,6 +41,15 @@ class LineStringZM extends AbstractShapeZM
         return $this;
     }
 
+    /**
+     * @return $this
+     */
+    public function reverse(): self
+    {
+        $this->points = array_reverse($this->points);
+        return $this;
+    }
+
     public function toWKT(): string
     {
         $coords = array_map(fn(PointZM $pt) => implode(' ', $pt->getCoordinates()), $this->points);

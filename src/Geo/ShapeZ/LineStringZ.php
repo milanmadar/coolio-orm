@@ -119,6 +119,15 @@ class LineStringZ extends AbstractShapeZ implements HasStartEndPointZInterface
     }
 
     /**
+     * @return $this
+     */
+    public function reverse(): self
+    {
+        $this->points = array_reverse($this->points);
+        return $this;
+    }
+
+    /**
      * @return string
      */
     public function toWKT(): string

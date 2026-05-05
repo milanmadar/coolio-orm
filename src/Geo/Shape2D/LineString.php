@@ -126,6 +126,15 @@ class LineString extends AbstractShape2D implements HasStartEndPointInterface
     }
 
     /**
+     * @return $this
+     */
+    public function reverse(): self
+    {
+        $this->points = array_reverse($this->points);
+        return $this;
+    }
+
+    /**
      * @return string
      */
     public function toWKT(): string
