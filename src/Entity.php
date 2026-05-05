@@ -88,31 +88,60 @@ abstract class Entity implements Event\AnnouncerInterface
         // relations
 
         // Is the new data different from the original (what's in the db)
+        $isChanged = false;
         if(!array_key_exists($fieldName, $this->_dataOrigi)) { // this field was not in the original data
             if(isset($value)) {
                 $this->_changedDataKeys[$fieldName] = true;
             } else {
                 unset($this->_changedDataKeys[$fieldName]);
             }
-        } else {
-            if($this->_dataOrigi[$fieldName] === $value) {
-                unset($this->_changedDataKeys[$fieldName]);
-            } else {
+        } else { // this field was in the original data
+            if(isset($this->_dataOrigi[$fieldName]) != isset($value)) {
                 $this->_changedDataKeys[$fieldName] = true;
+            }
+            else {
+                // geoms
+                if(isset($this->_dataOrigi[$fieldName]) && isset($value)
+                && $this->_dataOrigi[$fieldName] instanceof Geo\AbstractShape
+                && $value instanceof Geo\AbstractShape) {
+                    if($this->_dataOrigi[$fieldName]->equals($value)) {
+                        unset($this->_changedDataKeys[$fieldName]);
+                    } else {
+                        $this->_changedDataKeys[$fieldName] = true;
+                    }
+                }
+                // not geoms
+                else {
+                    if($this->_dataOrigi[$fieldName] === $value) {
+                        unset($this->_changedDataKeys[$fieldName]);
+                    } else {
+                        $this->_changedDataKeys[$fieldName] = true;
+                    }
+                }
             }
         }
 
         // Change it
         $oldValue = $this->_data[$fieldName] ?? null;
 
+        // DateTime should be cloned
         if($value instanceof \DateTime) {
             $this->_data[$fieldName] = clone $value;
         } else {
             $this->_data[$fieldName] = $value;
         }
 
+        // geom change is tricky
+        if(isset($oldValue) && isset($value)
+        && $oldValue instanceof Geo\AbstractShape
+        && $value instanceof Geo\AbstractShape) {
+            $isChanged = !$oldValue->equals($value);
+        } else {
+            $isChanged = ($oldValue !== $value);
+        }
+
         // Event dispatch
-        if($oldValue !== $value) {
+        if($isChanged) {
             $this->eventAnnounce(Event\EntityEventTypeEnum::DATA_CHANGED, $this, [$fieldName, $value, $oldValue]);
             if ($fieldName == 'id') {
                 $this->eventAnnounce(Event\EntityEventTypeEnum::ID_CHANGED, $this, [$value, $oldValue]);

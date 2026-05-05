@@ -101,4 +101,33 @@ class FeatureCollection extends AbstractShape2D
         }
         $this->features = $clones;
     }
+
+    /**
+     * @param AbstractShape $shape
+     * @return bool
+     */
+    public function equals(AbstractShape $shape): bool
+    {
+        if($this === $shape) {
+            return true;
+        }
+        if(get_class($this) !== get_class($shape)) {
+            return false;
+        }
+        /** @var FeatureCollection $shape */
+        $myFeatures = $this->features;
+        $otherFeatures = $shape->getFeatures();
+        if(!count($otherFeatures) != count($myFeatures)) {
+            return false;
+        }
+        foreach($otherFeatures as $i=>$feature) {
+            if(!isset($myFeatures[$i])) {
+                return false;
+            }
+            if(!$feature->equals($myFeatures[$i])) {
+                return false;
+            }
+        }
+        return true;
+    }
 }
