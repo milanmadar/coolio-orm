@@ -422,4 +422,27 @@ class ORM
         return $res;
     }
 
+    /**
+     * @template T of Geo\AbstractShape
+     *
+     * @param T $geom
+     * @param int $targetSrid
+     * @param Manager|Connection|string $dbOrMgrOrConnectionUrl
+     * @return T
+     */
+    public function transformGeomToSrid(Geo\AbstractShape $geom, int $targetSrid, Manager|Connection|string $dbOrMgrOrConnectionUrl): Geo\AbstractShape
+    {
+        $stTransform = Geo\GeoFunctions::ST_Transform($geom, $targetSrid);
+        $sql = "SELECT ST_AsEWKT(".$stTransform.")";
+        if(is_string($dbOrMgrOrConnectionUrl)) {
+            $db = $this->getDbByUrl($dbOrMgrOrConnectionUrl);
+        } elseif($dbOrMgrOrConnectionUrl instanceof Manager) {
+            $db = $dbOrMgrOrConnectionUrl->getDb();
+        } else {
+            $db = $dbOrMgrOrConnectionUrl;
+        }
+        $geomEWKT = $db->executeQuery($sql)->fetchOne();
+        return Geo\Shape2D3D4DFactory::createFromGeoEWKTString($geomEWKT);
+    }
+
 }

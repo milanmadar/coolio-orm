@@ -1105,4 +1105,16 @@ abstract class Manager
         return $dbData;
     }
 
+    /**
+     * @template T of Geo\AbstractShape
+     *
+     * @param T $geom
+     * @param int $targetSrid
+     * @return T
+     */
+    public function transformGeomToSrid(Geo\AbstractShape $geom, int $targetSrid,): Geo\AbstractShape
+    {
+        return $this->orm->transformGeomToSrid($geom, $targetSrid, $this->getDb());
+    }
+
 }
