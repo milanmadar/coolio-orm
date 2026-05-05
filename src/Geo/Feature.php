@@ -84,6 +84,15 @@ class Feature extends AbstractShape2D
     }
 
     /**
+     * @param string $name
+     * @return mixed OR NULL
+     */
+    public function getProperty(string $name): mixed
+    {
+        return $this->properties[$name] ?? null;
+    }
+
+    /**
      * @param array<string, mixed>|null $properties
      * @return $this
      */
@@ -101,6 +110,18 @@ class Feature extends AbstractShape2D
     public function setProperty(string $name, mixed $value): self
     {
         $this->properties[$name] = $value;
+        return $this;
+    }
+
+    /**
+     * @param string $name
+     * @return $this
+     */
+    public function delProperty(string $name): self
+    {
+        if(is_array($this->properties)) {
+            unset($this->properties[$name]);
+        }
         return $this;
     }
 
