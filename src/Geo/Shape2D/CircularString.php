@@ -5,7 +5,7 @@ namespace Milanmadar\CoolioORM\Geo\Shape2D;
 class CircularString extends AbstractShape2D implements HasStartEndPointInterface
 {
     /** @var array<Point> */
-    private  array $points;
+    private array $points;
 
     /**
      * GeoJSON does not support CircularString
@@ -150,5 +150,14 @@ class CircularString extends AbstractShape2D implements HasStartEndPointInterfac
     public function getEndPoint(): Point
     {
         return $this->points[count($this->points) - 1];
+    }
+
+    public function __clone(): void
+    {
+        $clones = [];
+        foreach ($this->points as $geom) {
+            $clones[] = clone $geom;
+        }
+        $this->points = $clones;
     }
 }

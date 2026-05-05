@@ -152,4 +152,10 @@ class Feature extends AbstractShape2D
     {
         return $this->geometry->toWKT();
     }
+
+    public function __clone(): void
+    {
+        $this->geometry = clone $this->geometry;
+        $this->properties = is_array($this->properties) ? array_map(fn($v) => is_object($v) ? clone $v : $v, $this->properties) : $this->properties;
+    }
 }

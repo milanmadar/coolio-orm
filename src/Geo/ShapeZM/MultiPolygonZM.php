@@ -228,4 +228,13 @@ class MultiPolygonZM extends AbstractShapeZM
             )
         ];
     }
+
+    public function __clone(): void
+    {
+        $clones = [];
+        foreach ($this->polygons as $geom) {
+            $clones[] = clone $geom;
+        }
+        $this->polygons = $clones;
+    }
 }

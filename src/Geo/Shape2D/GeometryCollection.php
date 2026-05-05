@@ -152,4 +152,13 @@ class GeometryCollection extends AbstractShape2D
     {
         return $this->geometries;
     }
+
+    public function __clone(): void
+    {
+        $clones = [];
+        foreach ($this->geometries as $geom) {
+            $clones[] = clone $geom;
+        }
+        $this->geometries = $clones;
+    }
 }

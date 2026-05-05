@@ -147,4 +147,13 @@ class CircularStringZM extends AbstractShapeZM implements HasStartEndPointZMInte
     {
         throw new \RuntimeException('GeoJSON does not support CircularStringZM. Use EWKT instead.');
     }
+
+    public function __clone(): void
+    {
+        $clones = [];
+        foreach ($this->points as $geom) {
+            $clones[] = clone $geom;
+        }
+        $this->points = $clones;
+    }
 }

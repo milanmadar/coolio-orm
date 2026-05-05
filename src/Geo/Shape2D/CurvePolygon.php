@@ -152,4 +152,13 @@ class CurvePolygon extends AbstractShape2D
         }
     }
 
+    public function __clone(): void
+    {
+        $clones = [];
+        foreach ($this->boundaries as $geom) {
+            $clones[] = clone $geom;
+        }
+        $this->boundaries = $clones;
+    }
+
 }

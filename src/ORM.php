@@ -442,6 +442,7 @@ class ORM
             $db = $dbOrMgrOrConnectionUrl;
         }
         $geomEWKT = $db->executeQuery($sql)->fetchOne();
+        /* @phpstan-ignore-next-line */
         return Geo\Shape2D3D4DFactory::createFromGeoEWKTString($geomEWKT);
     }
 

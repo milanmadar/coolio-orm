@@ -92,4 +92,13 @@ class FeatureCollection extends AbstractShape2D
             'features' => array_map(fn(Feature $f) => $f->toGeoJSON(), $this->features),
         ];
     }
+
+    public function __clone(): void
+    {
+        $clones = [];
+        foreach ($this->features as $geom) {
+            $clones[] = clone $geom;
+        }
+        $this->features = $clones;
+    }
 }

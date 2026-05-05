@@ -179,4 +179,13 @@ class MultiLineString extends AbstractShape2D
             )
         ];
     }
+
+    public function __clone(): void
+    {
+        $clones = [];
+        foreach ($this->lineStrings as $geom) {
+            $clones[] = clone $geom;
+        }
+        $this->lineStrings = $clones;
+    }
 }

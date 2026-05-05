@@ -124,4 +124,13 @@ class GeometryCollectionZM extends AbstractShapeZM
             'geometries' => array_map(fn(AbstractShapeZM $g) => $g->toGeoJSON(), $this->geometries),
         ];
     }
+
+    public function __clone(): void
+    {
+        $clones = [];
+        foreach ($this->geometries as $geom) {
+            $clones[] = clone $geom;
+        }
+        $this->geometries = $clones;
+    }
 }

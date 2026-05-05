@@ -163,4 +163,13 @@ class CompoundCurveZ extends AbstractShapeZ implements HasStartEndPointZInterfac
     {
         return $this->segments[count($this->segments) - 1]->getEndPointZ();
     }
+
+    public function __clone(): void
+    {
+        $clones = [];
+        foreach ($this->segments as $geom) {
+            $clones[] = clone $geom;
+        }
+        $this->segments = $clones;
+    }
 }

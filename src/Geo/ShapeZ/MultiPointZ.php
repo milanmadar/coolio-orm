@@ -148,4 +148,13 @@ class MultiPointZ extends AbstractShapeZ
             )
         ];
     }
+
+    public function __clone(): void
+    {
+        $clones = [];
+        foreach ($this->points as $geom) {
+            $clones[] = clone $geom;
+        }
+        $this->points = $clones;
+    }
 }

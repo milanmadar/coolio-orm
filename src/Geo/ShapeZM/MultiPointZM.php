@@ -132,4 +132,13 @@ class MultiPointZM extends AbstractShapeZM
             )
         ];
     }
+
+    public function __clone(): void
+    {
+        $clones = [];
+        foreach ($this->points as $geom) {
+            $clones[] = clone $geom;
+        }
+        $this->points = $clones;
+    }
 }

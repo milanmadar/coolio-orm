@@ -162,4 +162,13 @@ class CompoundCurveZM extends AbstractShapeZM implements HasStartEndPointZMInter
     {
         return $this->segments[count($this->segments)-1]->getEndPointZM();
     }
+
+    public function __clone(): void
+    {
+        $clones = [];
+        foreach ($this->segments as $geom) {
+            $clones[] = clone $geom;
+        }
+        $this->segments = $clones;
+    }
 }

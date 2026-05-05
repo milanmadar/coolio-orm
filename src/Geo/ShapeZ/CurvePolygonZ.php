@@ -117,4 +117,13 @@ class CurvePolygonZ extends AbstractShapeZ
         $this->boundaries = $boundaries;
         return $this;
     }
+
+    public function __clone(): void
+    {
+        $clones = [];
+        foreach ($this->boundaries as $geom) {
+            $clones[] = clone $geom;
+        }
+        $this->boundaries = $clones;
+    }
 }

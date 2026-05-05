@@ -153,4 +153,13 @@ class CircularStringZ extends AbstractShapeZ implements HasStartEndPointZInterfa
     {
         return $this->points[count($this->points) - 1];
     }
+
+    public function __clone(): void
+    {
+        $clones = [];
+        foreach ($this->points as $geom) {
+            $clones[] = clone $geom;
+        }
+        $this->points = $clones;
+    }
 }

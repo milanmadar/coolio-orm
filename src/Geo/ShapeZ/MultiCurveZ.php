@@ -119,4 +119,13 @@ class MultiCurveZ extends AbstractShapeZ
         $this->curves = $curves;
         return $this;
     }
+
+    public function __clone(): void
+    {
+        $clones = [];
+        foreach ($this->curves as $geom) {
+            $clones[] = clone $geom;
+        }
+        $this->curves = $clones;
+    }
 }

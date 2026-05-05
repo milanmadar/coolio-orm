@@ -115,4 +115,13 @@ class MultiCurve extends AbstractShape2D
     {
         return $this->curves;
     }
+
+    public function __clone(): void
+    {
+        $clones = [];
+        foreach ($this->curves as $geom) {
+            $clones[] = clone $geom;
+        }
+        $this->curves = $clones;
+    }
 }

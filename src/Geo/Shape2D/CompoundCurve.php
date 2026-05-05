@@ -183,5 +183,14 @@ class CompoundCurve extends AbstractShape2D implements HasStartEndPointInterface
     {
         return $this->segments[count($this->segments) - 1]->getEndPoint();
     }
+
+    public function __clone(): void
+    {
+        $clones = [];
+        foreach ($this->segments as $geom) {
+            $clones[] = clone $geom;
+        }
+        $this->segments = $clones;
+    }
 }
 

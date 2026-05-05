@@ -147,4 +147,13 @@ class MultiPoint extends AbstractShape2D
             )
         ];
     }
+
+    public function __clone(): void
+    {
+        $clones = [];
+        foreach ($this->points as $geom) {
+            $clones[] = clone $geom;
+        }
+        $this->points = $clones;
+    }
 }

@@ -270,4 +270,13 @@ class PolygonZ extends AbstractShapeZ
         }
         return $sum < 0; // CCW if sum < 0
     }
+
+    public function __clone(): void
+    {
+        $clones = [];
+        foreach ($this->lineStrings as $geom) {
+            $clones[] = clone $geom;
+        }
+        $this->lineStrings = $clones;
+    }
 }
