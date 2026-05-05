@@ -128,7 +128,7 @@ class MultiPointZ extends AbstractShapeZ
     public function toWKT(): string
     {
         $pointStrings = array_map(
-            fn(PointZ $p) => sprintf('%s %s %s', $p->getX(), $p->getY(), $p->getZ()),
+            fn(PointZ $p) => sprintf('%.8f %.8f %.8f', $p->getX(), $p->getY(), $p->getZ()),
             $this->points
         );
 

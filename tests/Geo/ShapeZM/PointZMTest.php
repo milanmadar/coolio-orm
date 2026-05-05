@@ -23,9 +23,9 @@ class PointZMTest extends TestCase
     {
         $point = new PointZM(1, 2, 3, 4, 3857);
 
-        $expectedWKT = 'POINT ZM(1 2 3 4)';
-        $expectedEWKT = 'SRID=3857;POINT ZM(1 2 3 4)';
-        $expectedST = "ST_GeomFromEWKT('SRID=3857;POINT ZM(1 2 3 4)')";
+        $expectedWKT = 'POINT ZM(1.00000000 2.00000000 3.00000000 4.00000000)';
+        $expectedEWKT = 'SRID=3857;POINT ZM(1.00000000 2.00000000 3.00000000 4.00000000)';
+        $expectedST = "ST_GeomFromEWKT('SRID=3857;POINT ZM(1.00000000 2.00000000 3.00000000 4.00000000)')";
 
         $this->assertSame($expectedWKT, $point->toWKT());
         $this->assertSame($expectedEWKT, $point->toEWKT());

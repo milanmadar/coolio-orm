@@ -15,7 +15,7 @@ class LineStringZTest extends TestCase
             new PointZ(4,5,6),
         ], 4326);
 
-        $expected = "ST_GeomFromEWKT('SRID=4326;LINESTRING Z(1 2 3,4 5 6)')";
+        $expected = "ST_GeomFromEWKT('SRID=4326;LINESTRING Z(1.00000000 2.00000000 3.00000000,4.00000000 5.00000000 6.00000000)')";
         $this->assertSame($expected, $lineString->ST_GeomFromEWKT());
     }
 
@@ -29,7 +29,7 @@ class LineStringZTest extends TestCase
             new PointZ(7, 8, 4),
         ], 4326);
 
-        $expected = "ST_GeomFromEWKT('SRID=4326;LINESTRING Z(0 0 0,1 2 1,2 4 2,5 6 3,7 8 4)')";
+        $expected = "ST_GeomFromEWKT('SRID=4326;LINESTRING Z(0.00000000 0.00000000 0.00000000,1.00000000 2.00000000 1.00000000,2.00000000 4.00000000 2.00000000,5.00000000 6.00000000 3.00000000,7.00000000 8.00000000 4.00000000)')";
         $this->assertSame($expected, $lineString->ST_GeomFromEWKT());
     }
 

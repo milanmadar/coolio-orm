@@ -20,7 +20,7 @@ class PointTest extends TestCase
     {
         $point = new Point(1.0, 2.0, 4326);
 
-        $expected = "ST_GeomFromEWKT('SRID=4326;POINT(1 2)')";
+        $expected = "ST_GeomFromEWKT('SRID=4326;POINT(1.00000000 2.00000000)')";
         $this->assertSame($expected, $point->ST_GeomFromEWKT());
     }
 
@@ -28,7 +28,7 @@ class PointTest extends TestCase
     {
         $point = new Point(12.3456, 78.9101, 4326);
 
-        $expected = "ST_GeomFromEWKT('SRID=4326;POINT(12.3456 78.9101)')";
+        $expected = "ST_GeomFromEWKT('SRID=4326;POINT(12.34560000 78.91010000)')";
         $this->assertSame($expected, $point->ST_GeomFromEWKT());
     }
 
@@ -43,6 +43,16 @@ class PointTest extends TestCase
 
         $this->assertEquals(4326, $point->getSRID());
         $this->assertEquals($jsonData, $point->toGeoJSON());
+    }
+
+    public function testFloatingPointPrecisionEquality()
+    {
+        $o = ini_get('precision');
+        ini_set('precision', 17);
+        $point1 = new Point(0.1+0.2, 0.1+0.2, 4326);
+        $point2 = new Point(0.3, 0.3, 4326);
+        $this->assertTrue($point1->equals($point2));
+        ini_set('precision', $o);
     }
 
 }

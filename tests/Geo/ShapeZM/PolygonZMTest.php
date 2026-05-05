@@ -27,6 +27,7 @@ class PolygonZMTest extends TestCase
 
     public function testCreate2()
     {
+        ini_set('precision', 8);
         new PolygonZM([
             new LineStringZM([new PointZM(0, 0, 2.5,90), new PointZM(0, 5, 1,91), new PointZM(5, 5, 4,92), new PointZM(5, 0, 4,93), new PointZM(0, 0, 2.5,94)]),
             new LineStringZM([new PointZM(1, 1, 2.5,95), new PointZM(1, 2, 1,96), new PointZM(2, 2, 4,97), new PointZM(2, 1, 4,98), new PointZM(1, 1, 2.5,99)])
@@ -71,7 +72,7 @@ class PolygonZMTest extends TestCase
         $lineString = new LineStringZM($points);
         $polygon = new PolygonZM([$lineString]);
 
-        $expected = 'POLYGON ZM((0 0 1 10,1 1 3 30,0 1 2 20,0 0 1 10))';
+        $expected = 'POLYGON ZM((0.00000000 0.00000000 1.00000000 10.00000000,1.00000000 1.00000000 3.00000000 30.00000000,0.00000000 1.00000000 2.00000000 20.00000000,0.00000000 0.00000000 1.00000000 10.00000000))';
         $this->assertSame($expected, $polygon->toWKT());
     }
 

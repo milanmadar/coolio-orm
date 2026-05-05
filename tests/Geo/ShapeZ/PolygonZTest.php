@@ -68,7 +68,7 @@ class PolygonZTest extends TestCase
 
         $polygon = new PolygonZ([$outerRing], 4326);
 
-        $expected = "ST_GeomFromEWKT('SRID=4326;POLYGON Z((0 0 3,1 0 3,1 1 3,0 1 3,0 0 3))')";
+        $expected = "ST_GeomFromEWKT('SRID=4326;POLYGON Z((0.00000000 0.00000000 3.00000000,1.00000000 0.00000000 3.00000000,1.00000000 1.00000000 3.00000000,0.00000000 1.00000000 3.00000000,0.00000000 0.00000000 3.00000000))')";
         $this->assertSame($expected, $polygon->ST_GeomFromEWKT());
     }
 
@@ -92,7 +92,7 @@ class PolygonZTest extends TestCase
 
         $polygon = new PolygonZ([$outerRing, $hole], 4326);
 
-        $expected = "ST_GeomFromEWKT('SRID=4326;POLYGON Z((0 0 4,5 0 4,5 5 4,0 5 4,0 0 4),(1 1 4,1 2 4,2 2 4,2 1 4,1 1 4))')";
+        $expected = "ST_GeomFromEWKT('SRID=4326;POLYGON Z((0.00000000 0.00000000 4.00000000,5.00000000 0.00000000 4.00000000,5.00000000 5.00000000 4.00000000,0.00000000 5.00000000 4.00000000,0.00000000 0.00000000 4.00000000),(1.00000000 1.00000000 4.00000000,1.00000000 2.00000000 4.00000000,2.00000000 2.00000000 4.00000000,2.00000000 1.00000000 4.00000000,1.00000000 1.00000000 4.00000000))')";
         $this->assertSame($expected, $polygon->ST_GeomFromEWKT());
     }
 

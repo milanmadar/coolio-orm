@@ -24,7 +24,7 @@ class MultiLineStringTest extends TestCase
 
         $multiLineString = new MultiLineString([$line1, $line2], 4326);
 
-        $expected = "ST_GeomFromEWKT('SRID=4326;MULTILINESTRING((1 1,2 2),(3 3,4 4))')";
+        $expected = "ST_GeomFromEWKT('SRID=4326;MULTILINESTRING((1.00000000 1.00000000,2.00000000 2.00000000),(3.00000000 3.00000000,4.00000000 4.00000000))')";
         $this->assertSame($expected, $multiLineString->ST_GeomFromEWKT());
     }
 
@@ -50,7 +50,7 @@ class MultiLineStringTest extends TestCase
 
         $multiLineString = new MultiLineString([$line1, $line2, $line3], 4326);
 
-        $expected = "ST_GeomFromEWKT('SRID=4326;MULTILINESTRING((1 1,2 2,3 3),(4 4,5 5),(6 6,7 7,8 8))')";
+        $expected = "ST_GeomFromEWKT('SRID=4326;MULTILINESTRING((1.00000000 1.00000000,2.00000000 2.00000000,3.00000000 3.00000000),(4.00000000 4.00000000,5.00000000 5.00000000),(6.00000000 6.00000000,7.00000000 7.00000000,8.00000000 8.00000000))')";
         $this->assertSame($expected, $multiLineString->ST_GeomFromEWKT());
     }
 

@@ -22,7 +22,7 @@ class GeometryCollectionZTest extends TestCase
 
         $geometryCollection = new GeometryCollectionZ([$point, $lineString], 4326);
 
-        $expected = "ST_GeomFromEWKT('SRID=4326;GEOMETRYCOLLECTION Z(POINT Z(1 1 1),LINESTRING Z(2 2 1,3 3 1,4 4 1))')";
+        $expected = "ST_GeomFromEWKT('SRID=4326;GEOMETRYCOLLECTION Z(POINT Z(1.00000000 1.00000000 1.00000000),LINESTRING Z(2.00000000 2.00000000 1.00000000,3.00000000 3.00000000 1.00000000,4.00000000 4.00000000 1.00000000))')";
         $this->assertSame($expected, $geometryCollection->ST_GeomFromEWKT());
     }
 
@@ -59,7 +59,7 @@ class GeometryCollectionZTest extends TestCase
         $geometryCollection = new GeometryCollectionZ([$point, $lineString, $polygon], 4326);
 
         // Construct the expected EWKT for the GeometryCollection
-        $expected = "ST_GeomFromEWKT('SRID=4326;GEOMETRYCOLLECTION Z(POINT Z(1 1 1),LINESTRING Z(2 2 1,3 3 1,4 4 1),POLYGON Z((0 0 1,5 0 1,5 5 1,0 5 1,0 0 1),(1 1 1,1 2 1,2 2 1,2 1 1,1 1 1)))')";
+        $expected = "ST_GeomFromEWKT('SRID=4326;GEOMETRYCOLLECTION Z(POINT Z(1.00000000 1.00000000 1.00000000),LINESTRING Z(2.00000000 2.00000000 1.00000000,3.00000000 3.00000000 1.00000000,4.00000000 4.00000000 1.00000000),POLYGON Z((0.00000000 0.00000000 1.00000000,5.00000000 0.00000000 1.00000000,5.00000000 5.00000000 1.00000000,0.00000000 5.00000000 1.00000000,0.00000000 0.00000000 1.00000000),(1.00000000 1.00000000 1.00000000,1.00000000 2.00000000 1.00000000,2.00000000 2.00000000 1.00000000,2.00000000 1.00000000 1.00000000,1.00000000 1.00000000 1.00000000)))')";
         $this->assertSame($expected, $geometryCollection->ST_GeomFromEWKT());
     }
 

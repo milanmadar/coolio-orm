@@ -201,7 +201,7 @@ class MultiPolygon extends AbstractShape2D
         $polygonStrings = array_map(
             fn(Polygon $p) => '(' . implode(',', array_map(
                     fn(LineString $ls) => '(' . implode(',', array_map(
-                            fn(Point $p) => sprintf('%s %s', $p->getX(), $p->getY()),
+                            fn(Point $p) => sprintf('%.8f %.8f', $p->getX(), $p->getY()),
                             $ls->getPoints()
                         )) . ')',
                     $p->getLineStrings()

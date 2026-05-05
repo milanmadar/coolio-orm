@@ -25,7 +25,7 @@ class CircularStringZMTest extends TestCase
         $this->assertEquals([4, 0, 4, 100], [$last->getX(), $last->getY(), $last->getZ(), $last->getM()]);
 
         // Check WKT output
-        $expectedWKT = 'CIRCULARSTRING ZM(0 0 0 100,1 1 1 100,2 0 2 100,3 1 3 100,4 0 4 100)';
+        $expectedWKT = 'CIRCULARSTRING ZM(0.00000000 0.00000000 0.00000000 100.00000000,1.00000000 1.00000000 1.00000000 100.00000000,2.00000000 0.00000000 2.00000000 100.00000000,3.00000000 1.00000000 3.00000000 100.00000000,4.00000000 0.00000000 4.00000000 100.00000000)';
         $this->assertSame($expectedWKT, $cs->toWKT());
     }
 

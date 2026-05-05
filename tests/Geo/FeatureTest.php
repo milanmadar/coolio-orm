@@ -28,13 +28,13 @@ class FeatureTest extends TestCase
         $feature = new Feature($point, ['name' => 'Test'], 'feature1');
 
         // WKT
-        $this->assertSame('POINT(12.34 56.78)', $feature->toWKT());
+        $this->assertSame('POINT(12.34000000 56.78000000)', $feature->toWKT());
 
         // EWKT
-        $this->assertSame('SRID=4326;POINT(12.34 56.78)', $feature->toEWKT());
+        $this->assertSame('SRID=4326;POINT(12.34000000 56.78000000)', $feature->toEWKT());
 
         // ST_GeomFromEWKT
-        $this->assertSame("ST_GeomFromEWKT('SRID=4326;POINT(12.34 56.78)')", $feature->ST_GeomFromEWKT());
+        $this->assertSame("ST_GeomFromEWKT('SRID=4326;POINT(12.34000000 56.78000000)')", $feature->ST_GeomFromEWKT());
     }
 
     public function testFeatureWithLineString()
@@ -48,10 +48,10 @@ class FeatureTest extends TestCase
         $feature = new Feature($line);
 
         // WKT
-        $this->assertSame('LINESTRING(1 2,3 4,5 6)', $feature->toWKT());
+        $this->assertSame('LINESTRING(1.00000000 2.00000000,3.00000000 4.00000000,5.00000000 6.00000000)', $feature->toWKT());
 
         // EWKT
-        $expectedEWKT = 'SRID=' . $_ENV['GEO_DEFAULT_SRID'] . ';LINESTRING(1 2,3 4,5 6)';
+        $expectedEWKT = 'SRID=' . $_ENV['GEO_DEFAULT_SRID'] . ';LINESTRING(1.00000000 2.00000000,3.00000000 4.00000000,5.00000000 6.00000000)';
         $this->assertSame($expectedEWKT, $feature->toEWKT());
 
         // ST_GeomFromEWKT
@@ -76,7 +76,7 @@ class FeatureTest extends TestCase
         ], $geoJson);
 
         // WKT still matches geometry
-        $this->assertSame('POINT(0 0)', $feature->toWKT());
+        $this->assertSame('POINT(0.00000000 0.00000000)', $feature->toWKT());
     }
 
     public function testFeatureWithPolygon()
@@ -92,7 +92,7 @@ class FeatureTest extends TestCase
         ]);
         $feature = new Feature($polygon);
 
-        $expected = 'POLYGON((0 0,10 0,10 10,0 10,0 0))';
+        $expected = 'POLYGON((0.00000000 0.00000000,10.00000000 0.00000000,10.00000000 10.00000000,0.00000000 10.00000000,0.00000000 0.00000000))';
         $this->assertSame($expected, $feature->toWKT());
 
         $expectedEWKT = 'SRID=' . $_ENV['GEO_DEFAULT_SRID'] . ';'.$expected;
@@ -124,7 +124,7 @@ class FeatureTest extends TestCase
         ]);
         $feature = new Feature($multiPolygon);
 
-        $expected = 'MULTIPOLYGON(((0 0,5 0,5 5,0 5,0 0)),((10 10,15 10,15 15,10 15,10 10)))';
+        $expected = 'MULTIPOLYGON(((0.00000000 0.00000000,5.00000000 0.00000000,5.00000000 5.00000000,0.00000000 5.00000000,0.00000000 0.00000000)),((10.00000000 10.00000000,15.00000000 10.00000000,15.00000000 15.00000000,10.00000000 15.00000000,10.00000000 10.00000000)))';
         $this->assertSame($expected, $feature->toWKT());
 
         $expectedEWKT = 'SRID=' . $_ENV['GEO_DEFAULT_SRID'] . ';'.$expected;

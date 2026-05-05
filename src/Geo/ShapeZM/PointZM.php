@@ -80,7 +80,8 @@ class PointZM extends AbstractShapeZM
 
     public function toWKT(): string
     {
-        return sprintf('POINT ZM(%s %s %s %s)', $this->x, $this->y, $this->z, $this->m);
+        return sprintf('POINT ZM(%.8f %.8f %.8f %.8f)', $this->x, $this->y, $this->z, $this->m);
+        //return sprintf('POINT ZM(%s %s %s %s)', $this->x, $this->y, $this->z, $this->m);
     }
 
     public function toEWKT(): string
@@ -156,7 +157,18 @@ class PointZM extends AbstractShapeZM
         return [$this->x, $this->y, $this->z, $this->m];
     }
 
-    public function equals(PointZM $other): bool
+    /*public function equals(PointZM $other): bool
+    {
+        return (
+            $this->x === $other->getX() &&
+            $this->y === $other->getY() &&
+            $this->z === $other->getZ()
+            // The last one is not actually a coordinate, but usually a timestamp or measure, so we might want to ignore it in equality checks
+            //&& $this->m === $other->getM()
+        );
+    }*/
+
+    public function equalsXYZ(PointZM $other): bool
     {
         return (
             $this->x === $other->getX() &&

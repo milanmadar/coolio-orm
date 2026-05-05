@@ -49,7 +49,7 @@ class PolygonZM extends AbstractShapeZM
     {
         $ringStrings = array_map(
             fn(LineStringZM $ls) => '(' . implode(',', array_map(
-                    fn(PointZM $p) => sprintf('%s %s %s %s', $p->getX(), $p->getY(), $p->getZ(), $p->getM()),
+                    fn(PointZM $p) => sprintf('%.8f %.8f %.8f %.8f', $p->getX(), $p->getY(), $p->getZ(), $p->getM()),
                     $ls->getPoints()
                 )) . ')',
             $this->lineStrings
@@ -230,7 +230,7 @@ class PolygonZM extends AbstractShapeZM
 
         foreach ($lineStrings as $lineString) {
             $points = $lineString->getPoints();
-            if (count($points) < 4 || !$points[0]->equals(end($points))) {
+            if (count($points) < 4 || !$points[0]->equalsXYZ(end($points))) {
                 throw new \InvalidArgumentException('All rings must be closed with at least 4 points.');
             }
         }

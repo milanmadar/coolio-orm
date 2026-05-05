@@ -112,7 +112,7 @@ class MultiPointZM extends AbstractShapeZM
     public function toWKT(): string
     {
         $pointStrings = array_map(
-            fn(PointZM $p) => sprintf('(%s %s %s %s)', $p->getX(), $p->getY(), $p->getZ(), $p->getM()),
+            fn(PointZM $p) => sprintf('(%.8f %.8f %.8f %.8f)', $p->getX(), $p->getY(), $p->getZ(), $p->getM()),
             $this->points
         );
 

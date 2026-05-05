@@ -16,7 +16,7 @@ class CircularStringTest extends TestCase
             new Point(2, 0),
         ], 4326);
 
-        $expected = "ST_GeomFromEWKT('SRID=4326;CIRCULARSTRING(0 0,1 1,2 0)')";
+        $expected = "ST_GeomFromEWKT('SRID=4326;CIRCULARSTRING(0.00000000 0.00000000,1.00000000 1.00000000,2.00000000 0.00000000)')";
         $this->assertSame($expected, $circularString->ST_GeomFromEWKT());
     }
 
@@ -30,7 +30,7 @@ class CircularStringTest extends TestCase
             new Point(0, 0),
         ], 4326);
 
-        $expected = "ST_GeomFromEWKT('SRID=4326;CIRCULARSTRING(0 0,4 0,4 4,0 4,0 0)')";
+        $expected = "ST_GeomFromEWKT('SRID=4326;CIRCULARSTRING(0.00000000 0.00000000,4.00000000 0.00000000,4.00000000 4.00000000,0.00000000 4.00000000,0.00000000 0.00000000)')";
         $this->assertSame($expected, $circularString->ST_GeomFromEWKT());
     }
 

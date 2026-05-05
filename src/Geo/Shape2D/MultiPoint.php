@@ -127,7 +127,7 @@ class MultiPoint extends AbstractShape2D
     public function toWKT(): string
     {
         $pointStrings = array_map(
-            fn(Point $p) => sprintf('%s %s', $p->getX(), $p->getY()),
+            fn(Point $p) => sprintf('%.8f %.8f', $p->getX(), $p->getY()),
             $this->points
         );
 

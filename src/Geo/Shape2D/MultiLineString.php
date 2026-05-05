@@ -154,7 +154,7 @@ class MultiLineString extends AbstractShape2D
     {
         $segments = array_map(
             fn(LineString $ls) => '(' . implode(',', array_map(
-                    fn(Point $p) => sprintf('%s %s', $p->getX(), $p->getY()),
+                    fn(Point $p) => sprintf('%.8f %.8f', $p->getX(), $p->getY()),
                     $ls->getPoints()
                 )) . ')',
             $this->lineStrings

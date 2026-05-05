@@ -76,7 +76,7 @@ class PointZ extends AbstractShapeZ
 
     public function toWKT(): string
     {
-        return sprintf('POINT Z(%s %s %s)', $this->x, $this->y, $this->z);
+        return sprintf('POINT Z(%.8f %.8f %.8f)', $this->x, $this->y, $this->z);
     }
 
     /**
@@ -131,12 +131,12 @@ class PointZ extends AbstractShapeZ
         return [$this->x, $this->y, $this->z];
     }
 
-    public function equals(PointZ $other): bool
+   /*public function equals(PointZ $other): bool
     {
         return (
             $this->x === $other->getX() &&
             $this->y === $other->getY() &&
             $this->z === $other->getZ()
         );
-    }
+    }*/
 }

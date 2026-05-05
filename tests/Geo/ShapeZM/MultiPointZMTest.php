@@ -29,7 +29,7 @@ class MultiPointZMTest extends TestCase
 
         $mp = new MultiPointZM($points);
 
-        $expected = 'MULTIPOINT ZM((1 2 3 4),(5 6 7 8))';
+        $expected = 'MULTIPOINT ZM((1.00000000 2.00000000 3.00000000 4.00000000),(5.00000000 6.00000000 7.00000000 8.00000000))';
         $this->assertSame($expected, $mp->toWKT());
     }
 

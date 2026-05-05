@@ -199,7 +199,7 @@ class MultiPolygonZM extends AbstractShapeZM
         foreach ($this->polygons as $polygon) {
             $polyStrings[] = '(' . implode(',', array_map(
                     fn(LineStringZM $ls) => '(' . implode(',', array_map(
-                            fn(PointZM $p) => sprintf('%s %s %s %s', $p->getX(), $p->getY(), $p->getZ(), $p->getM()),
+                            fn(PointZM $p) => sprintf('%.8f %.8f %.8f %.8f', $p->getX(), $p->getY(), $p->getZ(), $p->getM()),
                             $ls->getPoints()
                         )) . ')',
                     $polygon->getLineStrings()

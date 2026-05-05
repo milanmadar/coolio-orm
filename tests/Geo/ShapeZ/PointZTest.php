@@ -20,7 +20,7 @@ class PointZTest extends TestCase
     {
         $point = new PointZ(1.0, 2.0, 3.0, 4326);
 
-        $expected = "ST_GeomFromEWKT('SRID=4326;POINT Z(1 2 3)')";
+        $expected = "ST_GeomFromEWKT('SRID=4326;POINT Z(1.00000000 2.00000000 3.00000000)')";
         $this->assertSame($expected, $point->ST_GeomFromEWKT());
     }
 
@@ -28,7 +28,7 @@ class PointZTest extends TestCase
     {
         $point = new PointZ(12.3456, 78.9101, 50.54321, 4326);
 
-        $expected = "ST_GeomFromEWKT('SRID=4326;POINT Z(12.3456 78.9101 50.54321)')";
+        $expected = "ST_GeomFromEWKT('SRID=4326;POINT Z(12.34560000 78.91010000 50.54321000)')";
         $this->assertSame($expected, $point->ST_GeomFromEWKT());
     }
 

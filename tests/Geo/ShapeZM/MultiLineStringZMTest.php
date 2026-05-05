@@ -48,7 +48,7 @@ class MultiLineStringZMTest extends TestCase
 
         $mls = new MultiLineStringZM($lines);
 
-        $expected = 'MULTILINESTRING ZM((1 2 3 4,5 6 7 8),(9 10 11 12,13 14 15 16))';
+        $expected = 'MULTILINESTRING ZM((1.00000000 2.00000000 3.00000000 4.00000000,5.00000000 6.00000000 7.00000000 8.00000000),(9.00000000 10.00000000 11.00000000 12.00000000,13.00000000 14.00000000 15.00000000 16.00000000))';
         $this->assertSame($expected, $mls->toWKT());
     }
 

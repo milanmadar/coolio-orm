@@ -111,7 +111,7 @@ class Point extends AbstractShape2D
      */
     public function toWKT(): string
     {
-        return sprintf('POINT(%s %s)', $this->x, $this->y);
+        return sprintf('POINT(%.8f %.8f)', $this->x, $this->y);
     }
 
     /**
@@ -125,11 +125,11 @@ class Point extends AbstractShape2D
         ];
     }
 
-    public function equals(Point $other): bool
+    /*public function equals(Point $other): bool
     {
         return (
             $this->x === $other->getX() &&
             $this->y === $other->getY()
         );
-    }
+    }*/
 }

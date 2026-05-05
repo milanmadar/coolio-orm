@@ -133,7 +133,7 @@ class LineStringZ extends AbstractShapeZ implements HasStartEndPointZInterface
     public function toWKT(): string
     {
         $coordinateStrings = array_map(function (PointZ $point) {
-            return sprintf('%s %s %s', $point->getX(), $point->getY(), $point->getZ());
+            return sprintf('%.8f %.8f %.8f', $point->getX(), $point->getY(), $point->getZ());
         }, $this->points);
 
         return sprintf('LINESTRING Z(%s)', implode(',', $coordinateStrings));

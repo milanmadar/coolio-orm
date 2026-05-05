@@ -238,7 +238,7 @@ class GeoTest extends TestCase
             new LineString([new Point(3, 3, 4326), new Point(4, 4, 4326), new Point(5, 5, 4326)], 4326)
         ], 4326);
         $geometryCollection = new GeometryCollection([
-            new Point(1, 1, 4326),
+            new Point(0.1 + 0.2, 0.1 + 0.2, 4326),
             new LineString([new Point(2, 2, 4326), new Point(3, 3, 4326), new Point(4, 4, 4326)], 4326),
             new Polygon([
                 new LineString([new Point(0, 0, 4326), new Point(0, 5, 4326), new Point(5, 5, 4326), new Point(5, 0, 4326), new Point(0, 0, 4326),], 4326),
@@ -272,19 +272,17 @@ class GeoTest extends TestCase
         $mgr->_getEntityRepository()->clear();
         $ent = $mgr->findById(2);
 
-        $this->assertEquals($multiPolygon->toEWKT(), $ent->getMultipolygonGeom()->toEWKT());
-
-        $this->assertTrue($point == $ent->getPointGeom());
-        $this->assertTrue($lineString == $ent->getLinestringGeom());
-        $this->assertTrue($polygon == $ent->getPolygonGeom());
-        $this->assertTrue($multiPoint == $ent->getMultipointGeom());
-        $this->assertTrue($multiLineString == $ent->getMultilinestringGeom());
-        $this->assertTrue($multiPolygon == $ent->getMultipolygonGeom());
-        $this->assertTrue($geometryCollection == $ent->getGeomcollectionGeom());
-        $this->assertTrue($circularString == $ent->getCircularStringGeom());
-        $this->assertTrue($compoundCurve == $ent->getCompoundcurveGeom());
-        $this->assertTrue($curvePolygon == $ent->getCurvepolygonGeom());
-        $this->assertTrue($multiCurve == $ent->getMulticurveGeom());
+        $this->assertTrue($point->equals( $ent->getPointGeom() ));
+        $this->assertTrue($lineString->equals( $ent->getLinestringGeom() ));
+        $this->assertTrue($polygon->equals( $ent->getPolygonGeom() ));
+        $this->assertTrue($multiPoint->equals( $ent->getMultipointGeom() ));
+        $this->assertTrue($multiLineString->equals( $ent->getMultilinestringGeom() ));
+        $this->assertTrue($multiPolygon->equals( $ent->getMultipolygonGeom() ));
+        $this->assertTrue($geometryCollection->equals( $ent->getGeomcollectionGeom() ));
+        $this->assertTrue($circularString->equals( $ent->getCircularStringGeom() ));
+        $this->assertTrue($compoundCurve->equals( $ent->getCompoundcurveGeom() ));
+        $this->assertTrue($curvePolygon->equals( $ent->getCurvepolygonGeom() ));
+        $this->assertTrue($multiCurve->equals( $ent->getMulticurveGeom() ));
     }
 
     public function testInsert_asEntity()

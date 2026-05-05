@@ -62,4 +62,22 @@ abstract class AbstractShape
     {
         return $this->ST_GeomFromEWKT();
     }
+
+    /**
+     * @param AbstractShape $shape
+     * @return bool
+     */
+    public function equals(AbstractShape $shape): bool
+    {
+        if($this === $shape) {
+            return true;
+        }
+        if ($this->srid !== $shape->getSRID()) {
+            return false;
+        }
+        if(get_class($this) !== get_class($shape)) {
+            return false;
+        }
+        return ($this->toWKT() === $shape->toWKT());
+    }
 }

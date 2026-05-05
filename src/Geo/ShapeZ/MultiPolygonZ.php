@@ -128,7 +128,7 @@ class MultiPolygonZ extends AbstractShapeZ
         $polygonStrings = array_map(
             fn(PolygonZ $p) => '(' . implode(',', array_map(
                     fn(LineStringZ $ls) => '(' . implode(',', array_map(
-                            fn(PointZ $p) => sprintf('%s %s %s', $p->getX(), $p->getY(), $p->getZ()),
+                            fn(PointZ $p) => sprintf('%.8f %.8f %.8f', $p->getX(), $p->getY(), $p->getZ()),
                             $ls->getPoints()
                         )) . ')',
                     $p->getLineStrings()

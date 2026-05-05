@@ -13,7 +13,7 @@ class MultiPointTest extends TestCase
         // Simple case: A MultiPoint with two points
         $multiPoint = new MultiPoint([new Point(1, 1), new Point(2, 2)], 4326);
 
-        $expected = "ST_GeomFromEWKT('SRID=4326;MULTIPOINT(1 1,2 2)')";
+        $expected = "ST_GeomFromEWKT('SRID=4326;MULTIPOINT(1.00000000 1.00000000,2.00000000 2.00000000)')";
         $this->assertSame($expected, $multiPoint->ST_GeomFromEWKT());
     }
 
@@ -27,7 +27,7 @@ class MultiPointTest extends TestCase
             new Point(4, 4)
         ], 4326);
 
-        $expected = "ST_GeomFromEWKT('SRID=4326;MULTIPOINT(1 1,2 2,3 3,4 4)')";
+        $expected = "ST_GeomFromEWKT('SRID=4326;MULTIPOINT(1.00000000 1.00000000,2.00000000 2.00000000,3.00000000 3.00000000,4.00000000 4.00000000)')";
         $this->assertSame($expected, $multiPoint->ST_GeomFromEWKT());
     }
 

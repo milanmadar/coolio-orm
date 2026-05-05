@@ -347,7 +347,7 @@ $_AAA = $ent->getCurvepolygonZMGeom();
         $this->assertEquals( count($origiPoints), count($readLinePoints) );
 
         for($i=0; $i<15000; $i+=1000) {
-            $this->assertTrue( $origiPoints[$i]->equals( $readLinePoints[$i] ));
+            $this->assertTrue( $origiPoints[$i]->equalsXYZ( $readLinePoints[$i] ));
         }
     }
 
