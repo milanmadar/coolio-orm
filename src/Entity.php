@@ -124,9 +124,12 @@ abstract class Entity implements Event\AnnouncerInterface
         // Change it
         $oldValue = $this->_data[$fieldName] ?? null;
 
-        $this->_data[$fieldName] = is_object($value)
-            ? clone $value
-            : $value;
+        // DateTime should be cloned
+        if($value instanceof \DateTime) {
+            $this->_data[$fieldName] = clone $value;
+        } else {
+            $this->_data[$fieldName] = $value;
+        }
 
         // geom change is tricky
         if(isset($oldValue) && isset($value)
