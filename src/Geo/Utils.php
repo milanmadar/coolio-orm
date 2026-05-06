@@ -103,6 +103,7 @@ class Utils
         || $returnPointOnThisGeom instanceof ShapeZ\PointZ
         || $returnPointOnThisGeom instanceof ShapeZM\PointZM)
         {
+            /** @var T of Shape2D\Point|ShapeZ\PointZ|ShapeZM\PointZM */
             return clone $returnPointOnThisGeom;
         }
         // multipooint
