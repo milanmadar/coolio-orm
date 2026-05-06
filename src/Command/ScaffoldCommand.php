@@ -480,7 +480,10 @@ class ScaffoldCommand extends Command
             }
 
             // default values
-            if(!is_null($colDefVal) && $colType != 'geography' && $colType != 'geometry' && $colType != 'geometry_curved' && $colType != 'topogeometry')
+            if($colDefVal == 'gen_random_uuid()' || $colDefVal == 'uuid_generate_v4()' || $colDefVal == 'uuidv7()') {
+                // let db do it, php won't generate def val
+            }
+            elseif(!is_null($colDefVal) && $colType != 'geography' && $colType != 'geometry' && $colType != 'geometry_curved' && $colType != 'topogeometry')
             {
                 if($colType == 'string' || $colType == 'text' || $colType == 'character' || $colType == 'char' || $colType == 'varchar') {
                     $defValSrc = "'".str_replace("'", "\\'", $colDefVal)."'";
@@ -567,6 +570,7 @@ class ScaffoldCommand extends Command
                 case 'char':
                 case 'character':
                 case 'ltree':
+                case 'uuid':
                     $colType = 'string';
                     $paramType = 'string';
                     $docParamType = 'string';
