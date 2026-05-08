@@ -700,6 +700,8 @@ class QueryBuilder extends DoctrineQueryBuilder
      */
     public function whereGroup_inGroup(array $sqlParts): string
     {
+        if(empty($sqlParts)) return '';
+        $sqlParts = $this->_fixGroupSqlParts($sqlParts);
         return ' (' . implode(' ', $sqlParts) . ')';
     }
 
@@ -709,6 +711,8 @@ class QueryBuilder extends DoctrineQueryBuilder
      */
     public function andWhereGroup_inGroup(array $sqlParts): string
     {
+        if(empty($sqlParts)) return '';
+        $sqlParts = $this->_fixGroupSqlParts($sqlParts);
         return ' AND (' . implode(' ', $sqlParts) . ')';
     }
 
@@ -718,6 +722,8 @@ class QueryBuilder extends DoctrineQueryBuilder
      */
     public function orWhereGroup_inGroup(array $sqlParts): string
     {
+        if(empty($sqlParts)) return '';
+        $sqlParts = $this->_fixGroupSqlParts($sqlParts);
         return ' OR (' . implode(' ', $sqlParts) . ')';
     }
 
@@ -727,13 +733,9 @@ class QueryBuilder extends DoctrineQueryBuilder
      */
     public function andWhereGroup(array $sqlParts): self
     {
+        if(empty($sqlParts)) return $this;
+        $sqlParts = $this->_fixGroupSqlParts($sqlParts);
         $grouped = ' (' . implode(' ', $sqlParts) . ')';
-
-        // fix some things:
-        // actually not, because maybe a string expression has thos things
-        /*$grouped = str_replace('( AND ', '( ', $grouped);
-        $grouped = str_replace('( OR ', '( ', $grouped);*/
-
         $this->andWhere($grouped);
         return $this;
     }
@@ -744,9 +746,33 @@ class QueryBuilder extends DoctrineQueryBuilder
      */
     public function orWhereGroup(array $sqlParts): self
     {
+        if(empty($sqlParts)) return $this;
+        $sqlParts = $this->_fixGroupSqlParts($sqlParts);
         $grouped = ' (' . implode(' ', $sqlParts) . ')';
         $this->orWhere($grouped);
         return $this;
+    }
+
+    /**
+     * Remove starting OR or AND
+     * @param array<string> $sqlParts
+     * @return array<string>
+     */
+    private function _fixGroupSqlParts(array $sqlParts): array
+    {
+        if(empty($sqlParts)) {
+            return [];
+        }
+
+        // fix starting with AND or OR
+        $firstIndex = array_keys($sqlParts)[0];
+        if(str_starts_with($sqlParts[$firstIndex], ' OR ')) {
+            $sqlParts[$firstIndex] = substr($sqlParts[$firstIndex], 4);
+        } elseif(str_starts_with($sqlParts[$firstIndex], ' AND ')) {
+            $sqlParts[$firstIndex] = substr($sqlParts[$firstIndex], 6);
+        }
+
+        return $sqlParts;
     }
 
     /**
