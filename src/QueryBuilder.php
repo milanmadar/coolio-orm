@@ -430,32 +430,35 @@ class QueryBuilder extends DoctrineQueryBuilder
         $operator = strtoupper(trim($operator));
 
         // postgres jsonb: user is doing a mistake:
-        // he should do `@>' on a json column, but he did 'IN'
+        // he should do `?|' on a json column (assuming json value is of type string or int but not array), but he did 'IN'
         // so we correct the operator for him
         if($operator == 'IN'
-            && (
-                str_contains($column, '->')
-                || ($this->entityMgr?->getFieldTypes()[$column] ?? '') == 'json'
-                || ($this->entityMgr?->getFieldTypes()[$column])       == 'jsonb'
-            )) {
-            $operator = '@>';
+        && (
+            str_contains($column, '->')
+            || ($this->entityMgr?->getFieldTypes()[$column] ?? '') == 'json'
+            || ($this->entityMgr?->getFieldTypes()[$column])       == 'jsonb'
+        )) {
+            $operator = '?|';
         }
 
         // postgres jsonb: Contains operator: does the left json contains the right json
         // postgres jsonb: Contained in: is the left json contained in the right json
-        if($operator == '@>' || $operator == '<@')
+        if($operator == '@>' || $operator == '<@' || $operator == '?|')
         {
             if(!is_array($value)) {
                 $value = [ $value ];
             }
 
             // the column type is json and we are checking against an simple array $value
-            if(array_key_exists(0, $value)
+            if(
+                $operator != '?|'
+                && array_key_exists(0, $value)
                 && (
                     str_contains($column, '->')
                     || ($this->entityMgr?->getFieldTypes()[$column] ?? '') == 'json'
                     || ($this->entityMgr?->getFieldTypes()[$column])       == 'jsonb'
-                )) {
+                ))
+            {
                 $escapedValues = [];
                 foreach($value as $v) {
                     if(is_null($v)) {
@@ -471,11 +474,17 @@ class QueryBuilder extends DoctrineQueryBuilder
                         $escapedValues[] = '"'.$v.'"';
                     }
                 }
+
                 $sql = $column." ".$operator." '[".implode(',', $escapedValues)."]'::jsonb";
                 return [$sql, [$paramName=>$value]];
             }
             // the column is array type OR the given $value is json
             else {
+                // '?|' must be escaped with a double ?? for Doctrine DBAL
+                if($operator == '?|') {
+                    $operator = '??|';
+                }
+
                 if(empty($value)) {
                     return ['1=2', []];
                 }

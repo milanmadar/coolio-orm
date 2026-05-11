@@ -92,13 +92,19 @@ class QueryBuilderJsonbTest extends TestCase
         $this->assertEquals(1, $res);
     }
 
-    public function testJsonbContainsArray()
+    public function testJsonbArrayContainsArray()
     {
         $mgr = self::$dbHelper->getManager(OrmJsonTest\Manager::class);
 
         $res = $mgr->createQueryBuilder()
             ->select("count(*)")
             ->andWhereColumn("fld_jsonb->'array'", "@>", 2)
+            ->fetchOne();
+        $this->assertEquals(1, $res, 'single int value failed');
+
+        $res = $mgr->createQueryBuilder()
+            ->select("count(*)")
+            ->andWhereColumn("fld_jsonb->'array'", "@>", [2])
             ->fetchOne();
         $this->assertEquals(1, $res, 'single int value failed');
 
@@ -113,12 +119,23 @@ class QueryBuilderJsonbTest extends TestCase
             ->andWhereColumn("fld_jsonb->'array'", "@>", 'quoted "hi" str')
             ->fetchOne();
         $this->assertEquals(1, $res, 'single str value failed');
+    }
+
+    public function testJsonbStringIsInArray()
+    {
+        $mgr = self::$dbHelper->getManager(OrmJsonTest\Manager::class);
 
         $res = $mgr->createQueryBuilder()
             ->select("count(*)")
-            ->andWhereColumn("fld_jsonb->'array'", "IN", [1, 'quoted "hi" str'])
+            ->andWhereColumn("fld_jsonb->'str'", "?|", ['nope','lollypop'])
             ->fetchOne();
-        $this->assertEquals(1, $res, 'IN to @> failed');
+        $this->assertEquals(1, $res, 'IN to ?| failed');
+
+        $res = $mgr->createQueryBuilder()
+            ->select("count(*)")
+            ->andWhereColumn("fld_jsonb->'str'", "IN", ['nope','lollypop'])
+            ->fetchOne();
+        $this->assertEquals(1, $res, 'IN to ?| failed');
     }
 
     public function testJsonbIntCompare()
