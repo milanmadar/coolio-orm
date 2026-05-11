@@ -57,6 +57,7 @@ class Utils
     }
 
     /**
+     * 2 Points are optimized to stay in PHP (whenever possible)
      * @param AbstractShape $geom1
      * @param AbstractShape $geom2
      * @param Manager|Connection $dbOrMgr
@@ -65,6 +66,35 @@ class Utils
      */
     public static function getDistanceInMeters(AbstractShape $geom1, AbstractShape $geom2, Manager|Connection $dbOrMgr, int $roundToPrecision = -1): float
     {
+        // in some cases, PHP is enough
+        if($geom1 instanceof Shape2D\Point
+        || $geom1 instanceof ShapeZ\PointZ
+        || $geom1 instanceof ShapeZM\PointZM
+        ) {
+            if($geom2 instanceof Shape2D\Point
+            || $geom2 instanceof ShapeZ\PointZ
+            || $geom2 instanceof ShapeZM\PointZM
+            ) {
+                $srid1 = $geom1->getSRID();
+                $srid2 = $geom2->getSRID();
+                if($srid1 == $srid2)
+                {
+                    // WGS84 (Haversine)
+                    if($srid1 == 4326 && $srid2 == 4326) {
+                        return self::getDistanceInMetersPointsWGS($geom1, $geom2, $roundToPrecision);
+                    }
+
+                    // UTM (Pythagoras)
+                    $isUtmNorth = ($srid1 >= 32601 && $srid1 <= 32660);
+                    $isUtmSouth = ($srid1 >= 32701 && $srid1 <= 32760);
+                    if ($isUtmNorth || $isUtmSouth) {
+                        // This is the Pythagoras function we finalized earlier
+                        return self::getDistanceInMetersPoints($geom1, $geom2, $roundToPrecision);
+                    }
+                }
+            }
+        }
+
         $stDistance = GeoFunctions::ST_Distance(
             GeoFunctions::geography(
                 GeoFunctions::ST_Transform($geom1, 4326)
@@ -86,6 +116,98 @@ class Utils
             return round($v, $roundToPrecision);
         }
         return $v;
+    }
+
+    /**
+     * @param Shape2D\Point|ShapeZ\PointZ|ShapeZM\PointZM $geom1
+     * @param Shape2D\Point|ShapeZ\PointZ|ShapeZM\PointZM $geom2
+     * @param int $roundToPrecision
+     * @return float
+     */
+    private static function getDistanceInMetersPoints(Shape2D\Point|ShapeZ\PointZ|ShapeZM\PointZM $geom1, Shape2D\Point|ShapeZ\PointZ|ShapeZM\PointZM $geom2, int $roundToPrecision = -1): float
+    {
+        $srid1 = $geom1->getSrid();
+        $srid2 = $geom2->getSrid();
+
+        if($srid1 != $srid2) {
+            throw new \InvalidArgumentException("getDistanceInMetersPoints() Both points must be in the same SRID. Use getDistanceInMeters() function (that will use postgres)");
+        }
+
+        // Haversine
+        if($srid1 == 4326) {
+            return self::getDistanceInMetersPointsWGS($geom1, $geom2, $roundToPrecision);
+        }
+
+        $x1 = $geom1->getX();
+        $y1 = $geom1->getY();
+        $x2 = $geom2->getX();
+        $y2 = $geom2->getY();
+        $z1 = ($geom1 instanceof ShapeZ\PointZ || $geom1 instanceof ShapeZM\PointZM) ? $geom1->getZ() : null;
+        $z2 = ($geom2 instanceof ShapeZ\PointZ || $geom2 instanceof ShapeZM\PointZM) ? $geom2->getZ() : null;
+
+        $dx = $x2 - $x1;
+        $dy = $y2 - $y1;
+
+        if(isset($z1) && !isset($z2)) {
+            $z2 = $z1;
+        } elseif(!isset($z1) && isset($z2)) {
+            $z1 = $z2;
+        }
+
+        if(isset($z1)) {
+            $dz = $z2 - $z1;
+            $dist = sqrt($dx**2 + $dy**2 + $dz**2);
+        } else {
+            $dist = sqrt($dx**2 + $dy**2);
+        }
+
+        return ($roundToPrecision > -1)
+            ? round($dist, $roundToPrecision)
+            : $dist;
+    }
+
+    /**
+     * Haversine formula
+     * @param Shape2D\Point|ShapeZ\PointZ|ShapeZM\PointZM $geom1
+     * @param Shape2D\Point|ShapeZ\PointZ|ShapeZM\PointZM $geom2
+     * @param int $roundToPrecision Optional. Default is no rounding
+     * @return float|int
+     */
+    private static function getDistanceInMetersPointsWGS(Shape2D\Point|ShapeZ\PointZ|ShapeZM\PointZM $geom1, Shape2D\Point|ShapeZ\PointZ|ShapeZM\PointZM $geom2, int $roundToPrecision = -1): float
+    {
+        $earthRadius = 6371000; // Radius in meters
+
+        $lon1 = $geom1->getX();
+        $lat1 = $geom1->getY();
+        $lon2 = $geom2->getX();
+        $lat2 = $geom2->getY();
+
+        // Horizontal Surface Distance
+        $dLat = deg2rad($lat2 - $lat1);
+        $dLon = deg2rad($lon2 - $lon1);
+
+        $a = sin($dLat / 2) * sin($dLat / 2) +
+            cos(deg2rad($lat1)) * cos(deg2rad($lat2)) *
+            sin($dLon / 2) * sin($dLon / 2);
+
+        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+        $horizontalMeters = $earthRadius * $c;
+
+        // Altitude (Z)
+        $z1 = ($geom1 instanceof ShapeZ\PointZ || $geom1 instanceof ShapeZM\PointZM) ? $geom1->getZ() : null;
+        $z2 = ($geom2 instanceof ShapeZ\PointZ || $geom2 instanceof ShapeZM\PointZM) ? $geom2->getZ() : null;
+
+        if (isset($z1) && isset($z2)) {
+            $dz = $z2 - $z1;
+            // Combine Horizontal and Vertical using Pythagoras
+            $totalMeters = sqrt($horizontalMeters**2 + $dz**2);
+        } else {
+            $totalMeters = $horizontalMeters;
+        }
+
+        return ($roundToPrecision > -1)
+            ? round($totalMeters, $roundToPrecision)
+            : $totalMeters;
     }
 
     /**
