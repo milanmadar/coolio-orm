@@ -171,7 +171,7 @@ class Utils
      * @param Shape2D\Point|ShapeZ\PointZ|ShapeZM\PointZM $geom1
      * @param Shape2D\Point|ShapeZ\PointZ|ShapeZM\PointZM $geom2
      * @param int $roundToPrecision Optional. Default is no rounding
-     * @return float|int
+     * @return float
      */
     private static function getDistanceInMetersPointsWGS(Shape2D\Point|ShapeZ\PointZ|ShapeZM\PointZM $geom1, Shape2D\Point|ShapeZ\PointZ|ShapeZM\PointZM $geom2, int $roundToPrecision = -1): float
     {
@@ -261,6 +261,64 @@ class Utils
         else {
             throw new \InvalidArgumentException("Geo\Utils::getLengthInMeter() doesnt support ".get_class($geom));
         }
+
+        if($dbOrMgr instanceof Manager) {
+            $db = $dbOrMgr->getDb();
+        } else {
+            $db = $dbOrMgr;
+        }
+
+        $v = (float)$db->executeQuery($sql)->fetchOne();
+        if($roundToPrecision > -1) {
+            return round($v, $roundToPrecision);
+        }
+        return $v;
+    }
+
+    /**
+     * @param AbstractShape $line
+     * @param Manager|Connection $dbOrMgr
+     * @param 'start'|'end' $untilStartOrEnd 'start'|'end'
+     * @param int $roundToPrecision optional
+     * @return float
+     */
+    public static function getLength_fromPointInLine_tillEndOfLine_InMeter(AbstractShape $line, Shape2D\Point|ShapeZ\PointZ|ShapeZM\PointZM $pointOnLine, string $untilStartOrEnd, Manager|Connection $dbOrMgr, int $roundToPrecision = -1): float
+    {
+        if(!($line instanceof Shape2D\LineString)
+        && !($line instanceof ShapeZ\LineStringZ)
+        && !($line instanceof ShapeZM\LineStringZM)
+        && !($line instanceof Shape2D\CircularString)
+        && !($line instanceof ShapeZ\CircularStringZ)
+        && !($line instanceof ShapeZM\CircularStringZM)
+        ) {
+            throw new \InvalidArgumentException("Geo\Utils::getLength_fromPointInLine_tillEndOfLine_InMeter() only supports LineString, LineStringZ, LineStringZM, CircularString, CircularStringZ and CircularStringZM");
+        }
+
+        $lineEwkt = GeoFunctions::ST_GeomFromEWKT_geom($line);
+        if($line instanceof Shape2D\CircularString
+        || $line instanceof ShapeZ\CircularStringZ
+        || $line instanceof ShapeZM\CircularStringZM
+        ) {
+            $lineEwkt = "ST_CurveToLine(".$lineEwkt.")";
+        }
+
+        $startFrac = ($untilStartOrEnd === 'start') ? '0.0' : 'ST_LineLocatePoint(line, ST_Transform(p, ST_SRID(line)))';
+        $endFrac   = ($untilStartOrEnd === 'start') ? 'ST_LineLocatePoint(line, ST_Transform(p, ST_SRID(line)))' : '1.0';
+
+        $sql = "
+            SELECT ST_Length(
+                ST_LineSubstring(
+                    line,
+                    $startFrac,
+                    $endFrac
+                )::geography
+            )
+            FROM (
+                SELECT
+                    ".$lineEwkt." AS line,
+                    ".GeoFunctions::ST_GeomFromEWKT_geom($pointOnLine)." AS p
+            ) AS data
+        ";
 
         if($dbOrMgr instanceof Manager) {
             $db = $dbOrMgr->getDb();

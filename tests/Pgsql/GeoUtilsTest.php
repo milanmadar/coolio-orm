@@ -59,6 +59,21 @@ class GeoUtilsTest extends TestCase
         $this->assertEquals($srid, $snappedPoint->getSRID());
     }
 
+    public function testgetLength_fromPointInLine_tillEndOfLine_InMeter_2d()
+    {
+        $db = \Milanmadar\CoolioORM\ORM::instance()->getDbByUrl($_ENV['DB_POSTGRES_DB1']);
+
+        $srid = 4326;
+        $point = new Geo\Shape2D\Point(5, 5, $srid);
+        $line = new Geo\Shape2D\LineString([
+            new Geo\Shape2D\Point(0, 0, $srid),
+            new Geo\Shape2D\Point(10, 10, $srid),
+        ]);
+
+        $length = Geo\Utils::getLength_fromPointInLine_tillEndOfLine_InMeter($line, $point, 'end', $db, 0);
+        $this->assertEquals(781106, $length);
+    }
+
     public function testGetClosestPointZM()
     {
         $db = \Milanmadar\CoolioORM\ORM::instance()->getDbByUrl($_ENV['DB_POSTGRES_DB1']);
