@@ -457,12 +457,20 @@ class Utils
     }
 
     /**
+     * Clone
      * If needed, it will add 1 more point to match the first one. MultiLines will be turned into single polygons
      * @param AbstractShape $line
      * @return Shape2D\Polygon|ShapeZ\PolygonZ|ShapeZM\PolygonZM
      */
     public static function lineToPolygon(AbstractShape $line): Shape2D\Polygon|ShapeZ\PolygonZ|ShapeZM\PolygonZM
     {
+        if($line instanceof Shape2D\Polygon
+        || $line instanceof ShapeZ\PolygonZ
+        || $line instanceof ShapeZM\PolygonZM)
+        {
+            return clone $line;
+        }
+
         if($line instanceof Shape2D\MultiLineString
         || $line instanceof ShapeZ\MultiLineStringZ
         || $line instanceof ShapeZM\MultiLineStringZM)
