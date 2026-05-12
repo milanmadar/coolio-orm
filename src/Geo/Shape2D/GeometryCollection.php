@@ -62,6 +62,7 @@ class GeometryCollection extends AbstractShape2D
         $srid = (int) substr($sridPart, 5);
 
         // Validate and extract the GEOMETRYCOLLECTION coordinates
+        $geometryPart = str_replace(' (', '(', $geometryPart);
         preg_match('/GEOMETRYCOLLECTION\((.*)\)/', $geometryPart, $matches);
         if (empty($matches)) {
             throw new \InvalidArgumentException('Invalid GEOMETRYCOLLECTION format in EWKT.');

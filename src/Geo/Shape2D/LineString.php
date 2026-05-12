@@ -76,7 +76,7 @@ class LineString extends AbstractShape2D implements HasStartEndPointInterface
         $points = [];
 
         foreach ($pointsData as $pointData) {
-            $coords = array_map('trim', explode(' ', $pointData));
+            $coords = array_map('trim', explode(' ', trim($pointData)));
             if (count($coords) !== 2) {
                 throw new \InvalidArgumentException('Each point must have exactly 2 coordinates.');
             }

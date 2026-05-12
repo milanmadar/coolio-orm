@@ -66,6 +66,7 @@ class PointZ extends AbstractShapeZ
         $srid = (int) substr($sridPart, 5);
 
         // Validate and extract the POINTZ coordinates
+        $geometryPart = str_replace(' (', '(', $geometryPart);
         preg_match('/POINT ?Z?\(([-0-9\.]+) ([-0-9\.]+) ([-0-9\.]+)\)/', $geometryPart, $matches);
         if (empty($matches)) {
             throw new \InvalidArgumentException('Invalid POINTZ format in EWKT.');

@@ -107,6 +107,7 @@ class PolygonZM extends AbstractShapeZM
      */
     public static function createFromGeoEWKTString(string $ewktString): PolygonZM
     {
+        $ewktString = str_replace('; ', ';', $ewktString);
         if (strpos($ewktString, ';POLYGON') === false) {
             throw new \InvalidArgumentException('Invalid EWKT string for PolygonZM.');
         }
@@ -137,7 +138,7 @@ class PolygonZM extends AbstractShapeZM
             $ringData = trim($ringData, " ()");
             $points = [];
             foreach (explode(',', $ringData) as $pointData) {
-                $coords = array_map('trim', explode(' ', $pointData));
+                $coords = array_map('trim', explode(' ', trim($pointData)));
                 if (count($coords) !== 4) {
                     throw new \InvalidArgumentException('Each point must have 4 coordinates for ZM.');
                 }

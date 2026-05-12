@@ -63,6 +63,7 @@ class GeometryCollectionZM extends AbstractShapeZM
         $srid = (int) substr($sridPart, 5);
 
         // Extract geometries while respecting parentheses
+        $geometryPart = str_replace(' (', '(', $geometryPart);
         preg_match('/GEOMETRYCOLLECTION ?Z?M?\((.*)\)/', $geometryPart, $matches);
         if (empty($matches)) {
             throw new \InvalidArgumentException('Invalid GEOMETRYCOLLECTIONZM format in EWKT.');

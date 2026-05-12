@@ -32,7 +32,7 @@ class LineStringZMTest extends TestCase
         ];
         $line = new LineStringZM($points, 4326);
 
-        $expectedWKT = 'LINESTRING ZM(1.1 2.2 3.3 4326,4.4 5.5 6.6 4326,7.7 8.8 9.9 4326)';
+        $expectedWKT = 'LINESTRING ZM(1.10000000 2.20000000 3.30000000 4326.00000000,4.40000000 5.50000000 6.60000000 4326.00000000,7.70000000 8.80000000 9.90000000 4326.00000000)';
         $this->assertSame($expectedWKT, $line->toWKT());
 
         $expectedEWKT = 'SRID=4326;' . $expectedWKT;
@@ -96,8 +96,8 @@ class LineStringZMTest extends TestCase
         ];
         $this->assertEquals($expected, $coords);
 
-        $this->assertSame($ewkt, $line->toEWKT());
-        $this->assertSame('LINESTRING ZM(1 2 3 4,5 6 7 8,9 10 11 12)', $line->toWKT());
+        $expected = 'SRID=4326;LINESTRING ZM(1.00000000 2.00000000 3.00000000 4.00000000,5.00000000 6.00000000 7.00000000 8.00000000,9.00000000 10.00000000 11.00000000 12.00000000)';
+        $this->assertSame($expected, $line->toEWKT());
     }
 
     public function testInvalidGeoJSONThrows()

@@ -87,7 +87,7 @@ class Polygon extends AbstractShape2D
             $points = [];
 
             foreach ($pointsData as $pointData) {
-                $coords = array_map('trim', explode(' ', $pointData));
+                $coords = array_map('trim', explode(' ', trim($pointData)));
                 if (count($coords) !== 2) {
                     throw new \InvalidArgumentException('Each point in the ring must have exactly 2 coordinates.');
                 }

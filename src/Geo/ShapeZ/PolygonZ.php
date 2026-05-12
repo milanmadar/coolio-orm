@@ -89,7 +89,7 @@ class PolygonZ extends AbstractShapeZ
             $points = [];
 
             foreach ($pointsData as $pointData) {
-                $coords = array_map('trim', explode(' ', $pointData));
+                $coords = array_map('trim', explode(' ', trim($pointData)));
                 if (count($coords) !== 3) {
                     throw new \InvalidArgumentException('Each point in the ring must have exactly 3 coordinates.');
                 }

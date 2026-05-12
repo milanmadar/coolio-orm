@@ -63,6 +63,7 @@ class GeometryCollectionZ extends AbstractShapeZ
         $srid = (int) substr($sridPart, 5);
 
         // Validate and extract the GEOMETRYCOLLECTIONZ coordinates
+        $geometryPart = str_replace(' (', '(', $geometryPart);
         preg_match('/GEOMETRYCOLLECTION ?Z?\((.*)\)/', $geometryPart, $matches);
         if (empty($matches)) {
             throw new \InvalidArgumentException('Invalid GEOMETRYCOLLECTIONZ format in EWKT.');

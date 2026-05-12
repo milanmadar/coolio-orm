@@ -52,8 +52,10 @@ class LineStringZM extends AbstractShapeZM
 
     public function toWKT(): string
     {
-        $coords = array_map(fn(PointZM $pt) => implode(' ', $pt->getCoordinates()), $this->points);
-        return 'LINESTRING ZM(' . implode(',', $coords) . ')';
+        $coordinateStrings = array_map(function (PointZM $point) {
+            return sprintf('%.8f %.8f %.8f %.8f', $point->getX(), $point->getY(), $point->getZ(), $point->getM());
+        }, $this->points);
+        return sprintf('LINESTRING ZM(%s)', implode(',', $coordinateStrings));
     }
 
     public function toEWKT(): string

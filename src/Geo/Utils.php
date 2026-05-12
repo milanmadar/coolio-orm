@@ -524,4 +524,237 @@ class Utils
 
         throw new \InvalidArgumentException("Geo\Utils::lineToPolygon() doesnt support ".get_class($line));
     }
+
+    /**
+     * Clone
+     * @param AbstractShape $shape
+     * @return Shape2D\AbstractShape2D Clone
+     */
+    public static function to2D(AbstractShape $shape): Shape2D\AbstractShape2D
+    {
+        if($shape instanceof Shape2D\AbstractShape2D) {
+            return clone $shape;
+        }
+
+        if($shape instanceof ShapeZ\AbstractShapeZ) {
+            /** @var Shape2D\AbstractShape2D */
+            return Shape2D3D4DFactory::createFromGeoEWKTString(
+                self::_ewktConvert_3Dto2D(
+                    $shape->toEWKT()
+                )
+            );
+        }
+
+        /** @var Shape2D\AbstractShape2D */
+        return Shape2D3D4DFactory::createFromGeoEWKTString(
+            self::_ewktConvert_4Dto2D(
+                $shape->toEWKT()
+            )
+        );
+    }
+
+    /**
+     * Clone
+     * @param AbstractShape $shape
+     * @param int|float $altitudeWhenGoingFrom2D = 0
+     * @return ShapeZ\AbstractShapeZ Clone
+     */
+    public static function to3D(AbstractShape $shape, int|float $altitudeWhenGoingFrom2D = 0): ShapeZ\AbstractShapeZ
+    {
+        if($shape instanceof ShapeZ\AbstractShapeZ) {
+            return clone $shape;
+        }
+
+        if($shape instanceof ShapeZM\AbstractShapeZM) {
+            /** @var ShapeZ\AbstractShapeZ */
+            return Shape2D3D4DFactory::createFromGeoEWKTString(
+                self::_ewktConvert_4Dto3D(
+                    $shape->toEWKT()
+                )
+            );
+        }
+
+        /** @var ShapeZ\AbstractShapeZ */
+        return Shape2D3D4DFactory::createFromGeoEWKTString(
+            self::_ewktConvert_2Dto3D(
+                $shape->toEWKT(), $altitudeWhenGoingFrom2D
+            )
+        );
+    }
+
+    /**
+     * Clone
+     * @param AbstractShape $shape
+     * @param int|float $altitudeWhenGoingFrom2D = 0
+     * @param int|float $measureValueWhenGoingFrom2Dor3D = 0
+     * @return ShapeZM\AbstractShapeZM Clone
+     */
+    public static function to4D(AbstractShape $shape, int|float $altitudeWhenGoingFrom2D = 0,  int|float $measureValueWhenGoingFrom2Dor3D = 0): ShapeZM\AbstractShapeZM
+    {
+        if($shape instanceof ShapeZM\AbstractShapeZM) {
+            return clone $shape;
+        }
+
+        if($shape instanceof ShapeZ\AbstractShapeZ) {
+            /** @var ShapeZM\AbstractShapeZM */
+            return Shape2D3D4DFactory::createFromGeoEWKTString(
+                self::_ewktConvert_3Dto4D(
+                    $shape->toEWKT(), $measureValueWhenGoingFrom2Dor3D
+                )
+            );
+        }
+
+        /** @var ShapeZM\AbstractShapeZM */
+        return Shape2D3D4DFactory::createFromGeoEWKTString(
+            self::_ewktConvert_2Dto4D(
+                $shape->toEWKT(), $altitudeWhenGoingFrom2D, $measureValueWhenGoingFrom2Dor3D
+            )
+        );
+    }
+
+    /**
+     * @param string $ewkt
+     * @return string
+     */
+    private static function _ewktConvert_3Dto2D(string $ewkt): string
+    {
+        // 1. Update the Header: Change 'ZM' to 'Z' (e.g., LINESTRING ZM -> LINESTRING Z)
+        $ewkt = (string)preg_replace('/(\w+)\s*Z\b/i', '$1', $ewkt);
+
+        // 2. Process the Coordinates
+        // Matches: (X Y) Z
+        // Pattern: Two numbers followed by a third.
+        return (string)preg_replace_callback(
+            '/([\d\.-]+\s+[\d\.-]+)\s+[\d\.-]+/',
+            function ($matches) {
+                // $matches[1] contains only (X, Y)
+                return $matches[1];
+            },
+            $ewkt
+        );
+    }
+
+    /**
+     * @param string $ewkt
+     * @return string
+     */
+    private static function _ewktConvert_4Dto2D(string $ewkt): string
+    {
+        // 1. Update the Header: Change 'ZM' to 'Z' (e.g., LINESTRING ZM -> LINESTRING Z)
+        $ewkt = (string)preg_replace('/(\w+)\s*ZM/i', '$1', $ewkt);
+
+        // 2. Process the Coordinates
+        // Matches: (X Y) Z M
+        // Pattern: Two numbers followed by two more numbers.
+        return (string)preg_replace_callback(
+            '/([\d\.-]+\s+[\d\.-]+)\s+[\d\.-]+\s+[\d\.-]+/',
+            function ($matches) {
+                // $matches[1] contains only (X, Y)
+                return $matches[1];
+            },
+            $ewkt
+        );
+    }
+
+    /**
+     * @param string $ewkt
+     * @return string
+     */
+    private static function _ewktConvert_4Dto3D(string $ewkt): string
+    {
+        // 1. Update the Header: Change 'ZM' to 'Z' (e.g., LINESTRING ZM -> LINESTRING Z)
+        $ewkt = (string)preg_replace('/(\w+)\s*ZM/i', '$1 Z', $ewkt);
+
+        // 2. Process the Coordinates
+        // This regex looks for sequences of numbers/decimals separated by spaces.
+        return (string)preg_replace_callback(
+            '/([\d\.-]+\s+[\d\.-]+\s+[\d\.-]+)\s+[\d\.-]+/',
+            function ($matches) {
+                // $matches[1] contains the first three coordinates (X, Y, Z)
+                // The fourth one is matched but excluded from the return
+                return $matches[1];
+            },
+            $ewkt
+        );
+    }
+
+    /**
+     * @param string $ewkt
+     * @param int|float $altitude
+     * @return string
+     */
+    private static function _ewktConvert_2Dto3D(string $ewkt, int|float $altitude): string
+    {
+        $zValue = sprintf('%.8f', $altitude);
+
+        // 1. Update Headers: Add 'Z' (e.g., POINT -> POINT Z)
+        // We look for geometry keywords not followed by a Z/M/ZM indicator
+        // This handles POINT, LINESTRING, POLYGON, and COLLECTIONs
+        $ewkt = (string)preg_replace('/(POINT|LINESTRING|POLYGON|GEOMETRYCOLLECTION|MULTIPOINT|MULTILINESTRING|MULTIPOLYGON)(?!\s*[ZM])/i', '$1 Z', $ewkt);
+
+        // 2. Add the Z coordinate
+        // Matches two numbers: (X Y)
+        // Replaces with: (X Y Z)
+        return (string)preg_replace_callback(
+            '/([\d\.-]+\s+[\d\.-]+)/',
+            function ($matches) use ($zValue) {
+                return $matches[1] . ' ' . $zValue;
+            },
+            $ewkt
+        );
+    }
+
+    /**
+     * @param string $ewkt
+     * @param int|float $measure
+     * @return string
+     */
+    private static function _ewktConvert_3Dto4D(string $ewkt, int|float $measure): string
+    {
+        $mValue = sprintf('%.8f', $measure);
+
+        // 1. Update Headers: Change 'Z' to 'ZM' (e.g., POINT Z -> POINT ZM)
+        // We use a word boundary \b to ensure we only hit the dimension flag.
+        $ewkt = (string)preg_replace('/(\w+)\s*Z\b/i', '$1 ZM', $ewkt);
+
+        // 2. Add the M coordinate
+        // Matches three numbers: (X Y Z)
+        // Replaces with: (X Y Z M)
+        return (string)preg_replace_callback(
+            '/([\d\.-]+\s+[\d\.-]+\s+[\d\.-]+)/',
+            function ($matches) use ($mValue) {
+                return $matches[1] . ' ' . $mValue;
+            },
+            $ewkt
+        );
+    }
+
+    /**
+     * @param string $ewkt
+     * @param int|float $altitude
+     * @param int|float $measure
+     * @return string
+     */
+    private static function _ewktConvert_2Dto4D(string $ewkt, int|float $altitude, int|float $measure): string
+    {
+        $zVal = sprintf('%.8f', $altitude);
+        $mVal = sprintf('%.8f', $measure);
+        $suffix = " $zVal $mVal";
+
+        // 1. Update Headers: Add 'ZM' (e.g., POLYGON -> POLYGON ZM)
+        // Negative lookahead ensures we don't double-tag if Z/M already exists
+        $geometryTypes = 'POINT|LINESTRING|POLYGON|GEOMETRYCOLLECTION|MULTIPOINT|MULTILINESTRING|MULTIPOLYGON';
+        $ewkt = (string)preg_replace('/(' . $geometryTypes . ')(?!\s*[ZM])/i', '$1 ZM', $ewkt);
+
+        // 2. Append Z and M to coordinates
+        // Matches: (X Y)
+        // Replaces with: (X Y Z M)
+        return (string)preg_replace_callback(
+            '/([\d\.-]+\s+[\d\.-]+)/',
+            function ($matches) use ($suffix) {
+                return $matches[1] . $suffix;
+            },
+            $ewkt
+        );
+    }
 }
