@@ -455,4 +455,73 @@ class Utils
         /* @phpstan-ignore-next-line */
         return Shape2D3D4DFactory::createFromGeoEWKTString($geomEWKT);
     }
+
+    /**
+     * If needed, it will add 1 more point to match the first one. MultiLines will be turned into single polygons
+     * @param AbstractShape $line
+     * @return Shape2D\Polygon|ShapeZ\PolygonZ|ShapeZM\PolygonZM
+     */
+    public static function lineToPolygon(AbstractShape $line): Shape2D\Polygon|ShapeZ\PolygonZ|ShapeZM\PolygonZM
+    {
+        if($line instanceof Shape2D\MultiLineString
+        || $line instanceof ShapeZ\MultiLineStringZ
+        || $line instanceof ShapeZM\MultiLineStringZM)
+        {
+            $pointsOfSingleLine = [];
+            $lineStrings = array_values( $line->getLineStrings() );
+            foreach ($lineStrings as $lineString) {
+                $lineString = clone $lineString;
+                $points = $lineString->getPoints();
+                $pointsOfSingleLine = array_merge( $pointsOfSingleLine, $points );
+            }
+
+            /** @var Shape2D\Point|ShapeZ\PointZ|ShapeZM\PointZM $lastPoint */
+            $lastPoint = end($pointsOfSingleLine);
+            if(!$lastPoint->equals($pointsOfSingleLine[0])) {
+                $pointsOfSingleLine[] = clone $pointsOfSingleLine[0];
+            }
+
+            if($line instanceof Shape2D\MultiLineString) {
+                /** @var array<Shape2D\Point> $pointsOfSingleLine */
+                $line = new Shape2D\LineString($pointsOfSingleLine, $line->getSRID());
+                return new Shape2D\Polygon([$line], $line->getSRID());
+            }
+            elseif($line instanceof ShapeZ\MultiLineStringZ) {
+                /** @var array<ShapeZ\PointZ> $pointsOfSingleLine */
+                $line = new ShapeZ\LineStringZ($pointsOfSingleLine, $line->getSRID());
+                return new ShapeZ\PolygonZ([$line], $line->getSRID());
+            }
+            elseif($line instanceof ShapeZM\MultiLineStringZM) {
+                /** @var array<ShapeZM\PointZM> $pointsOfSingleLine */
+                $line = new ShapeZM\LineStringZM($pointsOfSingleLine, $line->getSRID());
+                return new ShapeZM\PolygonZM([$line], $line->getSRID());
+            }
+        }
+
+        if($line instanceof Shape2D\LineString
+        || $line instanceof ShapeZ\LineStringZ
+        || $line instanceof ShapeZM\LineStringZM)
+        {
+            $line = clone $line;
+            $points = $line->getPoints();
+
+            /** @var Shape2D\Point|ShapeZ\PointZ|ShapeZM\PointZM $lastPoint */
+            $lastPoint = end($points);
+            if(!$lastPoint->equals($points[0])) {
+                $points[] = clone $points[0];
+            }
+
+            $line->setPoints($points);
+
+            if($line instanceof Shape2D\LineString) {
+                return new Shape2D\Polygon([$line], $line->getSRID());
+            } elseif($line instanceof ShapeZ\LineStringZ) {
+                return new ShapeZ\PolygonZ([$line], $line->getSRID());
+            } elseif($line instanceof ShapeZM\LineStringZM) {
+                return new ShapeZM\PolygonZM([$line], $line->getSRID());
+            }
+        }
+
+        throw new \InvalidArgumentException("Geo\Utils::lineToPolygon() doesnt support ".get_class($line));
+    }
 }
