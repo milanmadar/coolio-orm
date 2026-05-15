@@ -17,7 +17,7 @@ class GeoUtilsTest extends TestCase
 
     public function testTransformGeomToSrid()
     {
-        $db = \Milanmadar\CoolioORM\ORM::instance()->getDbByUrl($_ENV['DB_POSTGRES_DB1']);
+        $db = ORM::instance()->getDbByUrl($_ENV['DB_POSTGRES_DB1']);
 
         $line = new Geo\ShapeZ\LineStringZ([
             new Geo\ShapeZ\PointZ(1, 2, 3),
@@ -33,7 +33,7 @@ class GeoUtilsTest extends TestCase
 
     public function testGetDistanceInMeters()
     {
-        $db = \Milanmadar\CoolioORM\ORM::instance()->getDbByUrl($_ENV['DB_POSTGRES_DB1']);
+        $db = ORM::instance()->getDbByUrl($_ENV['DB_POSTGRES_DB1']);
 
         $p1 = new Geo\Shape2D\Point(448250, 5302850, 32631);
         $p2 = new Geo\Shape2D\Point(448350, 5302850, 32631);
@@ -44,7 +44,7 @@ class GeoUtilsTest extends TestCase
 
     public function testGetClosestPoint2D()
     {
-        $db = \Milanmadar\CoolioORM\ORM::instance()->getDbByUrl($_ENV['DB_POSTGRES_DB1']);
+        $db = ORM::instance()->getDbByUrl($_ENV['DB_POSTGRES_DB1']);
 
         $srid = 32631;
         $line = new Geo\Shape2D\LineString([
@@ -61,7 +61,7 @@ class GeoUtilsTest extends TestCase
 
     public function testgetLength_fromPointInLine_tillEndOfLine_InMeter_2d()
     {
-        $db = \Milanmadar\CoolioORM\ORM::instance()->getDbByUrl($_ENV['DB_POSTGRES_DB1']);
+        $db = ORM::instance()->getDbByUrl($_ENV['DB_POSTGRES_DB1']);
 
         $srid = 4326;
         $point = new Geo\Shape2D\Point(5, 5, $srid);
@@ -74,9 +74,50 @@ class GeoUtilsTest extends TestCase
         $this->assertEquals(781106, $length);
     }
 
+    public function testgetLength_fromPointInLine_tillEndOfLine_InMeter_3D()
+    {
+        $db = ORM::instance()->getDbByUrl($_ENV['DB_POSTGRES_DB1']);
+
+        $srid = 32633; // meters already
+
+        // A line starting at 500m elevation and ending at 1500m elevation
+        // Horizontal distance is exactly 1000m (on the Y axis)
+        // Vertical distance is exactly 1000m (Z axis)
+        $line = new Geo\ShapeZ\LineStringZ([
+            new Geo\ShapeZ\PointZ(600000, 5000000, 500, $srid),
+            new Geo\ShapeZ\PointZ(600000, 5001000, 1500, $srid),
+        ]);
+
+        // Midpoint: 2D-wise it's halfway (500m horizontally), 3D-wise it's at 1000m elevation
+        $point = new Geo\ShapeZ\PointZ(600000, 5000500, 1000, $srid);
+
+        $length = Geo\Utils::getLength_fromPointInLine_tillEndOfLine_InMeter($line, $point, 'end', $db, 2);
+
+        $this->assertEquals(707.11, $length);
+    }
+
+    public function testgetLength_fromPointInLine_tillEndOfLine_InMeter_3d_wgs84()
+    {
+        $db = ORM::instance()->getDbByUrl($_ENV['DB_POSTGRES_DB1']);
+
+        $srid = 4326;
+
+        $line = new Geo\ShapeZ\LineStringZ([
+            new Geo\ShapeZ\PointZ(0.0, 0.0, 500, $srid),
+            new Geo\ShapeZ\PointZ(0.0, 0.01, 1500, $srid),
+        ]);
+
+        // midpoint
+        $point = new Geo\ShapeZ\PointZ(0.0, 0.005, 1000, $srid);
+
+        $length = Geo\Utils::getLength_fromPointInLine_tillEndOfLine_InMeter($line, $point, 'end', $db, 1);
+
+        $this->assertEquals(745.8, $length);
+    }
+
     public function testGetClosestPointZM()
     {
-        $db = \Milanmadar\CoolioORM\ORM::instance()->getDbByUrl($_ENV['DB_POSTGRES_DB1']);
+        $db = ORM::instance()->getDbByUrl($_ENV['DB_POSTGRES_DB1']);
 
         $srid = 32631;
         $line = new Geo\ShapeZM\LineStringZM([

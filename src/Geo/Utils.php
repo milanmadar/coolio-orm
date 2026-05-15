@@ -294,43 +294,65 @@ class Utils
             throw new \InvalidArgumentException("Geo\Utils::getLength_fromPointInLine_tillEndOfLine_InMeter() only supports LineString, LineStringZ, LineStringZM, CircularString, CircularStringZ and CircularStringZM");
         }
 
-        $lineEwkt = GeoFunctions::ST_GeomFromEWKT_geom($line);
-        if($line instanceof Shape2D\CircularString
-        || $line instanceof ShapeZ\CircularStringZ
-        || $line instanceof ShapeZM\CircularStringZM
-        ) {
-            $lineEwkt = "ST_CurveToLine(".$lineEwkt.")";
+        if ($line->getSRID() != $pointOnLine->getSRID()) {
+            throw new \InvalidArgumentException("Geo\Utils::getLength_fromPointInLine_tillEndOfLine_InMeter() SRIDs must match");
         }
 
-        $startFrac = ($untilStartOrEnd === 'start') ? '0.0' : 'ST_LineLocatePoint(line, ST_Transform(p, ST_SRID(line)))';
-        $endFrac   = ($untilStartOrEnd === 'start') ? 'ST_LineLocatePoint(line, ST_Transform(p, ST_SRID(line)))' : '1.0';
+        $is3D = ($line instanceof ShapeZ\LineStringZ
+            || $line instanceof ShapeZM\LineStringZM
+            || $line instanceof ShapeZ\CircularStringZ
+            || $line instanceof ShapeZM\CircularStringZM
+        );
+
+        $inputSrid = $line->getSRID();
+
+        $lineEwkt = GeoFunctions::ST_GeomFromEWKT_geom($line);
+        if ($line instanceof Shape2D\CircularString || $line instanceof ShapeZ\CircularStringZ || $line instanceof ShapeZM\CircularStringZM) {
+            $lineEwkt = "ST_CurveToLine(" . $lineEwkt . ")";
+        }
+
+        $pointEwkt = GeoFunctions::ST_GeomFromEWKT_geom($pointOnLine);
+
+        // Point Location Logic (Always 2D)
+        $locateSql = "ST_LineLocatePoint(ST_Force2D(line), ST_Force2D(p))";
+        $startFrac = ($untilStartOrEnd === 'start') ? '0.0' : $locateSql;
+        $endFrac   = ($untilStartOrEnd === 'start') ? $locateSql : '1.0';
+
+        // Length Calculation Strategy
+        if ($is3D) {
+            if ($inputSrid === 4326) {
+                // Case: 3D WGS84 -> Must project to UTM for valid 3D meters
+                $utmSrid = self::getUtmSridFromWGS($pointOnLine->getX(), $pointOnLine->getY());
+                $lengthSql = "ST_3DLength(ST_Transform(sub, $utmSrid))";
+            } else {
+                // Case: 3D Projected -> Assume input units are already meters
+                $lengthSql = "ST_3DLength(sub)";
+            }
+        } else {
+            if ($inputSrid === 4326) {
+                // Case: 2D WGS84 -> Use Geography (Spheroid) for high precision
+                $lengthSql = "ST_Length(sub::geography)";
+            } else {
+                // Case: 2D Projected -> Use Geometry (Planar) to match user projection
+                $lengthSql = "ST_Length(sub)";
+            }
+        }
 
         $sql = "
-            SELECT ST_Length(
-                ST_LineSubstring(
-                    line,
-                    $startFrac,
-                    $endFrac
-                )::geography
+            WITH data AS (
+                SELECT $lineEwkt AS line, $pointEwkt AS p
+            ),
+            segment AS (
+                SELECT ST_LineSubstring(line, $startFrac, $endFrac) as sub
+                FROM data
             )
-            FROM (
-                SELECT
-                    ".$lineEwkt." AS line,
-                    ".GeoFunctions::ST_GeomFromEWKT_geom($pointOnLine)." AS p
-            ) AS data
+            SELECT $lengthSql FROM segment
         ";
 
-        if($dbOrMgr instanceof Manager) {
-            $db = $dbOrMgr->getDb();
-        } else {
-            $db = $dbOrMgr;
-        }
-
+        $db = ($dbOrMgr instanceof Manager) ? $dbOrMgr->getDb() : $dbOrMgr;
         $v = (float)$db->executeQuery($sql)->fetchOne();
-        if($roundToPrecision > -1) {
-            return round($v, $roundToPrecision);
-        }
-        return $v;
+
+        return ($roundToPrecision > -1) ? round($v, $roundToPrecision) : $v;
     }
 
     /**
