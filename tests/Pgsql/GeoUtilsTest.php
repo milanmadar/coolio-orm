@@ -228,4 +228,19 @@ class GeoUtilsTest extends TestCase
 
         $this->assertEquals($ewktOut, $geomOut->toEWKT());
     }
+
+    public function testGetLengthInMeters(): void
+    {
+        $db = ORM::instance()->getDbByUrl($_ENV['DB_POSTGRES_DB1']);
+
+        $srid = 4326;
+        $p1 = new Geo\ShapeZ\PointZ(16.37305556, 48.20847222, 500, $srid);
+        $p2 = new Geo\ShapeZ\PointZ(16.37305556, 48.21746485, 1500, $srid);
+        $line = new Geo\ShapeZ\LineStringZ([$p1, $p2], $srid);
+
+        $dist   = Geo\Utils::getDistanceInMeters($p1, $p2, $db, 0);
+        $length = Geo\Utils::getLengthInMeter($line, $db, 0);
+
+        $this->assertEquals($length, $dist);
+    }
 }
