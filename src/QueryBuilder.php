@@ -1137,6 +1137,9 @@ class QueryBuilder extends DoctrineQueryBuilder
                 // becuase DBAL+Posgres has a bug that even if i say ParameterType::BOOLEAN
                 // when the value is false, it still write empty string
                 $type = ParameterType::BOOLEAN;
+                if($value === false) {
+                    $value = 0;
+                }
             }
         }
         elseif(is_array($value) && !empty($value) && is_bool(array_values($value)[0])) {
