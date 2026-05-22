@@ -402,6 +402,59 @@ abstract class Manager
     }
 
     /**
+     * Returns many Entity, unordered
+     * @param array<int|string>|null $ids will be made uniq unside
+     * @param bool $forceToGetFromDb Optional, Set to TRUE if you wan to skip the EntityRepository and surely fetch it from the db
+     * @return array<Entity> Unordered
+     * @throws \Doctrine\DBAL\Driver\Exception
+     * @throws \Doctrine\DBAL\Exception
+     * @throws \InvalidArgumentException
+     */
+    public function findManyByIds(?array $ids, bool $forceToGetFromDb = false): array
+    {
+        if(empty($ids)) return [];
+        $ids = array_values(array_unique($ids));
+
+        // topology changes the geometry, so always fetch it from the db, so skip the entity repository
+        if( !empty( $this->getTopoGeometryFieldInfo() ) ) {
+            $forceToGetFromDb = true;
+        }
+
+        // If its in the Entity Repository, return what we already have
+        if($this->useEntityRepository && !$forceToGetFromDb)
+        {
+            $retEnts = [];
+            $missingIds = [];
+
+            foreach($ids as $id) {
+                $id = (int)$id;
+                $existingEnt = $this->entityRepository->getByDbId($id, $this->getDbTable().$this->getDbConnUrl());
+                if (isset($existingEnt)) {
+                    $retEnts[] = $existingEnt;
+                } else {
+                    $missingIds[] = $id;
+                }
+            }
+
+            if(empty($missingIds)) {
+                return $retEnts;
+            }
+
+            // implode() is safe cuz they are all INTs
+            $missingEnts = $this->findManyWhere('id IN ('.implode(',', $missingIds).')', [], $forceToGetFromDb);
+            return array_merge($retEnts, $missingEnts);
+        }
+
+        // Get it from to the database
+        $intIds = [];
+        foreach($ids as $id) {
+            $intIds[] = (int)$id;
+        }
+        // implode() is safe cuz they are all INTs
+        return $this->findManyWhere('id IN ('.implode(',', $intIds).')', [], $forceToGetFromDb);
+    }
+
+    /**
      * Returns 1 Entity. USED BY ENTITY RELATIONS
      * @param string $field
      * @param mixed $value
@@ -540,7 +593,7 @@ abstract class Manager
                 $ent->_setForceInsertOnNextSave(false);
             } else {
                 if($this->dbType == 'pg') {
-                    $ent->setId($this->db->getNativeConnection()->lastInsertId($this->getDbTable().'_id_seq')); /* phpstan-ignore-line */
+                    $ent->setId($this->db->getNativeConnection()->lastInsertId($this->getDbTable().'_id_seq')); /* @phpstan-ignore-line */
                 } else {
                     $ent->setId(intval($this->db->lastInsertId()));
                 }
