@@ -787,4 +787,52 @@ class Utils
             $ewkt
         );
     }
+
+    /**
+     * @param string $ewkt
+     * @return array<int>
+     */
+    private static function _ewktConvert_3DgetZvalues(string $ewkt): array
+    {
+        // Match X Y Z groupings, capturing only the Z component
+        // Handles positive/negative floats and scientific notation
+        preg_match_all('/(?:[\d\.-]+(?:e[+-]?\d+)?\s+){2}([\d\.-]+(?:e[+-]?\d+)?)/i', $ewkt, $matches);
+
+        if (empty($matches[1])) {
+            return [];
+        }
+
+        // Convert string array to floats
+        return array_map('floatval', $matches[1]);
+    }
+
+    /**
+     * Inject an ordered array of Z-values back into a 2D EWKT string.
+     *
+     * @param string $ewkt
+     * @param array<float|int> $zValues
+     * @return string The 3D EWKT with all altitudes restored
+     */
+    private static function _ewktConvert_2DsetZvalues(string $ewkt, array $zValues): string
+    {
+        // 1. Update Geometry Type Headers (e.g., LINESTRING -> LINESTRING Z)
+        $keywords = 'POINT|LINESTRING|POLYGON|GEOMETRYCOLLECTION|MULTIPOINT|MULTILINESTRING|MULTIPOLYGON';
+        $ewkt = (string)preg_replace('/(' . $keywords . ')(?!\s*[ZM])/i', '$1 Z', $ewkt);
+
+        // 2. Track matching indices sequentially
+        $index = 0;
+
+        // 3. Match 2D coordinate pairs and append their respective Z value
+        return (string)preg_replace_callback(
+            '/([\d\.-]+(?:e[+-]?\d+)?\s+[\d\.-]+(?:e[+-]?\d+)?)/i',
+            function ($matches) use (&$index, $zValues) {
+                // Pull the Z value or fallback to 0.0 if index out of bounds
+                $z = isset($zValues[$index]) ? sprintf('%.8f', $zValues[$index]) : '0.00000000';
+                $index++;
+
+                return $matches[1] . ' ' . $z;
+            },
+            $ewkt
+        );
+    }
 }

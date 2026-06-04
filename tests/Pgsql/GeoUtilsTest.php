@@ -15,7 +15,22 @@ class GeoUtilsTest extends TestCase
         ORM::_clearSingleton();
     }
 
-    public function testTransformGeomToSrid()
+    public function testTransformGeomToSrid2D()
+    {
+        $db = ORM::instance()->getDbByUrl($_ENV['DB_POSTGRES_DB1']);
+
+        $line = new Geo\Shape2D\LineString([
+            new Geo\Shape2D\Point(1, 2),
+            new Geo\Shape2D\Point(4, 5),
+            new Geo\Shape2D\Point(7, 8)
+        ], 4326);
+
+        $lineRegional = Geo\Utils::transformGeomToSrid($line, 32633, $db);
+        $this->assertInstanceOf(Geo\Shape2D\LineString::class, $lineRegional);
+        $this->assertEquals(32633, $lineRegional->getSRID());
+    }
+
+    public function testTransformGeomToSrid3D()
     {
         $db = ORM::instance()->getDbByUrl($_ENV['DB_POSTGRES_DB1']);
 
