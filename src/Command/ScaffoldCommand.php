@@ -335,105 +335,105 @@ class ScaffoldCommand extends Command
                         ? 'geography'
                         : 'geometry';
 
-                    // 2d
-                    if(str_contains($nativeColType, '(point,')) {
-                        $geoShapeType = Shape2D\Point::class;
-                    } elseif(str_contains($nativeColType, '(linestring,')) {
-                        $geoShapeType = Shape2D\LineString::class;
-                    } elseif(str_contains($nativeColType, '(polygon,')) {
-                        $geoShapeType = Shape2D\Polygon::class;
-                    } elseif(str_contains($nativeColType, '(multipoint,')) {
-                        $geoShapeType = Shape2D\MultiPoint::class;
-                    } elseif(str_contains($nativeColType, '(multilinestring,')) {
-                        $geoShapeType = Shape2D\MultiLineString::class;
-                    } elseif(str_contains($nativeColType, '(multipolygon,')) {
-                        $geoShapeType = Shape2D\MultiPolygon::class;
-                    } elseif(str_contains($nativeColType, '(geometrycollection,')) {
-                        $geoShapeType = Shape2D\GeometryCollection::class;
-                    } elseif(str_contains($nativeColType, '(circularstring,')) {
-                        $geoShapeType = Shape2D\CircularString::class;
+                    // 4d
+                    if(str_contains($nativeColType, '(pointzm')) {
+                        $geoShapeType = ShapeZM\PointZM::class;
+                    } elseif(str_contains($nativeColType, '(linestringzm')) {
+                        $geoShapeType = ShapeZM\LineStringZM::class;
+                    } elseif(str_contains($nativeColType, '(polygonzm')) {
+                        $geoShapeType = ShapeZM\PolygonZM::class;
+                    } elseif(str_contains($nativeColType, '(multipointzm')) {
+                        $geoShapeType = ShapeZM\MultiPointZM::class;
+                    } elseif(str_contains($nativeColType, '(multilinestringzm')) {
+                        $geoShapeType = ShapeZM\MultiLineStringZM::class;
+                    } elseif(str_contains($nativeColType, '(multipolygonzm')) {
+                        $geoShapeType = ShapeZM\MultiPolygonZM::class;
+                    } elseif(str_contains($nativeColType, '(geometrycollectionzm')) {
+                        $geoShapeType = ShapeZM\GeometryCollectionZM::class;
+                    } elseif(str_contains($nativeColType, '(circularstringzm')) {
+                        $geoShapeType = ShapeZM\CircularStringZM::class;
                         $colType = 'geometry_curved';
-                    } elseif(str_contains($nativeColType, '(compoundcurve,')) {
-                        $geoShapeType = Shape2D\CompoundCurve::class;
+                    } elseif(str_contains($nativeColType, '(compoundcurvezm')) {
+                        $geoShapeType = ShapeZM\CompoundCurveZM::class;
                         $colType = 'geometry_curved';
-                    } elseif(str_contains($nativeColType, '(curvepolygon,')) {
-                        $geoShapeType = Shape2D\CurvePolygon::class;
+                    } elseif(str_contains($nativeColType, '(curvepolygonzm')) {
+                        $geoShapeType = ShapeZM\CurvePolygonZM::class;
                         $colType = 'geometry_curved';
-                    } elseif(str_contains($nativeColType, '(multicurve,')) {
-                        $geoShapeType = Shape2D\MultiCurve::class;
+                    } elseif(str_contains($nativeColType, '(multicurvezm')) {
+                        $geoShapeType = ShapeZM\MultiCurveZM::class;
                         $colType = 'geometry_curved';
+                    } elseif(str_contains($nativeColType, '(geometryzm')
+                        || str_contains($nativeColType, '(geometryzm)')
+                        || $nativeColType == 'geometryzm'
+                        || str_contains($nativeColType, '(geographyzm,')
+                        || str_contains($nativeColType, '(geographyzm)')
+                        || $nativeColType == 'geographyzm') {
+                        $geoShapeType = ShapeZM\AbstractShapeZM::class;
                     }
 
                     // 3d
-                    elseif(str_contains($nativeColType, '(pointz,')) {
+                    elseif(str_contains($nativeColType, '(pointz')) {
                         $geoShapeType = ShapeZ\PointZ::class;
-                    } elseif(str_contains($nativeColType, '(linestringz,')) {
+                    } elseif(str_contains($nativeColType, '(linestringz')) {
                         $geoShapeType = ShapeZ\LineStringZ::class;
-                    } elseif(str_contains($nativeColType, '(polygonz,')) {
+                    } elseif(str_contains($nativeColType, '(polygonz')) {
                         $geoShapeType = ShapeZ\PolygonZ::class;
-                    } elseif(str_contains($nativeColType, '(multipointz,')) {
+                    } elseif(str_contains($nativeColType, '(multipointz')) {
                         $geoShapeType = ShapeZ\MultiPointZ::class;
-                    } elseif(str_contains($nativeColType, '(multilinestringz,')) {
+                    } elseif(str_contains($nativeColType, '(multilinestringz')) {
                         $geoShapeType = ShapeZ\MultiLineStringZ::class;
-                    } elseif(str_contains($nativeColType, '(multipolygonz,')) {
+                    } elseif(str_contains($nativeColType, '(multipolygonz')) {
                         $geoShapeType = ShapeZ\MultiPolygonZ::class;
-                    } elseif(str_contains($nativeColType, '(geometrycollectionz,')) {
+                    } elseif(str_contains($nativeColType, '(geometrycollectionz')) {
                         $geoShapeType = ShapeZ\GeometryCollectionZ::class;
-                    } elseif(str_contains($nativeColType, '(circularstringz,')) {
+                    } elseif(str_contains($nativeColType, '(circularstringz')) {
                         $geoShapeType = ShapeZ\CircularStringZ::class;
                         $colType = 'geometry_curved';
-                    } elseif(str_contains($nativeColType, '(compoundcurvez,')) {
+                    } elseif(str_contains($nativeColType, '(compoundcurvez')) {
                         $geoShapeType = ShapeZ\CompoundCurveZ::class;
                         $colType = 'geometry_curved';
-                    } elseif(str_contains($nativeColType, '(curvepolygonz,')) {
+                    } elseif(str_contains($nativeColType, '(curvepolygonz')) {
                         $geoShapeType = ShapeZ\CurvePolygonZ::class;
                         $colType = 'geometry_curved';
-                    } elseif(str_contains($nativeColType, '(multicurvez,')) {
+                    } elseif(str_contains($nativeColType, '(multicurvez')) {
                         $geoShapeType = ShapeZ\MultiCurveZ::class;
                         $colType = 'geometry_curved';
-                    } elseif(str_contains($nativeColType, '(geometryz,')
-                    || str_contains($nativeColType, '(geometryz)')
-                    || $nativeColType == 'geometryz'
-                    || str_contains($nativeColType, '(geographyz,')
-                    || str_contains($nativeColType, '(geographyz)')
-                    || $nativeColType == 'geographyz') {
+                    } elseif(str_contains($nativeColType, '(geometryz')
+                        || str_contains($nativeColType, '(geometryz)')
+                        || $nativeColType == 'geometryz'
+                        || str_contains($nativeColType, '(geographyz')
+                        || str_contains($nativeColType, '(geographyz)')
+                        || $nativeColType == 'geographyz') {
                         $geoShapeType = ShapeZ\AbstractShapeZ::class;
                     }
 
-                    // 4d
-                    elseif(str_contains($nativeColType, '(pointzm,')) {
-                        $geoShapeType = ShapeZM\PointZM::class;
-                    } elseif(str_contains($nativeColType, '(linestringzm,')) {
-                        $geoShapeType = ShapeZM\LineStringZM::class;
-                    } elseif(str_contains($nativeColType, '(polygonzm,')) {
-                        $geoShapeType = ShapeZM\PolygonZM::class;
-                    } elseif(str_contains($nativeColType, '(multipointzm,')) {
-                        $geoShapeType = ShapeZM\MultiPointZM::class;
-                    } elseif(str_contains($nativeColType, '(multilinestringzm,')) {
-                        $geoShapeType = ShapeZM\MultiLineStringZM::class;
-                    } elseif(str_contains($nativeColType, '(multipolygonzm,')) {
-                        $geoShapeType = ShapeZM\MultiPolygonZM::class;
-                    } elseif(str_contains($nativeColType, '(geometrycollectionzm,')) {
-                        $geoShapeType = ShapeZM\GeometryCollectionZM::class;
-                    } elseif(str_contains($nativeColType, '(circularstringzm,')) {
-                        $geoShapeType = ShapeZM\CircularStringZM::class;
+                    // 2d
+                    elseif(str_contains($nativeColType, '(point')) {
+                        $geoShapeType = Shape2D\Point::class;
+                    } elseif(str_contains($nativeColType, '(linestring')) {
+                        $geoShapeType = Shape2D\LineString::class;
+                    } elseif(str_contains($nativeColType, '(polygon')) {
+                        $geoShapeType = Shape2D\Polygon::class;
+                    } elseif(str_contains($nativeColType, '(multipoint')) {
+                        $geoShapeType = Shape2D\MultiPoint::class;
+                    } elseif(str_contains($nativeColType, '(multilinestring')) {
+                        $geoShapeType = Shape2D\MultiLineString::class;
+                    } elseif(str_contains($nativeColType, '(multipolygon')) {
+                        $geoShapeType = Shape2D\MultiPolygon::class;
+                    } elseif(str_contains($nativeColType, '(geometrycollection')) {
+                        $geoShapeType = Shape2D\GeometryCollection::class;
+                    } elseif(str_contains($nativeColType, '(circularstring')) {
+                        $geoShapeType = Shape2D\CircularString::class;
                         $colType = 'geometry_curved';
-                    } elseif(str_contains($nativeColType, '(compoundcurvezm,')) {
-                        $geoShapeType = ShapeZM\CompoundCurveZM::class;
+                    } elseif(str_contains($nativeColType, '(compoundcurve')) {
+                        $geoShapeType = Shape2D\CompoundCurve::class;
                         $colType = 'geometry_curved';
-                    } elseif(str_contains($nativeColType, '(curvepolygonzm,')) {
-                        $geoShapeType = ShapeZM\CurvePolygonZM::class;
+                    } elseif(str_contains($nativeColType, '(curvepolygon')) {
+                        $geoShapeType = Shape2D\CurvePolygon::class;
                         $colType = 'geometry_curved';
-                    } elseif(str_contains($nativeColType, '(multicurvezm,')) {
-                        $geoShapeType = ShapeZM\MultiCurveZM::class;
+                    } elseif(str_contains($nativeColType, '(multicurve')) {
+                        $geoShapeType = Shape2D\MultiCurve::class;
                         $colType = 'geometry_curved';
-                    } elseif(str_contains($nativeColType, '(geometryzm,')
-                    || str_contains($nativeColType, '(geometryzm)')
-                    || $nativeColType == 'geometryzm'
-                    || str_contains($nativeColType, '(geographyzm,')
-                    || str_contains($nativeColType, '(geographyzm)')
-                    || $nativeColType == 'geographyzm') {
-                        $geoShapeType = ShapeZM\AbstractShapeZM::class;
                     }
 
                     // general
