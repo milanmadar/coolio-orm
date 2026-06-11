@@ -109,6 +109,15 @@ abstract class Manager
     }
 
     /**
+     * Is it using the EntityRepository (kinda like an Entity Cache)
+     * @return bool
+     */
+    public function getUseEntityRepository(): bool
+    {
+        return $this->useEntityRepository;
+    }
+
+    /**
      * Returns a new empty Entity. (If you are not really doing it from the database row, then use $manager->createEntity())
      * @param array<string, string> $db_data Db table row. (If you are not really doing it from the database row, then use $manager->createEntity())
      * @param bool $skipEntityRepo Optional. If TRUE it will not store this Entity in the Entity Repository
