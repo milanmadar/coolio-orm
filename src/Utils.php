@@ -3,8 +3,10 @@
 namespace Milanmadar\CoolioORM;
 
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Exception;
+use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\DBAL\Result;
+use Milanmadar\CoolioORM\ORMException\ORMUniqueConstraintViolationException;
+use Milanmadar\CoolioORM\ORMException\ORMException;
 
 class Utils
 {
@@ -69,7 +71,7 @@ class Utils
      * @param Connection $conn
      * @param StatementRepository|null $statementRepo
      * @return Result
-     * @throws Exception
+     * @throws ORMException
      */
     public static function executeQuery_bindValues(string $sql, array $binds, Connection $conn, StatementRepository|null $statementRepo): \Doctrine\DBAL\Result
     {
@@ -104,7 +106,7 @@ class Utils
                     $stmt->bindValue($name_or_qmarkIndex, $binds[$name_or_qmarkIndex], $type);
                 }
             }
-        } catch (Exception\DriverException $e) {
+        } catch (DBALException\DriverException $e) {
             throw self::handleDriverException($e, $sql, $binds);
         }
 
@@ -120,13 +122,13 @@ class Utils
                 }
             }
             // @codeCoverageIgnoreStart
-            catch (Exception\ConnectionException | Exception\ConnectionLost | Exception\RetryableException $e) {
+            catch (DBALException\ConnectionException | DBALException\ConnectionLost | DBALException\RetryableException $e) {
                 if ($i == $maxTries) {
                     throw self::handleDriverException($e, $sql, $binds);
                 }
                 sleep($retrySleep);
             }
-            catch (Exception $e) {
+            catch (ORMException $e) {
                 throw self::handleDriverException($e, $sql, $binds);
             }
             // @codeCoverageIgnoreEnd
@@ -142,7 +144,7 @@ class Utils
      * @param Connection $conn
      * @param StatementRepository|null $statementRepo
      * @return int The number of affected rows
-     * @throws Exception
+     * @throws ORMException
      */
     public static function executeStatement_bindValues(string $sql, array $binds, Connection $conn, StatementRepository|null $statementRepo): int
     {
@@ -177,7 +179,7 @@ class Utils
                     $stmt->bindValue($name_or_qmarkIndex, $binds[$name_or_qmarkIndex], $type);
                 }
             }
-        } catch (Exception\DriverException $e) {
+        } catch (DBALException\DriverException $e) {
             throw self::handleDriverException($e, $sql, $binds);
         }
 
@@ -193,13 +195,13 @@ class Utils
                 }
             }
             // @codeCoverageIgnoreStart
-            catch (Exception\ConnectionException | Exception\ConnectionLost | Exception\RetryableException $e) {
+            catch (DBALException\ConnectionException | DBALException\ConnectionLost | DBALException\RetryableException $e) {
                 if ($i == $maxTries) {
                     throw self::handleDriverException($e, $sql, $binds);
                 }
                 sleep($retrySleep);
             }
-            catch (Exception $e) {
+            catch (ORMException | DBALException $e) {
                 throw self::handleDriverException($e, $sql, $binds);
             }
             // @codeCoverageIgnoreEnd
@@ -210,12 +212,12 @@ class Utils
     }
 
     /**
-     * @param Exception | Exception\RetryableException $e
+     * @param ORMException | DBALException | DBALException\ConnectionException | DBALException\ConnectionLost | DBALException\RetryableException $e
      * @param string|null $sql
      * @param array<int|string, mixed>|null $binds
      * @return ORMException
      */
-    public static function handleDriverException(Exception|Exception\RetryableException $e, ?string $sql, ?array $binds): ORMException
+    public static function handleDriverException(ORMException | DBALException | DBALException\ConnectionException | DBALException\ConnectionLost | DBALException\RetryableException $e, ?string $sql, ?array $binds): ORMException
     {
         $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 3);
         $caller = $backtrace[2];
@@ -223,7 +225,7 @@ class Utils
         $callerFunction = $caller['function'];
         $from = $callerClass.'::'.$callerFunction.'()';
 
-        if($e instanceof Exception\DriverException)
+        if($e instanceof DBALException\DriverException)
         {
             $exClass = get_class($e);
             $query = $e->getQuery();
@@ -235,6 +237,11 @@ class Utils
                 ."\n\n".($query?->getSQL() ?? $sql ?? '(no sql)')
                 ."\n\n".print_r($query?->getParams() ?? $binds ?? [], true);
             $code = ($theirPrevEx instanceof \Exception) ? $theirPrevEx->getCode() : $e->getCode();
+
+            if($e instanceof DBALException\UniqueConstraintViolationException) {
+                return new ORMUniqueConstraintViolationException($newMsg, $code, $e);
+            }
+
             return new ORMException($newMsg, $code, $e);
         }
 

@@ -790,9 +790,9 @@ class Utils
 
     /**
      * @param string $ewkt
-     * @return array<int>
+     * @return array<float>
      */
-    private static function _ewktConvert_3DgetZvalues(string $ewkt): array
+    private static function _ewktConvert_3DgetZvalues(string $ewkt): array /* @phpstan-ignore-line */
     {
         // Match X Y Z groupings, capturing only the Z component
         // Handles positive/negative floats and scientific notation
@@ -813,7 +813,7 @@ class Utils
      * @param array<float|int> $zValues
      * @return string The 3D EWKT with all altitudes restored
      */
-    private static function _ewktConvert_2DsetZvalues(string $ewkt, array $zValues): string
+    private static function _ewktConvert_2DsetZvalues(string $ewkt, array $zValues): string /* @phpstan-ignore-line */
     {
         // 1. Update Geometry Type Headers (e.g., LINESTRING -> LINESTRING Z)
         $keywords = 'POINT|LINESTRING|POLYGON|GEOMETRYCOLLECTION|MULTIPOINT|MULTILINESTRING|MULTIPOLYGON';

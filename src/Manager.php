@@ -3,9 +3,10 @@
 namespace Milanmadar\CoolioORM;
 
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\ParameterType;
-use Doctrine\DBAL\Exception;
+use Doctrine\DBAL\Types\Type;
+use Doctrine\DBAL\Exception as DBALException;
+use Milanmadar\CoolioORM\ORMException\ORMException;
 
 abstract class Manager
 {
@@ -50,7 +51,7 @@ abstract class Manager
     /**
      * If a transaction is already started, it will do nothing
      * @return $this
-     * @throws Exception
+     * @throws ORMException
      */
     public function beginTransaction(): self
     {
@@ -61,7 +62,7 @@ abstract class Manager
     /**
      * If you are not in a transaction, it will do nothing
      * @return $this
-     * @throws Exception
+     * @throws ORMException
      */
     public function commitTransaction(): self
     {
@@ -72,7 +73,7 @@ abstract class Manager
     /**
      * If you are not in a transaction, it will do nothing
      * @return $this
-     * @throws Exception
+     * @throws ORMException
      */
     public function rollbackTransaction(): self
     {
@@ -385,8 +386,7 @@ abstract class Manager
      * @param int|null $id
      * @param bool $forceToGetFromDb Optional, Set to TRUE if you wan to skip the EntityRepository and surely fetch it from the db
      * @return Entity|null
-     * @throws \Doctrine\DBAL\Driver\Exception
-     * @throws \Doctrine\DBAL\Exception
+     * @throws ORMException
      * @throws \InvalidArgumentException
      */
     public function findById(?int $id, bool $forceToGetFromDb = false): ?Entity
@@ -415,8 +415,7 @@ abstract class Manager
      * @param array<int|string>|null $ids will be made uniq unside
      * @param bool $forceToGetFromDb Optional, Set to TRUE if you wan to skip the EntityRepository and surely fetch it from the db
      * @return array<Entity> Unordered
-     * @throws \Doctrine\DBAL\Driver\Exception
-     * @throws \Doctrine\DBAL\Exception
+     * @throws ORMException
      * @throws \InvalidArgumentException
      */
     public function findManyByIds(?array $ids, bool $forceToGetFromDb = false): array
@@ -469,8 +468,7 @@ abstract class Manager
      * @param mixed $value
      * @param bool $forceToGetFromDb Optional, Set to TRUE if you wan to skip the EntityRepository and surely fetch it from the db
      * @return Entity|null
-     * @throws \Doctrine\DBAL\Driver\Exception
-     * @throws \Doctrine\DBAL\Exception
+     * @throws ORMException
      * @throws \InvalidArgumentException
      */
     public function findByField(string $field, mixed $value, bool $forceToGetFromDb = false): ?Entity
@@ -493,8 +491,7 @@ abstract class Manager
      * @param array<mixed>|array<string, mixed> $binds Optional
      * @param bool $forceToGetFromDb Optional. Set to TRUE if you want to skip the EntityRepository and surely fetch it from the db
      * @return Entity|null
-     * @throws \Doctrine\DBAL\Driver\Exception
-     * @throws \Doctrine\DBAL\Exception
+     * @throws ORMException
      * @throws \InvalidArgumentException
      */
     public function findOneWhere(string $sqlAfterWHERE, array $binds = [], bool $forceToGetFromDb = false): ?Entity
@@ -508,7 +505,7 @@ abstract class Manager
      * @param array<string|int, mixed> $binds Optional
      * @param bool $forceToGetFromDb Optional, Set to TRUE if you wan to skip the EntityRepository and surely fetch it from the db
      * @return Entity|null
-     * @throws \Doctrine\DBAL\Exception
+     * @throws ORMException
      * @throws \InvalidArgumentException
      */
     public function findOne(string $sql, array $binds = [], bool $forceToGetFromDb = false): ?Entity
@@ -524,8 +521,7 @@ abstract class Manager
      * @param array<mixed>|array<string, mixed> $binds Optional
      * @param bool $forceToGetFromDb Optional, Set to TRUE if you wan to skip the EntityRepository and surely fetch it from the db
      * @return array<Entity>
-     * @throws \Doctrine\DBAL\Driver\Exception
-     * @throws \Doctrine\DBAL\Exception
+     * @throws ORMException
      * @throws \InvalidArgumentException
      */
     public function findManyWhere(string $sqlAfterWHERE, array $binds = [], bool $forceToGetFromDb = false): array
@@ -539,7 +535,7 @@ abstract class Manager
      * @param array<string|int, mixed> $binds Optional
      * @param bool $forceToGetFromDb Optional, Set to TRUE if you wan to skip the EntityRepository and surely fetch it from the db
      * @return array<Entity>
-     * @throws \Doctrine\DBAL\Exception
+     * @throws ORMException
      * @throws \InvalidArgumentException
      */
     public function findMany(string $sql, array $binds = [], bool $forceToGetFromDb = false): array
@@ -569,7 +565,7 @@ abstract class Manager
     /**
      * Save the Entity to the database
      * @param Entity $ent
-     * @throws \Doctrine\DBAL\Exception
+     * @throws ORMException
      * @throws \LogicException When the Entity was deleted. To get the 'id' it had, call _getDeletedId().
      * @Event Event\EntityEventTypeEnum::DATA_CHANGED , @EventArg [string:'id', int:'new id', null]
      * @Event Event\EntityEventTypeEnum::ID_CHANGED , @EventArg [int|null:'new value', int|null:'old value]
@@ -602,7 +598,14 @@ abstract class Manager
                 $ent->_setForceInsertOnNextSave(false);
             } else {
                 if($this->dbType == 'pg') {
-                    $ent->setId($this->db->getNativeConnection()->lastInsertId($this->getDbTable().'_id_seq')); /* @phpstan-ignore-line */
+                    try {
+                        $ent->setId($this->db->getNativeConnection()->lastInsertId($this->getDbTable().'_id_seq')); /* @phpstan-ignore-line */
+                    }
+                    catch(\PDOException $e) {
+                        if(str_contains($e->getMessage(), "does not exist")) {
+                            throw new ORMException('Postgres primary id must be SERIAL and called "'.$this->getDbTable().'_id_seq" for table "'.$this->getDbTable().'"');
+                        }
+                    }
                 } else {
                     $ent->setId(intval($this->db->lastInsertId()));
                 }
@@ -696,7 +699,6 @@ abstract class Manager
      * @param array<mixed> $allTypes
      * @return void
      * @throws ORMException
-     * @throws \Doctrine\DBAL\Exception
      */
     private function _bulkInsert_insert(array $columns, array $allValues, string $allPlaceholdersStr, array $allTypes): void
     {
@@ -718,13 +720,13 @@ abstract class Manager
                 return;
             }
             // @codeCoverageIgnoreStart
-            catch (Exception\ConnectionException | Exception\ConnectionLost | Exception\RetryableException $e) {
+            catch (DBALException\ConnectionException | DBALException\ConnectionLost | DBALException\RetryableException $e) {
                 if ($i == $maxTries) {
                     throw Utils::handleDriverException($e, "Manager::insertBulk() ".get_class($this).", SQL: ".substr($sql, 0, 50).'...', null);
                 }
                 sleep($retrySleep);
             }
-            catch (Exception $e) {
+            catch (DBALException $e) {
                 throw Utils::handleDriverException($e, "Manager::insertBulk() ".get_class($this).", SQL: ".substr($sql, 0, 50).'...', null);
             }
             // @codeCoverageIgnoreEnd
@@ -767,13 +769,13 @@ abstract class Manager
                     return;
                 }
                 // @codeCoverageIgnoreStart
-                catch (Exception\ConnectionException | Exception\ConnectionLost | Exception\RetryableException $e) {
+                catch (DBALException\ConnectionException | DBALException\ConnectionLost | DBALException\RetryableException $e) {
                     if ($i == $maxTries) {
                         throw Utils::handleDriverException($e, "Manager::delete() ".get_class($this).', TABLE: '.$this->getDbTable(), ['id' => $oldId]);
                     }
                     sleep($retrySleep);
                 }
-                catch (Exception $e) {
+                catch (DBALException $e) {
                     throw Utils::handleDriverException($e, "Manager::delete() ".get_class($this).', TABLE: '.$this->getDbTable(), ['id' => $oldId]);
                 }
                 // @codeCoverageIgnoreEnd
@@ -820,13 +822,13 @@ abstract class Manager
                 return;
             }
             // @codeCoverageIgnoreStart
-            catch (Exception\ConnectionException | Exception\ConnectionLost | Exception\RetryableException $e) {
+            catch (DBALException\ConnectionException | DBALException\ConnectionLost | DBALException\RetryableException $e) {
                 if ($i == $maxTries) {
                     throw Utils::handleDriverException($e, "Manager::truncate() ".get_class($this).', TABLE: '.$this->getDbTable(), null);
                 }
                 sleep($retrySleep);
             }
-            catch (Exception $e) {
+            catch (DBALException $e) {
                 throw Utils::handleDriverException($e, "Manager::truncate() ".get_class($this).', TABLE: '.$this->getDbTable(), null);
             }
             // @codeCoverageIgnoreEnd
@@ -912,13 +914,13 @@ abstract class Manager
                 return $this->db->executeStatement($sql, $values, $types);
             }
             // @codeCoverageIgnoreStart
-            catch (Exception\ConnectionException | Exception\ConnectionLost | Exception\RetryableException $e) {
+            catch (DBALException\ConnectionException | DBALException\ConnectionLost | DBALException\RetryableException $e) {
                 if ($i == $maxTries) {
                     throw Utils::handleDriverException($e, "Manager::save() INSERT ".get_class($this).', SQL: '.($sql ?? '(no sql)'), $values ?? []);
                 }
                 sleep($retrySleep);
             }
-            catch (Exception $e) {
+            catch (DBALException $e) {
                 throw Utils::handleDriverException($e, "Manager::save() INSERT ".get_class($this).', SQL: '.($sql ?? '(no sql)'), $values ?? []);
             }
             // @codeCoverageIgnoreEnd
@@ -967,13 +969,13 @@ abstract class Manager
                 return $this->db->executeStatement($sql, $values, $types);
             }
             // @codeCoverageIgnoreStart
-            catch (Exception\ConnectionException | Exception\ConnectionLost | Exception\RetryableException $e) {
+            catch (DBALException\ConnectionException | DBALException\ConnectionLost | DBALException\RetryableException $e) {
                 if ($i == $maxTries) {
                     throw Utils::handleDriverException($e, "Manager::save() UPDATE ".get_class($this).', SQL: '.$sql, $values);
                 }
                 sleep($retrySleep);
             }
-            catch (Exception $e) {
+            catch (DBALException $e) {
                 throw Utils::handleDriverException($e, "Manager::save() UPDATE ".get_class($this).', SQL: '.$sql, $values);
             }
             // @codeCoverageIgnoreEnd

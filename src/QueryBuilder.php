@@ -3,12 +3,13 @@
 namespace Milanmadar\CoolioORM;
 
 use Doctrine\DBAL\ArrayParameterType;
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Query\Expression\CompositeExpression;
 use Doctrine\DBAL\Query\QueryBuilder as DoctrineQueryBuilder;
-use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Result;
-use Doctrine\DBAL\Exception;
+use Milanmadar\CoolioORM\ORMException\ORMException;
 use Milanmadar\CoolioORM\Geo\AbstractShape;
 use Milanmadar\CoolioORM\Geo\GeoQueryProcessor;
 
@@ -1280,7 +1281,7 @@ class QueryBuilder extends DoctrineQueryBuilder
     /**
      * Returns the ID of the last inserted row.
      * @return int The last inserted ID.
-     * @throws Exception
+     * @throws ORMException
      */
     public function lastInsertId(): int
     {
@@ -1290,7 +1291,7 @@ class QueryBuilder extends DoctrineQueryBuilder
     /**
      * @inheritDoc
      * @return array<string, mixed>|false False is returned if no rows are found.
-     * @throws Exception
+     * @throws ORMException
      */
     public function fetchAssociative(): array|false
     {
@@ -1312,13 +1313,13 @@ class QueryBuilder extends DoctrineQueryBuilder
                 return $this->db->fetchAssociative($sql, $params, $paramTypes);
             }
                 // @codeCoverageIgnoreStart
-            catch (Exception\ConnectionException|Exception\ConnectionLost|Exception\RetryableException $e) {
+            catch (DBALException\ConnectionException | DBALException\ConnectionLost | DBALException\RetryableException $e) {
                 if ($i == $maxTries) {
                     throw Utils::handleDriverException($e, $sql, $params);
                 }
                 sleep($retrySleep);
             }
-            catch (Exception $e) {
+            catch (ORMException $e) {
                 throw Utils::handleDriverException($e, $sql, $params);
             }
             // @codeCoverageIgnoreEnd
@@ -1331,7 +1332,7 @@ class QueryBuilder extends DoctrineQueryBuilder
     /**
      * @inheritDoc
      * @return array<int, mixed>|false False is returned if no rows are found.
-     * @throws Exception
+     * @throws ORMException
      */
     public function fetchNumeric(): array|false
     {
@@ -1353,13 +1354,13 @@ class QueryBuilder extends DoctrineQueryBuilder
                 return $this->db->fetchNumeric($sql, $params, $paramTypes);
             }
                 // @codeCoverageIgnoreStart
-            catch (Exception\ConnectionException|Exception\ConnectionLost|Exception\RetryableException $e) {
+            catch (DBALException\ConnectionException | DBALException\ConnectionLost | DBALException\RetryableException $e) {
                 if ($i == $maxTries) {
                     throw Utils::handleDriverException($e, $sql, $params);
                 }
                 sleep($retrySleep);
             }
-            catch (Exception $e) {
+            catch (ORMException $e) {
                 throw Utils::handleDriverException($e, $sql, $params);
             }
             // @codeCoverageIgnoreEnd
@@ -1372,7 +1373,7 @@ class QueryBuilder extends DoctrineQueryBuilder
     /**
      * @inheritDoc
      * @return array<int,array<int,mixed>>
-     * @throws Exception
+     * @throws ORMException
      */
     public function fetchAllNumeric(): array
     {
@@ -1394,13 +1395,13 @@ class QueryBuilder extends DoctrineQueryBuilder
                 return $this->db->fetchAllNumeric($sql, $params, $paramTypes);
             }
                 // @codeCoverageIgnoreStart
-            catch (Exception\ConnectionException|Exception\ConnectionLost|Exception\RetryableException $e) {
+            catch (DBALException\ConnectionException | DBALException\ConnectionLost | DBALException\RetryableException $e) {
                 if ($i == $maxTries) {
                     throw Utils::handleDriverException($e, $sql, $params);
                 }
                 sleep($retrySleep);
             }
-            catch (Exception $e) {
+            catch (ORMException $e) {
                 throw Utils::handleDriverException($e, $sql, $params);
             }
             // @codeCoverageIgnoreEnd
@@ -1413,7 +1414,7 @@ class QueryBuilder extends DoctrineQueryBuilder
     /**
      * @inheritDoc
      * @return array<int,array<string,mixed>>
-     * @throws Exception
+     * @throws ORMException
      */
     public function fetchAllAssociative(): array
     {
@@ -1435,13 +1436,13 @@ class QueryBuilder extends DoctrineQueryBuilder
                 return $this->db->fetchAllAssociative($sql, $params, $paramTypes);
             }
                 // @codeCoverageIgnoreStart
-            catch (Exception\ConnectionException|Exception\ConnectionLost|Exception\RetryableException $e) {
+            catch (DBALException\ConnectionException | DBALException\ConnectionLost | DBALException\RetryableException $e) {
                 if ($i == $maxTries) {
                     throw Utils::handleDriverException($e, $sql, $params);
                 }
                 sleep($retrySleep);
             }
-            catch (Exception $e) {
+            catch (ORMException $e) {
                 throw Utils::handleDriverException($e, $sql, $params);
             }
             // @codeCoverageIgnoreEnd
@@ -1454,7 +1455,7 @@ class QueryBuilder extends DoctrineQueryBuilder
     /**
      * @inheritDoc
      * @return array<string|int|float, string|int|float|bool|null>
-     * @throws Exception
+     * @throws ORMException
      */
     public function fetchAllKeyValue(): array
     {
@@ -1476,13 +1477,13 @@ class QueryBuilder extends DoctrineQueryBuilder
                 return $this->db->fetchAllKeyValue($sql, $params, $paramTypes);
             }
                 // @codeCoverageIgnoreStart
-            catch (Exception\ConnectionException|Exception\ConnectionLost|Exception\RetryableException $e) {
+            catch (DBALException\ConnectionException | DBALException\ConnectionLost | DBALException\RetryableException $e) {
                 if ($i == $maxTries) {
                     throw Utils::handleDriverException($e, $sql, $params);
                 }
                 sleep($retrySleep);
             }
-            catch (Exception $e) {
+            catch (ORMException $e) {
                 throw Utils::handleDriverException($e, $sql, $params);
             }
             // @codeCoverageIgnoreEnd
@@ -1495,7 +1496,7 @@ class QueryBuilder extends DoctrineQueryBuilder
     /**
      * @inheritDoc
      * @return array<mixed,array<string,mixed>>
-     * @throws Exception
+     * @throws ORMException
      */
     public function fetchAllAssociativeIndexed(): array
     {
@@ -1517,13 +1518,13 @@ class QueryBuilder extends DoctrineQueryBuilder
                 return $this->db->fetchAllAssociativeIndexed($sql, $params, $paramTypes);
             }
                 // @codeCoverageIgnoreStart
-            catch (Exception\ConnectionException|Exception\ConnectionLost|Exception\RetryableException $e) {
+            catch (DBALException\ConnectionException | DBALException\ConnectionLost | DBALException\RetryableException $e) {
                 if ($i == $maxTries) {
                     throw Utils::handleDriverException($e, $sql, $params);
                 }
                 sleep($retrySleep);
             }
-            catch (Exception $e) {
+            catch (ORMException $e) {
                 throw Utils::handleDriverException($e, $sql, $params);
             }
             // @codeCoverageIgnoreEnd
@@ -1536,7 +1537,7 @@ class QueryBuilder extends DoctrineQueryBuilder
     /**
      * @inheritDoc
      * @return mixed|false False is returned if no rows are found.
-     * @throws Exception
+     * @throws ORMException
      */
     public function fetchOne(): mixed
     {
@@ -1558,13 +1559,13 @@ class QueryBuilder extends DoctrineQueryBuilder
                 return $this->db->fetchOne($sql, $params, $paramTypes);
             }
                 // @codeCoverageIgnoreStart
-            catch (Exception\ConnectionException|Exception\ConnectionLost|Exception\RetryableException $e) {
+            catch (DBALException\ConnectionException | DBALException\ConnectionLost | DBALException\RetryableException $e) {
                 if ($i == $maxTries) {
                     throw Utils::handleDriverException($e, $sql, $params);
                 }
                 sleep($retrySleep);
             }
-            catch (Exception $e) {
+            catch (ORMException $e) {
                 throw Utils::handleDriverException($e, $sql, $params);
             }
             // @codeCoverageIgnoreEnd
@@ -1577,7 +1578,7 @@ class QueryBuilder extends DoctrineQueryBuilder
     /**
      * @inheritDoc
      * @return array<int,mixed>
-     * @throws Exception
+     * @throws ORMException
      */
     public function fetchFirstColumn(): array
     {
@@ -1599,13 +1600,13 @@ class QueryBuilder extends DoctrineQueryBuilder
                 return $this->db->fetchFirstColumn($sql, $params, $paramTypes);
             }
                 // @codeCoverageIgnoreStart
-            catch (Exception\ConnectionException|Exception\ConnectionLost|Exception\RetryableException $e) {
+            catch (DBALException\ConnectionException | DBALException\ConnectionLost | DBALException\RetryableException $e) {
                 if ($i == $maxTries) {
                     throw Utils::handleDriverException($e, $sql, $params);
                 }
                 sleep($retrySleep);
             }
-            catch (Exception $e) {
+            catch (ORMException $e) {
                 throw Utils::handleDriverException($e, $sql, $params);
             }
             // @codeCoverageIgnoreEnd
@@ -1619,7 +1620,7 @@ class QueryBuilder extends DoctrineQueryBuilder
      * Returns 1 Entity If a Manager was set in the constructor
      * @param bool $forceToGetFromDb Optional, Set to TRUE if you wan to skip the EntityRepository and surely fetch it from the db
      * @return Entity|null
-     * @throws \LogicException|Exception
+     * @throws \LogicException|ORMException
      */
     public function fetchOneEntity(bool $forceToGetFromDb = false): ?Entity
     {
@@ -1635,7 +1636,7 @@ class QueryBuilder extends DoctrineQueryBuilder
      * Returns an array Entity If a Manager was set in the constructor
      * @param bool $forceToGetFromDb Optional, Set to TRUE if you wan to skip the EntityRepository and surely fetch it from the db
      * @return array<Entity>
-     * @throws \LogicException|Exception
+     * @throws \LogicException|ORMException
      */
     public function fetchManyEntity(bool$forceToGetFromDb = false): array
     {

@@ -2,8 +2,8 @@
 
 namespace Pgsql;
 
+use Milanmadar\CoolioORM\ORMException\ORMException;
 use Milanmadar\CoolioORM\ORM;
-use Milanmadar\CoolioORM\ORMException;
 use PHPUnit\Framework\TestCase;
 use tests\DbHelper;
 use tests\Model\OrmTest;

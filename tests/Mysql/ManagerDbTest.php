@@ -3,13 +3,13 @@
 namespace Mysql;
 
 use Doctrine\DBAL\Tools\DsnParser;
-use Milanmadar\CoolioORM\ORM;
 use Milanmadar\CoolioORM\Event\EntityEventTypeEnum;
+use Milanmadar\CoolioORM\ORM;
 use PHPUnit\Framework\TestCase;
 use tests\DbHelper;
-use tests\Model\OrmTest;
-use tests\Model\OrmOther;
 use tests\EntityEventSubscriber;
+use tests\Model\OrmOther;
+use tests\Model\OrmTest;
 
 class ManagerDbTest extends TestCase
 {
@@ -552,7 +552,7 @@ class ManagerDbTest extends TestCase
 
     public function testInsertBadQuery()
     {
-        $this->expectException(\Milanmadar\CoolioORM\ORMException::class);
+        $this->expectException(\Milanmadar\CoolioORM\ORMException\ORMException::class);
 
         $mgr = self::$dbHelper->getManager(OrmTest\Manager::class);
 
@@ -564,7 +564,7 @@ class ManagerDbTest extends TestCase
 
     public function testUpdateBadQuery()
     {
-        $this->expectException(\Milanmadar\CoolioORM\ORMException::class);
+        $this->expectException(\Milanmadar\CoolioORM\ORMException\ORMException::class);
 
         $mgr = self::$dbHelper->getManager(OrmTest\Manager::class);
 
