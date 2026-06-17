@@ -57,6 +57,26 @@ class Utils
     }
 
     /**
+     * @param AbstractShape $geom
+     * @return Shape2D\Polygon
+     * @param Manager|Connection $dbOrMgr
+     */
+    public static function getBoundingPolygon(AbstractShape $geom, Manager|Connection $dbOrMgr): Shape2D\Polygon
+    {
+        $sql = "SELECT ST_AsEWKT(ST_Envelope(".GeoFunctions::ST_GeomFromEWKT_geom($geom).'))';
+
+        if($dbOrMgr instanceof Manager) {
+            $db = $dbOrMgr->getDb();
+        } else {
+            $db = $dbOrMgr;
+        }
+
+        $ewkt = (float)$db->executeQuery($sql)->fetchOne();
+        /** @var Shape2D\Polygon */
+        return Shape2D3D4DFactory::createFromGeoEWKTString($ewkt);
+    }
+
+    /**
      * 2 Points are optimized to stay in PHP (whenever possible)
      * @param AbstractShape $geom1
      * @param AbstractShape $geom2
