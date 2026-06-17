@@ -1169,4 +1169,17 @@ abstract class Manager
         return $dbData;
     }
 
+    /**
+     * @param string $functionName
+     * @param array<int, mixed> $args
+     * @return mixed The result of the function call
+     */
+    public function callFunction(string $functionName, array $args = []): mixed
+    {
+        return $this->orm->callFunction(
+            $this->getDb(),
+            $functionName,
+            $args
+        );
+    }
 }
