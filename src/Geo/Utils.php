@@ -71,7 +71,7 @@ class Utils
             $db = $dbOrMgr;
         }
 
-        $ewkt = (float)$db->executeQuery($sql)->fetchOne();
+        $ewkt = $db->executeQuery($sql)->fetchOne();
         /** @var Shape2D\Polygon */
         return Shape2D3D4DFactory::createFromGeoEWKTString($ewkt);
     }
