@@ -268,9 +268,9 @@ class Utils
             || $geom instanceof ShapeZM\CompoundCurveZM)
         {
             if($geom->getSRID() == 4326) {
-                $sql = "SELECT ST_Length(".GeoFunctions::ST_GeomFromEWKT_geom($geom)."::geography)";
+                $sql = "SELECT ST_Length(".GeoFunctions::ST_GeogFromText_geom($geom).")";
             } else {
-                $sql = "SELECT ST_Length(".GeoFunctions::ST_GeomFromEWKT_geom($geom)."::geometry)";
+                $sql = "SELECT ST_Length(".GeoFunctions::ST_GeomFromEWKT_geom($geom).")";
             }
         }
         // polygon and multipolygon and curved polygons
@@ -285,9 +285,9 @@ class Utils
             || $geom instanceof ShapeZM\CurvePolygonZM)
         {
             if($geom->getSRID() == 4326) {
-                $sql = "SELECT ST_Perimeter(".GeoFunctions::ST_GeomFromEWKT_geom($geom)."::geography)";
+                $sql = "SELECT ST_Perimeter(".GeoFunctions::ST_GeogFromText_geom($geom).")";
             } else {
-                $sql = "SELECT ST_Perimeter(".GeoFunctions::ST_GeomFromEWKT_geom($geom)."::geometry)";
+                $sql = "SELECT ST_Perimeter(".GeoFunctions::ST_GeomFromEWKT_geom($geom).")";
             }
 
         }
