@@ -244,43 +244,52 @@ class Utils
     {
         // point, lengths in zero
         if($geom instanceof Shape2D\Point
-        || $geom instanceof ShapeZ\PointZ
-        || $geom instanceof ShapeZM\PointZM
-        || $geom instanceof Shape2D\MultiPoint
-        || $geom instanceof ShapeZ\MultiPointZ
-        || $geom instanceof ShapeZM\MultiPointZM)
+            || $geom instanceof ShapeZ\PointZ
+            || $geom instanceof ShapeZM\PointZM
+            || $geom instanceof Shape2D\MultiPoint
+            || $geom instanceof ShapeZ\MultiPointZ
+            || $geom instanceof ShapeZM\MultiPointZM)
         {
             return 0;
         }
 
         // line and multiline and curved lines
         if($geom instanceof Shape2D\LineString
-        || $geom instanceof ShapeZ\LineStringZ
-        || $geom instanceof ShapeZM\LineStringZM
-        || $geom instanceof Shape2D\MultiLineString
-        || $geom instanceof ShapeZ\MultiLineStringZ
-        || $geom instanceof ShapeZM\MultiLineStringZM
-        || $geom instanceof Shape2D\CircularString
-        || $geom instanceof ShapeZ\CircularStringZ
-        || $geom instanceof ShapeZM\CircularStringZM
-        || $geom instanceof Shape2D\CompoundCurve
-        || $geom instanceof ShapeZ\CompoundCurveZ
-        || $geom instanceof ShapeZM\CompoundCurveZM)
+            || $geom instanceof ShapeZ\LineStringZ
+            || $geom instanceof ShapeZM\LineStringZM
+            || $geom instanceof Shape2D\MultiLineString
+            || $geom instanceof ShapeZ\MultiLineStringZ
+            || $geom instanceof ShapeZM\MultiLineStringZM
+            || $geom instanceof Shape2D\CircularString
+            || $geom instanceof ShapeZ\CircularStringZ
+            || $geom instanceof ShapeZM\CircularStringZM
+            || $geom instanceof Shape2D\CompoundCurve
+            || $geom instanceof ShapeZ\CompoundCurveZ
+            || $geom instanceof ShapeZM\CompoundCurveZM)
         {
-            $sql = "SELECT ST_Length(".GeoFunctions::ST_GeomFromEWKT_geom($geom)."::geography)";
+            if($geom->getSRID() == 4326) {
+                $sql = "SELECT ST_Length(".GeoFunctions::ST_GeomFromEWKT_geom($geom)."::geography)";
+            } else {
+                $sql = "SELECT ST_Length(".GeoFunctions::ST_GeomFromEWKT_geom($geom)."::geometry)";
+            }
         }
         // polygon and multipolygon and curved polygons
         elseif($geom instanceof Shape2D\Polygon
-        || $geom instanceof ShapeZ\PolygonZ
-        || $geom instanceof ShapeZM\PolygonZM
-        || $geom instanceof Shape2D\MultiPolygon
-        || $geom instanceof ShapeZ\MultiPolygonZ
-        || $geom instanceof ShapeZM\MultiPolygonZM
-        || $geom instanceof Shape2D\CurvePolygon
-        || $geom instanceof ShapeZ\CurvePolygonZ
-        || $geom instanceof ShapeZM\CurvePolygonZM)
+            || $geom instanceof ShapeZ\PolygonZ
+            || $geom instanceof ShapeZM\PolygonZM
+            || $geom instanceof Shape2D\MultiPolygon
+            || $geom instanceof ShapeZ\MultiPolygonZ
+            || $geom instanceof ShapeZM\MultiPolygonZM
+            || $geom instanceof Shape2D\CurvePolygon
+            || $geom instanceof ShapeZ\CurvePolygonZ
+            || $geom instanceof ShapeZM\CurvePolygonZM)
         {
-            $sql = "SELECT ST_Perimeter(".GeoFunctions::ST_GeomFromEWKT_geom($geom)."::geography)";
+            if($geom->getSRID() == 4326) {
+                $sql = "SELECT ST_Perimeter(".GeoFunctions::ST_GeomFromEWKT_geom($geom)."::geography)";
+            } else {
+                $sql = "SELECT ST_Perimeter(".GeoFunctions::ST_GeomFromEWKT_geom($geom)."::geometry)";
+            }
+
         }
         else {
             throw new \InvalidArgumentException("Geo\Utils::getLengthInMeter() doesnt support ".get_class($geom));
