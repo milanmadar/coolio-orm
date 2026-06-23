@@ -41,6 +41,10 @@ class Utils
      */
     public static function transformGeomToSrid(AbstractShape $geom, int $targetSrid, Manager|Connection $dbOrMgr): AbstractShape
     {
+        if($geom->getSRID() == $targetSrid) {
+            return clone $geom;
+        }
+
         $stTransform = GeoFunctions::ST_Transform($geom, $targetSrid);
         $sql = "SELECT ST_AsEWKT(".$stTransform.")";
 

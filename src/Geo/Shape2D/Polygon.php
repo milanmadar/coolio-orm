@@ -137,20 +137,60 @@ class Polygon extends AbstractShape2D
     }
 
     /**
+     * IT CAN HANDLE SRID=4326 (WGS84) or UTM SRIDs.
+     *
+     * NOT OTHER SRIDs
+     *
      * Calculates the geometric centroid (center of mass) of the Polygon.
      * For simplicity and standard 2D representation, this uses the exterior ring.
      * * @return Point
      */
     public function getCenterPoint(): Point
     {
+        $srid = $this->getSRID();
         $exteriorRing = $this->lineStrings[0]->getPoints();
         $n = count($exteriorRing);
 
+        // SRID 4326
+        if ($srid === 4326)
+        {
+            // Ignore the last point if it closes the loop to avoid double-weighting
+            if ($n > 1 && $exteriorRing[0]->getX() === $exteriorRing[$n - 1]->getX()
+                && $exteriorRing[0]->getY() === $exteriorRing[$n - 1]->getY()) {
+                $n--;
+            }
+
+            $totalX = 0.0;
+            $totalY = 0.0;
+            $totalZ = 0.0;
+
+            for ($i = 0; $i < $n; $i++) {
+                $lon = deg2rad($exteriorRing[$i]->getX()); // X is Longitude
+                $lat = deg2rad($exteriorRing[$i]->getY()); // Y is Latitude
+
+                // Convert to 3D Cartesian coordinates (Unit Sphere)
+                $totalX += cos($lat) * cos($lon);
+                $totalY += cos($lat) * sin($lon);
+                $totalZ += sin($lat);
+            }
+
+            $avgX = $totalX / $n;
+            $avgY = $totalY / $n;
+            $avgZ = $totalZ / $n;
+
+            // Convert 3D vector back to surface Lat/Lon
+            $hyp = sqrt($avgX * $avgX + $avgY * $avgY);
+            $outLon = atan2($avgY, $avgX);
+            $outLat = atan2($avgZ, $hyp);
+
+            return new Point(rad2deg($outLon), rad2deg($outLat), 4326);
+        }
+
+        // SRID UTM
         $area = 0.0;
         $cx = 0.0;
         $cy = 0.0;
 
-        // Loop through points to calculate Area and Centroid components
         for ($i = 0; $i < $n - 1; $i++) {
             $p1 = $exteriorRing[$i];
             $p2 = $exteriorRing[$i + 1];
@@ -160,7 +200,6 @@ class Polygon extends AbstractShape2D
             $x2 = $p2->getX();
             $y2 = $p2->getY();
 
-            // Standard shoelace formula term: (x_i * y_{i+1} - x_{i+1} * y_i)
             $crossProduct = ($x1 * $y2) - ($x2 * $y1);
 
             $area += $crossProduct;
@@ -170,8 +209,7 @@ class Polygon extends AbstractShape2D
 
         $area *= 0.5;
 
-        // Fallback: If the polygon is mathematically degenerate (area of 0),
-        // fallback to the bounding box center.
+        // Fallback for degenerate planar polygons
         if (abs($area) < 1e-9) {
             $minX = $minY = PHP_FLOAT_MAX;
             $maxX = $maxY = -PHP_FLOAT_MAX;
@@ -183,14 +221,13 @@ class Polygon extends AbstractShape2D
                 $maxY = max($maxY, $p->getY());
             }
 
-            return new Point(($minX + $maxX) / 2.0, ($minY + $maxY) / 2.0);
+            return new Point(($minX + $maxX) / 2.0, ($minY + $maxY) / 2.0, $srid);
         }
 
-        // Finalize centroid coordinates
         $cx = $cx / (6.0 * $area);
         $cy = $cy / (6.0 * $area);
 
-        return new Point($cx, $cy);
+        return new Point($cx, $cy, $srid);
     }
 
     /**

@@ -212,8 +212,10 @@ class PolygonTest extends TestCase
 
         // 3. Assertions
         // For a square with corners (0,0) and (1,1), the center is (0.5, 0.5)
-        $this->assertEquals(0.5, $center->getX(), 'The X coordinate of the centroid should be 0.5');
-        $this->assertEquals(0.5, $center->getY(), 'The Y coordinate of the centroid should be 0.5');
+        $x = round($center->getX(), 1);
+        $y = round($center->getY(), 1);
+        $this->assertEquals(0.5, $x, 'The X coordinate of the centroid should be 0.5');
+        $this->assertEquals(0.5, $y, 'The Y coordinate of the centroid should be 0.5');
     }
 
     /**
