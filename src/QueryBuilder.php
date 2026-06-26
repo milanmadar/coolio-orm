@@ -779,7 +779,7 @@ class QueryBuilder extends DoctrineQueryBuilder
         if(str_starts_with($sqlParts[$firstIndex], ' OR ')) {
             $sqlParts[$firstIndex] = substr($sqlParts[$firstIndex], 4);
         } elseif(str_starts_with($sqlParts[$firstIndex], ' AND ')) {
-            $sqlParts[$firstIndex] = substr($sqlParts[$firstIndex], 6);
+            $sqlParts[$firstIndex] = substr($sqlParts[$firstIndex], 5);
         }
 
         return $sqlParts;
