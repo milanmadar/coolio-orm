@@ -447,8 +447,8 @@ class ORM
     }
 
     /**
-     * @param array|string|null $val
-     * @return array|null
+     * @param array<mixed>|string|null $val
+     * @return array<mixed>|null
      */
     public function pgArrResult(array|string|null $val): array|null
     {
