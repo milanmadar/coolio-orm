@@ -1706,4 +1706,13 @@ class QueryBuilder extends DoctrineQueryBuilder
         }
     }
 
+    /**
+     * @param array|string|null $val
+     * @return array|null
+     */
+    public function pgArrResult(array|string|null $val): array|null
+    {
+        return $this->orm->pgArrResult($val);
+    }
+
 }

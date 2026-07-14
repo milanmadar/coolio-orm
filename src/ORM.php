@@ -446,4 +446,18 @@ class ORM
         return Geo\Shape2D3D4DFactory::createFromGeoEWKTString($geomEWKT);
     }
 
+    /**
+     * @param array|string|null $val
+     * @return array|null
+     */
+    public function pgArrResult(array|string|null $val): array|null
+    {
+        if(is_array($val)) return $val;
+        if(empty($val) || $val === '{}' || $val === '[]') return [];
+        if($val[0] == '{') {
+            return explode(',', trim($val, '{}'));
+        }
+        return json_decode($val, true);
+    }
+
 }

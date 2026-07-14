@@ -194,4 +194,29 @@ class SelectInArrayTest extends TestCase
         }
     }
 
+    public function testArrayAgg()
+    {
+        $mgr = self::$dbHelper->getManager(OrmTest\Manager::class);
+
+        $res = $mgr->createQueryBuilder()
+            ->select(
+                'ARRAY_AGG(fld_date::date) AS list_array'
+            )
+            ->fetchAssociative();
+        $arr = $mgr->pgArrResult($res['list_array']);
+        $this->assertIsArray($arr);
+    }
+
+    public function testJsonAgg()
+    {
+        $mgr = self::$dbHelper->getManager(OrmTest\Manager::class);
+
+        $res = $mgr->createQueryBuilder()
+            ->select(
+                'JSON_AGG(fld_date::date) AS list_array'
+            )
+            ->fetchAssociative();
+        $arr = $mgr->pgArrResult($res['list_array']);
+        $this->assertIsArray($arr);
+    }
 }
