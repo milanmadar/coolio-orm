@@ -592,20 +592,21 @@ abstract class Manager
             $dataToSave = $ent->_getData();
             $this->beforeToDb($dataToSave);
 
-            $this->insert($dataToSave);
+            $postgresId = $this->insert($dataToSave);
 
             if($forceInsert) {
                 $ent->_setForceInsertOnNextSave(false);
             } else {
                 if($this->dbType == 'pg') {
-                    try {
-                        $ent->setId($this->db->getNativeConnection()->lastInsertId($this->getDbTable().'_id_seq')); /* @phpstan-ignore-line */
-                    }
-                    catch(\PDOException $e) {
-                        if(str_contains($e->getMessage(), "does not exist")) {
-                            throw new ORMException('Postgres primary id must be SERIAL and called "'.$this->getDbTable().'_id_seq" for table "'.$this->getDbTable().'"');
-                        }
-                    }
+                    $ent->setId((int)$postgresId);
+//                    try {
+//                        $ent->setId($this->db->getNativeConnection()->lastInsertId($this->getDbTable().'_id_seq')); /* @phpstan-ignore-line */
+//                    }
+//                    catch(\PDOException $e) {
+//                        if(str_contains($e->getMessage(), "does not exist")) {
+//                            throw new ORMException('Postgres primary id must be SERIAL and called "'.$this->getDbTable().'_id_seq" for table "'.$this->getDbTable().'"');
+//                        }
+//                    }
                 } else {
                     $ent->setId(intval($this->db->lastInsertId()));
                 }
@@ -911,7 +912,15 @@ abstract class Manager
                     . ' (' . implode(', ', $escapedColumns) . ')'
                     . ' VALUES (' . implode(', ', $placeholders) . ')';
 
-                return $this->db->executeStatement($sql, $values, $types);
+                if($this->dbType == 'pg') {
+                    $sql .= ' RETURNING id';
+                    return (int)$this->db->fetchOne($sql, $values, $types);
+                }
+                else {
+                    return $this->db->executeStatement($sql, $values, $types);
+                }
+
+
             }
             // @codeCoverageIgnoreStart
             catch (DBALException\ConnectionException | DBALException\ConnectionLost | DBALException\RetryableException $e) {
