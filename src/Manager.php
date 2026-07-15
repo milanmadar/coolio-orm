@@ -600,7 +600,7 @@ abstract class Manager
                 if($this->dbType == 'pg') {
                     $ent->setId((int)$postgresId);
 //                    try {
-//                        $ent->setId($this->db->getNativeConnection()->lastInsertId($this->getDbTable().'_id_seq')); /* @phpstan-ignore-line */
+//                        $ent->setId($this->db->getNativeConnection()->lastInsertId($this->getDbTable().'_id_seq')); /* phpstan-ignore-line */
 //                    }
 //                    catch(\PDOException $e) {
 //                        if(str_contains($e->getMessage(), "does not exist")) {
