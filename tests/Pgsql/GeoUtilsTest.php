@@ -89,6 +89,112 @@ class GeoUtilsTest extends TestCase
         $this->assertEquals(781106, $length);
     }
 
+    public function testgetLength_fromPointInLine_tillEndOfLine_InMeter_MultilineConnected2d()
+    {
+        $db = ORM::instance()->getDbByUrl($_ENV['DB_POSTGRES_DB1']);
+
+        $srid = 4326;
+        $point = new Geo\Shape2D\Point(5, 5, $srid);
+        $line1 = new Geo\Shape2D\LineString([
+            new Geo\Shape2D\Point(0, 0, $srid),
+            new Geo\Shape2D\Point(10, 10, $srid),
+        ]);
+        $line2 = new Geo\Shape2D\LineString([
+            new Geo\Shape2D\Point(10, 10, $srid),
+            new Geo\Shape2D\Point(20, 20, $srid),
+        ]);
+        $multiline = new Geo\Shape2D\MultiLineString([
+            $line1,
+            $line2,
+        ]);
+
+        $length = Geo\Utils::getLength_fromPointInLine_tillEndOfLine_InMeter($multiline, $point, 'end', $db, 0);
+        $this->assertEquals(2322963, $length);
+    }
+
+    public function testgetLength_fromPointInLine_tillEndOfLine_InMeter_MultilineDisconnected2d()
+    {
+        $db = ORM::instance()->getDbByUrl($_ENV['DB_POSTGRES_DB1']);
+
+        $srid = 4326;
+        $point = new Geo\Shape2D\Point(5, 5, $srid);
+        $line1 = new Geo\Shape2D\LineString([
+            new Geo\Shape2D\Point(0, 0, $srid),
+            new Geo\Shape2D\Point(10, 10, $srid),
+        ]);
+        $line2 = new Geo\Shape2D\LineString([
+            new Geo\Shape2D\Point(11, 11, $srid),
+            new Geo\Shape2D\Point(20, 20, $srid),
+        ]);
+        $multiline = new Geo\Shape2D\MultiLineString([
+            $line1,
+            $line2,
+        ]);
+
+        $length = Geo\Utils::getLength_fromPointInLine_tillEndOfLine_InMeter($multiline, $point, 'end', $db, 0);
+        $this->assertEquals(781106, $length);
+    }
+
+    public function testgetLength_fromPointInLine_tillEndOfLine_InMeter_MultilineConnected3D()
+    {
+        $db = ORM::instance()->getDbByUrl($_ENV['DB_POSTGRES_DB1']);
+
+        $srid = 32633; // meters already
+
+        // A line starting at 500m elevation and ending at 1500m elevation
+        // Horizontal distance is exactly 1000m (on the Y axis)
+        // Vertical distance is exactly 1000m (Z axis)
+        $line1 = new Geo\ShapeZ\LineStringZ([
+            new Geo\ShapeZ\PointZ(600000, 5000000, 500, $srid),
+            new Geo\ShapeZ\PointZ(600000, 5001000, 1500, $srid),
+        ]);
+        $line2 = new Geo\ShapeZ\LineStringZ([
+            new Geo\ShapeZ\PointZ(600000, 5001000, 1500, $srid),
+            new Geo\ShapeZ\PointZ(600000, 5002000, 2500, $srid),
+        ]);
+        $multiline = new Geo\ShapeZ\MultiLineStringZ([
+            $line1,
+            $line2,
+        ], $srid);
+
+        // Midpoint: 2D-wise it's halfway (500m horizontally), 3D-wise it's at 1000m elevation
+        $point = new Geo\ShapeZ\PointZ(600000, 5000500, 1000, $srid);
+
+        $length = Geo\Utils::getLength_fromPointInLine_tillEndOfLine_InMeter($multiline, $point, 'end', $db, 2);
+
+        $this->assertEquals(2121.32, $length);
+    }
+
+    public function testgetLength_fromPointInLine_tillEndOfLine_InMeter_MultilineDisconnected3D()
+    {
+        $db = ORM::instance()->getDbByUrl($_ENV['DB_POSTGRES_DB1']);
+
+        $srid = 32633; // meters already
+
+        // A line starting at 500m elevation and ending at 1500m elevation
+        // Horizontal distance is exactly 1000m (on the Y axis)
+        // Vertical distance is exactly 1000m (Z axis)
+        $line1 = new Geo\ShapeZ\LineStringZ([
+            new Geo\ShapeZ\PointZ(600000, 5000000, 500, $srid),
+            new Geo\ShapeZ\PointZ(600000, 5001000, 1500, $srid),
+        ]);
+        $line2 = new Geo\ShapeZ\LineStringZ([
+            new Geo\ShapeZ\PointZ(600500, 5006000, 1500, $srid),
+            new Geo\ShapeZ\PointZ(600500, 5007000, 2500, $srid),
+        ]);
+        $multiline = new Geo\ShapeZ\MultiLineStringZ([
+            $line1,
+            $line2,
+        ], $srid);
+
+        // Midpoint: 2D-wise it's halfway (500m horizontally), 3D-wise it's at 1000m elevation
+        $point = new Geo\ShapeZ\PointZ(600000, 5000500, 1000, $srid);
+
+        $length = Geo\Utils::getLength_fromPointInLine_tillEndOfLine_InMeter($multiline, $point, 'end', $db, 2);
+
+        $this->assertEquals(707.11, $length);
+    }
+
     public function testgetLength_fromPointInLine_tillEndOfLine_InMeter_3D()
     {
         $db = ORM::instance()->getDbByUrl($_ENV['DB_POSTGRES_DB1']);

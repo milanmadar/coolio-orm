@@ -320,22 +320,19 @@ class Utils
         if(!($line instanceof Shape2D\LineString)
         && !($line instanceof ShapeZ\LineStringZ)
         && !($line instanceof ShapeZM\LineStringZM)
+        && !($line instanceof Shape2D\MultiLineString)
+        && !($line instanceof ShapeZ\MultiLineStringZ)
+        && !($line instanceof ShapeZM\MultiLineStringZM)
         && !($line instanceof Shape2D\CircularString)
         && !($line instanceof ShapeZ\CircularStringZ)
         && !($line instanceof ShapeZM\CircularStringZM)
         ) {
-            throw new \InvalidArgumentException("Geo\Utils::getLength_fromPointInLine_tillEndOfLine_InMeter() only supports LineString, LineStringZ, LineStringZM, CircularString, CircularStringZ and CircularStringZM");
+            throw new \InvalidArgumentException("Geo\Utils::getLength_fromPointInLine_tillEndOfLine_InMeter() only supports LineString, LineStringZ, MultiLineStringZM, MultiLineString, MultiLineStringZ, MultiLineStringZM, CircularString, CircularStringZ and CircularStringZM, but ".get_class($line)." was given");
         }
 
         if ($line->getSRID() != $pointOnLine->getSRID()) {
             throw new \InvalidArgumentException("Geo\Utils::getLength_fromPointInLine_tillEndOfLine_InMeter() SRIDs must match");
         }
-
-        $is3D = ($line instanceof ShapeZ\LineStringZ
-            || $line instanceof ShapeZM\LineStringZM
-            || $line instanceof ShapeZ\CircularStringZ
-            || $line instanceof ShapeZM\CircularStringZM
-        );
 
         $inputSrid = $line->getSRID();
 
@@ -346,12 +343,30 @@ class Utils
 
         $pointEwkt = GeoFunctions::ST_GeomFromEWKT_geom($pointOnLine);
 
+        $is3D = (
+            $line instanceof ShapeZ\LineStringZ
+            || $line instanceof ShapeZM\LineStringZM
+            || $line instanceof ShapeZ\MultiLineStringZ
+            || $line instanceof ShapeZM\MultiLineStringZM
+            || $line instanceof ShapeZ\CircularStringZ
+            || $line instanceof ShapeZM\CircularStringZM
+        );
+
+        $isMulti = (
+            $line instanceof Shape2D\MultiLineString
+            || $line instanceof ShapeZ\MultiLineStringZ
+            || $line instanceof ShapeZM\MultiLineStringZM
+        );
+
         // Point Location Logic (Always 2D)
-        $locateSql = "ST_LineLocatePoint(ST_Force2D(line), ST_Force2D(p))";
+        $locateSql = $isMulti
+            ? "ST_LineLocatePoint(ST_Force2D(line_segment), ST_Force2D(p))"
+            : "ST_LineLocatePoint(ST_Force2D(line),         ST_Force2D(p))";
         $startFrac = ($untilStartOrEnd === 'start') ? '0.0' : $locateSql;
         $endFrac   = ($untilStartOrEnd === 'start') ? $locateSql : '1.0';
 
         // Length Calculation Strategy
+
         if ($is3D) {
             if ($inputSrid === 4326) {
                 // Case: 3D WGS84 -> Must project to UTM for valid 3D meters
@@ -371,16 +386,45 @@ class Utils
             }
         }
 
-        $sql = "
-            WITH data AS (
-                SELECT $lineEwkt AS line, $pointEwkt AS p
-            ),
-            segment AS (
-                SELECT ST_LineSubstring(line, $startFrac, $endFrac) as sub
-                FROM data
-            )
-            SELECT $lengthSql FROM segment
-        ";
+        // Multiline is tricky
+        if($isMulti) {
+            $sql = "
+                WITH data AS (
+                    SELECT 
+                        $lineEwkt AS line, 
+                        $pointEwkt AS p
+                ),
+                merged_and_dumped AS (
+                    -- Merge connected parts first, then dump into individual LINESTRINGs
+                    SELECT (ST_Dump(ST_LineMerge(line))).geom AS line_segment, p
+                    FROM data
+                ),
+                closest AS (
+                    -- Find the merged line segment closest to point P
+                    SELECT DISTINCT ON (p) line_segment, p
+                    FROM merged_and_dumped
+                    ORDER BY p, line_segment <-> p
+                ),
+                segment AS (
+                    SELECT ST_LineSubstring(line_segment, $startFrac, $endFrac) AS sub
+                    FROM closest
+                )
+                SELECT $lengthSql FROM segment
+            ";
+        } else {
+            $sql = "
+                WITH data AS (
+                    SELECT 
+                        $lineEwkt AS line, 
+                        $pointEwkt AS p
+                ),
+                segment AS (
+                    SELECT ST_LineSubstring(line, $startFrac, $endFrac) as sub
+                    FROM data
+                )
+                SELECT $lengthSql FROM segment
+            ";
+        }
 
         $db = ($dbOrMgr instanceof Manager) ? $dbOrMgr->getDb() : $dbOrMgr;
         $v = (float)$db->executeQuery($sql)->fetchOne();
