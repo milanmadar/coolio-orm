@@ -1317,6 +1317,10 @@ class QueryBuilder extends DoctrineQueryBuilder
                 if ($i == $maxTries) {
                     throw Utils::handleDriverException($e, $sql, $params);
                 }
+
+                $this->statementRepo->clear();
+                $this->db->close();
+
                 sleep($retrySleep);
             }
             catch (ORMException $e) {
@@ -1358,6 +1362,10 @@ class QueryBuilder extends DoctrineQueryBuilder
                 if ($i == $maxTries) {
                     throw Utils::handleDriverException($e, $sql, $params);
                 }
+
+                $this->statementRepo->clear();
+                $this->db->close();
+
                 sleep($retrySleep);
             }
             catch (ORMException $e) {
@@ -1399,6 +1407,10 @@ class QueryBuilder extends DoctrineQueryBuilder
                 if ($i == $maxTries) {
                     throw Utils::handleDriverException($e, $sql, $params);
                 }
+
+                $this->statementRepo->clear();
+                $this->db->close();
+
                 sleep($retrySleep);
             }
             catch (ORMException $e) {
@@ -1440,6 +1452,10 @@ class QueryBuilder extends DoctrineQueryBuilder
                 if ($i == $maxTries) {
                     throw Utils::handleDriverException($e, $sql, $params);
                 }
+
+                $this->statementRepo->clear();
+                $this->db->close();
+
                 sleep($retrySleep);
             }
             catch (ORMException $e) {
@@ -1481,6 +1497,10 @@ class QueryBuilder extends DoctrineQueryBuilder
                 if ($i == $maxTries) {
                     throw Utils::handleDriverException($e, $sql, $params);
                 }
+
+                $this->statementRepo->clear();
+                $this->db->close();
+
                 sleep($retrySleep);
             }
             catch (ORMException $e) {
@@ -1522,6 +1542,10 @@ class QueryBuilder extends DoctrineQueryBuilder
                 if ($i == $maxTries) {
                     throw Utils::handleDriverException($e, $sql, $params);
                 }
+
+                $this->statementRepo->clear();
+                $this->db->close();
+
                 sleep($retrySleep);
             }
             catch (ORMException $e) {
@@ -1563,6 +1587,10 @@ class QueryBuilder extends DoctrineQueryBuilder
                 if ($i == $maxTries) {
                     throw Utils::handleDriverException($e, $sql, $params);
                 }
+
+                $this->statementRepo->clear();
+                $this->db->close();
+
                 sleep($retrySleep);
             }
             catch (ORMException $e) {
@@ -1604,6 +1632,10 @@ class QueryBuilder extends DoctrineQueryBuilder
                 if ($i == $maxTries) {
                     throw Utils::handleDriverException($e, $sql, $params);
                 }
+
+                $this->statementRepo->clear();
+                $this->db->close();
+
                 sleep($retrySleep);
             }
             catch (ORMException $e) {

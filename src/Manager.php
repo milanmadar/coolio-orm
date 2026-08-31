@@ -365,6 +365,7 @@ abstract class Manager
         $this->statementRepo = $this->orm->getStatementRepositoryByConnection($db);
         if($ischangingDb) {
             $this->clearRepository(true);
+            $this->statementRepo?->clear();
         }
         $this->dbConnUrl = Utils::getDbConnUrl($this->db);
         $this->dbType = $this->orm->_getDbType($this->dbConnUrl);
@@ -725,6 +726,10 @@ abstract class Manager
                 if ($i == $maxTries) {
                     throw Utils::handleDriverException($e, "Manager::insertBulk() ".get_class($this).", SQL: ".substr($sql, 0, 50).'...', null);
                 }
+
+                $this->statementRepo?->clear();
+                $this->db->close();
+
                 sleep($retrySleep);
             }
             catch (DBALException $e) {
@@ -774,6 +779,10 @@ abstract class Manager
                     if ($i == $maxTries) {
                         throw Utils::handleDriverException($e, "Manager::delete() ".get_class($this).', TABLE: '.$this->getDbTable(), ['id' => $oldId]);
                     }
+
+                    $this->statementRepo?->clear();
+                    $this->db->close();
+
                     sleep($retrySleep);
                 }
                 catch (DBALException $e) {
@@ -827,6 +836,10 @@ abstract class Manager
                 if ($i == $maxTries) {
                     throw Utils::handleDriverException($e, "Manager::truncate() ".get_class($this).', TABLE: '.$this->getDbTable(), null);
                 }
+
+                $this->statementRepo?->clear();
+                $this->db->close();
+
                 sleep($retrySleep);
             }
             catch (DBALException $e) {
@@ -919,14 +932,16 @@ abstract class Manager
                 else {
                     return $this->db->executeStatement($sql, $values, $types);
                 }
-
-
             }
             // @codeCoverageIgnoreStart
             catch (DBALException\ConnectionException | DBALException\ConnectionLost | DBALException\RetryableException $e) {
                 if ($i == $maxTries) {
                     throw Utils::handleDriverException($e, "Manager::save() INSERT ".get_class($this).', SQL: '.($sql ?? '(no sql)'), $values ?? []);
                 }
+
+                $this->statementRepo?->clear();
+                $this->db->close();
+
                 sleep($retrySleep);
             }
             catch (DBALException $e) {
@@ -982,6 +997,10 @@ abstract class Manager
                 if ($i == $maxTries) {
                     throw Utils::handleDriverException($e, "Manager::save() UPDATE ".get_class($this).', SQL: '.$sql, $values);
                 }
+
+                $this->statementRepo?->clear();
+                $this->db->close();
+
                 sleep($retrySleep);
             }
             catch (DBALException $e) {

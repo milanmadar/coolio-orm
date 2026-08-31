@@ -126,6 +126,10 @@ class Utils
                 if ($i == $maxTries) {
                     throw self::handleDriverException($e, $sql, $binds);
                 }
+
+                if(isset($statementRepo)) $statementRepo->clear();
+                $conn->close();
+
                 sleep($retrySleep);
             }
             catch (ORMException $e) {
@@ -199,6 +203,10 @@ class Utils
                 if ($i == $maxTries) {
                     throw self::handleDriverException($e, $sql, $binds);
                 }
+
+                if(isset($statementRepo)) $statementRepo->clear();
+                $conn->close();
+
                 sleep($retrySleep);
             }
             catch (ORMException | DBALException $e) {
