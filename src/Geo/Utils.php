@@ -644,20 +644,22 @@ class Utils
         }
 
         if($shape instanceof ShapeZ\AbstractShapeZ) {
-            /** @var Shape2D\AbstractShape2D */
-            return Shape2D3D4DFactory::createFromGeoEWKTString(
+            /** @var Shape2D\AbstractShape2D $shape */
+            $shape = Shape2D3D4DFactory::createFromGeoEWKTString(
                 self::_ewktConvert_3Dto2D(
+                    $shape->toEWKT()
+                )
+            );
+        } else {
+            /** @var Shape2D\AbstractShape2D $shape */
+            $shape = Shape2D3D4DFactory::createFromGeoEWKTString(
+                self::_ewktConvert_4Dto2D(
                     $shape->toEWKT()
                 )
             );
         }
 
-        /** @var Shape2D\AbstractShape2D */
-        return Shape2D3D4DFactory::createFromGeoEWKTString(
-            self::_ewktConvert_4Dto2D(
-                $shape->toEWKT()
-            )
-        );
+        return $shape;
     }
 
     /**
@@ -725,20 +727,16 @@ class Utils
      */
     private static function _ewktConvert_3Dto2D(string $ewkt): string
     {
-        // 1. Update the Header: Change 'ZM' to 'Z' (e.g., LINESTRING ZM -> LINESTRING Z)
+        // 1. Update the Header: Change 'ZM' to 'Z' (e.g., LINESTRING Z -> LINESTRING)
         $ewkt = (string)preg_replace('/(\w+)\s*Z\b/i', '$1', $ewkt);
 
         // 2. Process the Coordinates
         // Matches: (X Y) Z
         // Pattern: Two numbers followed by a third.
-        return (string)preg_replace_callback(
-            '/([\d\.-]+\s+[\d\.-]+)\s+[\d\.-]+/',
-            function ($matches) {
-                // $matches[1] contains only (X, Y)
-                return $matches[1];
-            },
-            $ewkt
-        );
+        $ewkt = (string)preg_replace('/([\d\.-]+\s+[\d\.-]+)\s+[\d\.-]+/', '$1', $ewkt);
+
+        // 3. Deduplicate consecutive identical 2D points (e.g., "10 10, 10 10" -> "10 10")
+        return (string)preg_replace('/([\d\.-]+\s+[\d\.-]+)(?:\s*,\s*\1)+/', '$1', $ewkt);
     }
 
     /**
@@ -750,17 +748,11 @@ class Utils
         // 1. Update the Header: Change 'ZM' to 'Z' (e.g., LINESTRING ZM -> LINESTRING Z)
         $ewkt = (string)preg_replace('/(\w+)\s*ZM/i', '$1', $ewkt);
 
-        // 2. Process the Coordinates
-        // Matches: (X Y) Z M
-        // Pattern: Two numbers followed by two more numbers.
-        return (string)preg_replace_callback(
-            '/([\d\.-]+\s+[\d\.-]+)\s+[\d\.-]+\s+[\d\.-]+/',
-            function ($matches) {
-                // $matches[1] contains only (X, Y)
-                return $matches[1];
-            },
-            $ewkt
-        );
+        // 2. Strip 3rd (Z) and 4th (M) coordinates, keeping only (X, Y)
+        $ewkt = (string)preg_replace('/([\d\.-]+\s+[\d\.-]+)\s+[\d\.-]+\s+[\d\.-]+/', '$1', $ewkt);
+
+        // 3. Deduplicate consecutive identical 2D points (e.g., "10 10, 10 10" -> "10 10")
+        return (string)preg_replace('/([\d\.-]+\s+[\d\.-]+)(?:\s*,\s*\1)+/', '$1', $ewkt);
     }
 
     /**
