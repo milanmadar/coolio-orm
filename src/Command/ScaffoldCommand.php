@@ -495,6 +495,13 @@ class ScaffoldCommand extends Command
                     $defValSrc = 'date("Y-m-d")';
                 } elseif($colType == 'boolean') {
                     $defValSrc = $colDefVal ? 'true' : 'false';
+                } elseif($colType == 'json' || $colType == 'jsonb' || $colType == 'json_array') {
+                    if($colDefVal === null) {
+                        $defValSrc = $colDefVal;
+                    } else {
+                        $decoded = json_decode($colDefVal, true) ?? [];
+                        $defValSrc = $this->exportShortArray($decoded);
+                    }
                 } else {
                     $defValSrc = $colDefVal;
                 }
@@ -602,6 +609,12 @@ class ScaffoldCommand extends Command
                     $colType = 'text[]';
                     $paramType = 'array';
                     $docParamType = 'array<string>';
+                    break;
+                case 'integer[]':
+                case 'int[]':
+                    $colType = 'integer[]';
+                    $paramType = 'array';
+                    $docParamType = 'array<int>';
                     break;
                 default:
                     exit("Can't scaffold column type: '".$colType."' (column name: ".$colName." , native type: ".($nativeColType ?? '(unfined)').")\n");
@@ -791,5 +804,24 @@ class ScaffoldCommand extends Command
             $str .= "\n";
         }
         return $str;
+    }
+
+    private function exportShortArray(mixed $data): string
+    {
+        if (!is_array($data)) {
+            return var_export($data, true);
+        }
+
+        if (array_is_list($data)) {
+            $items = array_map(fn($item) => $this->exportShortArray($item), $data);
+            return '[' . implode(', ', $items) . ']';
+        }
+
+        $items = [];
+        foreach ($data as $key => $value) {
+            $items[] = var_export($key, true) . ' => ' . $this->exportShortArray($value);
+        }
+
+        return '[' . implode(', ', $items) . ']';
     }
 }

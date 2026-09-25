@@ -9,6 +9,7 @@ use Doctrine\DBAL\Types\Type;
 use Milanmadar\CoolioORM\Geo\AbstractShape;
 use Milanmadar\CoolioORM\DoctrineDBALType\CiTextType;
 use Milanmadar\CoolioORM\DoctrineDBALType\LTreeType;
+use Milanmadar\CoolioORM\DoctrineDBALType\Int4Type;
 use Milanmadar\CoolioORM\Geo\DoctrineDBALType\GeographyType;
 use Milanmadar\CoolioORM\Geo\DoctrineDBALType\GeometryType;
 use Milanmadar\CoolioORM\Geo\DoctrineDBALType\TopoGeometryType;
@@ -78,6 +79,7 @@ class ORM
             Type::addType('text[]', TextArrayBracketsType::class);
             Type::addType('citext', CiTextType::class);
             Type::addType('ltree', LTreeType::class);
+            Type::addType('_int4', Int4Type::class);
             self::$staticTypeAdded = true;
         }
 
@@ -230,6 +232,7 @@ class ORM
                 $this->doctrineConnectionsByUrl[$connUrl]->getDatabasePlatform()->registerDoctrineTypeMapping('text[]', TextArrayBracketsType::NAME);
                 $this->doctrineConnectionsByUrl[$connUrl]->getDatabasePlatform()->registerDoctrineTypeMapping('citext', CiTextType::NAME);
                 $this->doctrineConnectionsByUrl[$connUrl]->getDatabasePlatform()->registerDoctrineTypeMapping('ltree', LTreeType::NAME);
+                $this->doctrineConnectionsByUrl[$connUrl]->getDatabasePlatform()->registerDoctrineTypeMapping('_int4', Int4Type::NAME);
                 //$this->doctrineConnectionsByUrl[$connUrl]->getDatabasePlatform()->registerDoctrineTypeMapping('geometry', 'string');
                 self::$staticTypeMapped[$connUrl] = true;
             }

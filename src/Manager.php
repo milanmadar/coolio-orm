@@ -1094,12 +1094,25 @@ abstract class Manager
                         $values[$p] = (float)$val;
                         $types[$p] = ParameterType::STRING;
                         break;
+                    case 'string[]':
+                    case 'text[]':
                     case 'array':
+                    case 'array<string>':
+                    case 'simple_array<string>':
                     case 'simple_array':
                         $p = 'mgrPm' . ++self::$placeholderNameIndex;
                         $placeholders[] = ':'.$p;
                         $values[$p] = serialize($val);
                         $types[$p] = ParameterType::STRING;
+                        break;
+                    case 'int[]':
+                    case 'integer[]':
+                    case 'array<int>':
+                    case 'simple_array<int>':
+                        $p = 'mgrPm' . ++self::$placeholderNameIndex;
+                        $placeholders[] = ':'.$p;
+                        $values[$p] = serialize($val);
+                        $types[$p] = ParameterType::INTEGER;
                         break;
                     case 'json':
                     case 'jsonb':
@@ -1179,7 +1192,19 @@ abstract class Manager
                         'integer', 'smallint', 'bigint' => (int)$v,
                         'float', 'decimal' => (float)$v,
                         'boolean' => (bool)$v,
-                        'array', 'simple_array' => unserialize($v),
+                        'string[]', 'text[]', 'array', 'array<string>', 'simple_array', 'simple_array<string>' => unserialize($v),
+                        'int[]', 'integer[]', 'array<int>', 'simple_array<int>' => (function (mixed $raw): array {
+                            $arr = is_array($raw)
+                                ? $raw
+                                : (str_starts_with($raw, '{')
+                                    ? explode(',', trim($raw, '{}'))
+                                    : (unserialize($raw) ?: []));
+
+                            foreach ($arr as &$item) {
+                                $item = (int)$item;
+                            }
+                            return $arr;
+                        })($v),
                         'json', 'jsonb', 'json_array' => json_decode($v, true),
                         'date', 'time', 'datetime', 'datetime2', 'smalldatetime', 'datetimeoffset', 'timestamp', 'timestamp_tz', 'timestamp_micro', 'timestamp_tz_micro' => new \DateTimeImmutable($v),
                         //'geometry' => Geo\Shape2D3DFactory::createFromGeoJSONString($v, $data[$k.'_srid'] ?? null),
