@@ -61,6 +61,7 @@ class Manager extends \Milanmadar\CoolioORM\Manager
         'fld_medium_text' => 'text',
         'fld_json' => 'json',
         'fld_str_array' => 'text[]',
+        'fld_int_array' => 'int[]',
         'fld_date' => 'date',
         'fld_time' => 'time',
         'fld_timestamp' => 'timestamp',

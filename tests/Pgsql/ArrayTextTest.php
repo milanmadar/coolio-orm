@@ -6,9 +6,8 @@ use Milanmadar\CoolioORM\ORM;
 use PHPUnit\Framework\TestCase;
 use tests\DbHelper;
 use tests\Model\OrmTest;
-use tests\Model\OrmOther;
 
-class TextArrayTest extends TestCase
+class ArrayTextTest extends TestCase
 {
     private static DbHelper $dbHelper;
 

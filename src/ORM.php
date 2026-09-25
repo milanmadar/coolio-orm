@@ -15,6 +15,7 @@ use Milanmadar\CoolioORM\Geo\DoctrineDBALType\GeometryType;
 use Milanmadar\CoolioORM\Geo\DoctrineDBALType\TopoGeometryType;
 use Milanmadar\CoolioORM\DoctrineDBALType\TextArrayType;
 use Milanmadar\CoolioORM\DoctrineDBALType\TextArrayBracketsType;
+use Milanmadar\CoolioORM\DoctrineDBALType\IntArrayBracketsType;
 
 class ORM
 {
@@ -77,6 +78,9 @@ class ORM
             Type::addType('topogeometry', TopoGeometryType::class);
             Type::addType('_text', TextArrayType::class);
             Type::addType('text[]', TextArrayBracketsType::class);
+            Type::addType('string[]', TextArrayBracketsType::class);
+            Type::addType('int[]', IntArrayBracketsType::class);
+            Type::addType('integer[]', IntArrayBracketsType::class);
             Type::addType('citext', CiTextType::class);
             Type::addType('ltree', LTreeType::class);
             Type::addType('_int4', Int4Type::class);
@@ -230,6 +234,9 @@ class ORM
                 $this->doctrineConnectionsByUrl[$connUrl]->getDatabasePlatform()->registerDoctrineTypeMapping('topogeometry', TopoGeometryType::NAME);
                 $this->doctrineConnectionsByUrl[$connUrl]->getDatabasePlatform()->registerDoctrineTypeMapping('_text', TextArrayType::NAME);
                 $this->doctrineConnectionsByUrl[$connUrl]->getDatabasePlatform()->registerDoctrineTypeMapping('text[]', TextArrayBracketsType::NAME);
+                $this->doctrineConnectionsByUrl[$connUrl]->getDatabasePlatform()->registerDoctrineTypeMapping('string[]', TextArrayBracketsType::NAME);
+                $this->doctrineConnectionsByUrl[$connUrl]->getDatabasePlatform()->registerDoctrineTypeMapping('int[]', IntArrayBracketsType::NAME);
+                $this->doctrineConnectionsByUrl[$connUrl]->getDatabasePlatform()->registerDoctrineTypeMapping('integer[]', IntArrayBracketsType::NAME);
                 $this->doctrineConnectionsByUrl[$connUrl]->getDatabasePlatform()->registerDoctrineTypeMapping('citext', CiTextType::NAME);
                 $this->doctrineConnectionsByUrl[$connUrl]->getDatabasePlatform()->registerDoctrineTypeMapping('ltree', LTreeType::NAME);
                 $this->doctrineConnectionsByUrl[$connUrl]->getDatabasePlatform()->registerDoctrineTypeMapping('_int4', Int4Type::NAME);
