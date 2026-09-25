@@ -278,8 +278,13 @@ class EntityRepository
                 if(isset($evArgNewId)) // (123 -> 123) There was an old id, and there's also a new id
                 {
                     // Make sure this new db id is free in the Repo's dbIds
-                    //assert(!isset($this->dbIds[$dbTable][$evArgNewId]), throw new \LogicException('id('.$evArgOldId.'->'.$evArgNewId.') New db id slot should be free in $this->dbIds["'.$dbTable.'"]['.$evArgNewId.'], but its not (old id existed)'));
-                    if(isset($this->dbIds[$dbTable][$evArgNewId])) throw new \LogicException('id('.$evArgOldId.'->'.$evArgNewId.') New db id slot should be free in $this->dbIds["'.$dbTable.'"]['.$evArgNewId.'], but its not (old id existed)');
+                    //assert(!isset($this->dbIds[$dbTable][$evArgNewId]), throw new \LogicException('id('.$evArgOldId.'->'.$evArgNewId.') Change db id slot should be free in $this->dbIds["'.$dbTable.'"]['.$evArgNewId.'], but its not (old id existed)'));
+                    //if(isset($this->dbIds[$dbTable][$evArgNewId])) throw new \LogicException('id('.$evArgOldId.'->'.$evArgNewId.') Change db id slot should be free in $this->dbIds["'.$dbTable.'"]['.$evArgNewId.'], but its not (old id existed)');
+                    if(isset($this->dbIds[$dbTable][$evArgNewId])) {
+                        // fuck it, just clear the whole thing
+                        $this->clear();
+                        return;
+                    }
 
                     // Remove the old dbIds info
                     unset($this->dbIds[$dbTable][$storedOldDbId]);
@@ -299,8 +304,11 @@ class EntityRepository
                 // Make sure this new db id is free in the Repo's dbIds
                 //assert(!isset($this->dbIds[$dbTable][$evArgNewId]), throw new \LogicException('id('null->'.$evArgNewId.') New db id slot should be free in $this->dbIds["'.$dbTable.'"]['.$evArgNewId.'], but its not (old id didnt exist)'));
                 if(isset($this->dbIds[$dbTable][$evArgNewId])) {
-                    $debugMsgEntityData = $this->dbIds[$dbTable][$evArgNewId][0]->get()?->_getData() ?? 'Entity already GCd';
-                    throw new \LogicException('id(null->'.$evArgNewId.') New db id slot should be free in $this->dbIds["'.$dbTable.'"]['.$evArgNewId.'], but its not (old id didnt exist). The Entity data there looks like this: '.print_r($debugMsgEntityData, true));
+//                    $debugMsgEntityData = $this->dbIds[$dbTable][$evArgNewId][0]->get()?->_getData() ?? 'Entity already GCd';
+//                    throw new \LogicException('id(null->'.$evArgNewId.') New db id slot should be free in $this->dbIds["'.$dbTable.'"]['.$evArgNewId.'], but its not (old id didnt exist). The Entity data there looks like this: '.print_r($debugMsgEntityData, true));
+                    // fuck it, just clear the whole thing
+                    $this->clear();
+                    return;
                 }
 
                 // Add the new dbIds info
@@ -312,7 +320,7 @@ class EntityRepository
             // Change splIds arr
             $this->splIds[$dbTable][$splId][1] = $evArgNewId;
 
-            // no need cuz in add() in increment, in del() i decrement
+            // no need cuz in add() i increment, in del() i decrement
             //$this->currentEntityCount = count($this->splIdToDbTable);
         }
     }
