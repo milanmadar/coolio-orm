@@ -98,23 +98,18 @@ class Utils
         /** @var array<int<0, max>|string, mixed> $binds */
         /** @var array<int<1,max>|string, 'simple_array'|'string'> $paramTypes */
 
-        // Postgres already cries on $db->prepare() (inside $statementRepo->get()) if we have mixed params (so questionmarks and named params too)
-        try {
-            if(isset($statementRepo)) {
-                $stmt = $statementRepo->get($sql);
-                foreach ($paramTypes as $name_or_qmarkIndex => $type) {
-                    $stmt->bindValue($name_or_qmarkIndex, $binds[$name_or_qmarkIndex], $type);
-                }
-            }
-        } catch (DBALException\DriverException $e) {
-            throw self::handleDriverException($e, $sql, $binds);
-        }
-
         $maxTries = ($_ENV['COOLIO_ORM_RETRY_ATTEMPTS'] ?? 0)+1;
         $retrySleep = $_ENV['COOLIO_ORM_RETRY_SLEEP'] ?? 2;
 
         for ($i=1; $i<=$maxTries; ++$i) {
             try {
+                if (isset($statementRepo)) {
+                    $stmt = $statementRepo->get($sql);
+                    foreach ($paramTypes as $name_or_qmarkIndex => $type) {
+                        $stmt->bindValue($name_or_qmarkIndex, $binds[$name_or_qmarkIndex], $type);
+                    }
+                }
+
                 if(isset($stmt)) {
                     return $stmt->executeQuery();
                 } else {
@@ -175,23 +170,18 @@ class Utils
         /** @var array<int<0, max>|string, mixed> $binds */
         /** @var array<int<1,max>|string, 'simple_array'|'string'> $paramTypes */
 
-        // Postgres already cries on $db->prepare() (inside $statementRepo->get()) if we have mixed params (so questionmarks and named params too)
-        try {
-            if(isset($statementRepo)) {
-                $stmt = $statementRepo->get($sql);
-                foreach ($paramTypes as $name_or_qmarkIndex => $type) {
-                    $stmt->bindValue($name_or_qmarkIndex, $binds[$name_or_qmarkIndex], $type);
-                }
-            }
-        } catch (DBALException\DriverException $e) {
-            throw self::handleDriverException($e, $sql, $binds);
-        }
-
         $maxTries = ($_ENV['COOLIO_ORM_RETRY_ATTEMPTS'] ?? 0)+1;
         $retrySleep = $_ENV['COOLIO_ORM_RETRY_SLEEP'] ?? 2;
 
         for ($i=1; $i<=$maxTries; ++$i) {
             try {
+                if(isset($statementRepo)) {
+                    $stmt = $statementRepo->get($sql);
+                    foreach ($paramTypes as $name_or_qmarkIndex => $type) {
+                        $stmt->bindValue($name_or_qmarkIndex, $binds[$name_or_qmarkIndex], $type);
+                    }
+                }
+
                 if(isset($stmt)) {
                     return (int)$stmt->executeStatement();
                 } else {
