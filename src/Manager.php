@@ -633,7 +633,14 @@ abstract class Manager
     public function pgSyncSequence(): void
     {
         if($this->dbType == 'pg') {
-            $sql = "SELECT setval('".$this->getDbTable()."_id_seq', COALESCE((SELECT MAX(id) FROM ".$this->getDbTable()."), 0), true)";
+            //$sql = "SELECT setval('".$this->getDbTable()."_id_seq', COALESCE((SELECT MAX(id) FROM ".$this->getDbTable()."), 0), true)";
+            $sql = "
+                SELECT setval(
+                  'newsletter_template_settings_id_seq',
+                  COALESCE((SELECT MAX(id) FROM newsletter_template_settings), 1),
+                  (SELECT MAX(id) FROM newsletter_template_settings) IS NOT NULL
+                );
+            ";
             $this->db->executeStatement($sql);
         }
     }
