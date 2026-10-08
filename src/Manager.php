@@ -634,11 +634,12 @@ abstract class Manager
     {
         if($this->dbType == 'pg') {
             //$sql = "SELECT setval('".$this->getDbTable()."_id_seq', COALESCE((SELECT MAX(id) FROM ".$this->getDbTable()."), 0), true)";
+            $tbl = $this->getDbTable();
             $sql = "
                 SELECT setval(
-                  'newsletter_template_settings_id_seq',
-                  COALESCE((SELECT MAX(id) FROM newsletter_template_settings), 1),
-                  (SELECT MAX(id) FROM newsletter_template_settings) IS NOT NULL
+                  '{$tbl}_id_seq',
+                  COALESCE((SELECT MAX(id) FROM {$tbl}), 1),
+                  (SELECT MAX(id) FROM {$tbl}) IS NOT NULL
                 );
             ";
             $this->db->executeStatement($sql);
