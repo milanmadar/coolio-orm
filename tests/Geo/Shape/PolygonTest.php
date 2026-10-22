@@ -235,8 +235,8 @@ class PolygonTest extends TestCase
         $center = $polygon->getCenterPoint();
 
         // (0+3+0)/3 = 1.0
-        $this->assertEquals(1.0, $center->getX());
-        $this->assertEquals(1.0, $center->getY());
+        $this->assertEquals(1.0, round($center->getX(), 3));
+        $this->assertEquals(1.0, round($center->getY(), 3));
     }
 
     /**

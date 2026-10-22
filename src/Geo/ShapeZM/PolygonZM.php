@@ -229,21 +229,31 @@ class PolygonZM extends AbstractShapeZM
             throw new \InvalidArgumentException('PolygonZM must have at least one LineStringZM.');
         }
 
-        foreach ($lineStrings as $lineString) {
-            $points = $lineString->getPoints();
+        foreach ($lineStrings as $i => $ls) {
+            $points = $ls->getPoints();
+
+            // remove consecutive duplicate points
+            $deduped = [];
+            foreach ($points as $point) {
+                if (empty($deduped) || !end($deduped)->equalsXYZ($point)) {
+                    $deduped[] = $point;
+                }
+            }
+            $points = $deduped;
+
+            // check if the ring closes
             if (count($points) < 4 || !$points[0]->equalsXYZ(end($points))) {
                 throw new \InvalidArgumentException('All rings must be closed with at least 4 points.');
             }
-        }
 
-        // Winding order: outer ring CCW, holes CW
-        foreach ($lineStrings as $i => $ls) {
-            $points = $ls->getPoints();
+            // Winding order: outer ring CCW, holes CW
             $isOuter = ($i === 0);
             if ($isOuter && !$this->_isCCW($points)) {
                 $ls->setPoints(array_reverse($points));
             } elseif (!$isOuter && $this->_isCCW($points)) {
                 $ls->setPoints(array_reverse($points));
+            } else {
+                $ls->setPoints($points);
             }
         }
     }

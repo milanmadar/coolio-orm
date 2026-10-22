@@ -274,22 +274,31 @@ class Polygon extends AbstractShape2D
             throw new \InvalidArgumentException('A Polygon must have at least one LineString.');
         }
 
-        // make sure the rings are closed (first and last point must be the same, minimum 4 points)
-        foreach ($lineStrings as $lineString) {
-            $points = $lineString->getPoints();
+        foreach ($lineStrings as $i => $ls) {
+            $points = $ls->getPoints();
+
+            // remove consecutive duplicate points
+            $deduped = [];
+            foreach ($points as $point) {
+                if (empty($deduped) || !end($deduped)->equals($point)) {
+                    $deduped[] = $point;
+                }
+            }
+            $points = $deduped;
+
+            // check if the ring closes
             if (count($points) < 4 || !$points[0]->equals(end($points))) {
                 throw new \InvalidArgumentException('All rings must be a closed LineString (minimum 4 points, first and last point must be the same).');
             }
-        }
 
-        // winding order: outer ring must be CCW, holes must be CW
-        foreach ($lineStrings as $i => $ls) {
-            $points = $ls->getPoints();
+            // winding order: outer ring must be CCW, holes must be CW
             $isOuter = ($i === 0);
             if ($isOuter && !$this->_isCCW($points)) {
                 $ls->setPoints(array_reverse($points));
             } elseif (!$isOuter && $this->_isCCW($points)) {
                 $ls->setPoints(array_reverse($points));
+            } else {
+                $ls->setPoints($points);
             }
         }
     }
