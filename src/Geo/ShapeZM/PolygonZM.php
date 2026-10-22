@@ -232,10 +232,10 @@ class PolygonZM extends AbstractShapeZM
         foreach ($lineStrings as $i => $ls) {
             $points = $ls->getPoints();
 
-            // remove consecutive duplicate points
+            // remove consecutive duplicate points (including Z value)
             $deduped = [];
             foreach ($points as $point) {
-                if (empty($deduped) || !end($deduped)->equalsXYZ($point)) {
+                if (empty($deduped) || !end($deduped)->equals($point)) {
                     $deduped[] = $point;
                 }
             }
