@@ -121,6 +121,35 @@ class QueryBuilderJsonbTest extends TestCase
         $this->assertEquals(1, $res, 'single str value failed');
     }
 
+    public function testJsonbArrayContainsAssocArr()
+    {
+        $mgr = self::$dbHelper->getManager(OrmJsonTest\Manager::class);
+
+        $res = $mgr->createQueryBuilder()
+            ->select("count(*)")
+            ->andWhereColumn("fld_jsonb", "@>", ["str"=>"lollypop"])
+            ->fetchOne();
+        $this->assertEquals(1, $res, 'assoc arr value failed');
+    }
+
+    public function testJsonbArrayContainsAssocArrInArr()
+    {
+        $mgr = self::$dbHelper->getManager(OrmJsonTest\Manager::class);
+
+        $res = $mgr->createQueryBuilder()
+            ->select("count(*)")
+            ->andWhereColumn("fld_jsonb", "@>", [["a"=>11]])
+            ->fetchOne();
+        $this->assertEquals(1, $res, 'assoc arr in arr value failed');
+
+        $res = $mgr->createQueryBuilder()
+            ->select("count(*)")
+            ->andWhereColumn('id', '=', 5)
+            ->andWhereColumn("fld_jsonb", "@>", [["a"=>11]])
+            ->fetchManyEntity();
+        $this->assertEquals(1, count($res), 'assoc arr in arr and other value failed');
+    }
+
     public function testJsonbStringIsInArray()
     {
         $mgr = self::$dbHelper->getManager(OrmJsonTest\Manager::class);

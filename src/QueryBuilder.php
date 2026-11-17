@@ -477,7 +477,7 @@ class QueryBuilder extends DoctrineQueryBuilder
                 }
 
                 $sql = $column." ".$operator." '[".implode(',', $escapedValues)."]'::jsonb";
-                return [$sql, [$paramName=>$value]];
+                return [$sql, []];
             }
             // the column is array type OR the given $value is json
             else {
