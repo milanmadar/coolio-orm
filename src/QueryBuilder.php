@@ -651,6 +651,15 @@ class QueryBuilder extends DoctrineQueryBuilder
     }
 
     /**
+     * @param string $sql
+     * @return string The SQL part to be used in a grouped WHERE clause
+     */
+    public function where_inGroup(string $sql): string
+    {
+        return ' '.$sql;
+    }
+
+    /**
      * It handles NULL and corrrect '=' to 'IN' when $value is an array
      * @param string $column Field name
      * @param string $operator
@@ -669,6 +678,15 @@ class QueryBuilder extends DoctrineQueryBuilder
     }
 
     /**
+     * @param string $sql
+     * @return string The SQL part to be used in a grouped WHERE clause
+     */
+    public function andWhere_inGroup(string $sql): string
+    {
+        return ' AND '.$sql;
+    }
+
+    /**
      * It handles NULL and corrrect '=' to 'IN' when $value is an array
      * @param string $column Field name
      * @param string $operator
@@ -684,6 +702,15 @@ class QueryBuilder extends DoctrineQueryBuilder
         }
 
         return ' AND '.$sql;
+    }
+
+    /**
+     * @param string $sql
+     * @return string The SQL part to be used in a grouped WHERE clause
+     */
+    public function orWhere_inGroup(string $sql): string
+    {
+        return ' OR '.$sql;
     }
 
     /**
